@@ -1,0 +1,101 @@
+<ion-content>
+  <main class="register-shell">
+    <section class="register-panel" aria-labelledby="register-title">
+      <div class="brand">
+        <img
+          class="brand-logo"
+          src="assets/otclick-logo.jpg"
+          alt="OtClick"
+          width="128"
+          height="128"
+        >
+      </div>
+
+      <div class="intro">
+        <h1 id="register-title">Crea tu cuenta.</h1>
+        <p>Empieza a gestionar tus citas con OtClick.</p>
+      </div>
+
+      <form #registerForm="ngForm" (ngSubmit)="onRegister()">
+        <div class="field">
+          <ion-input
+            name="nombre"
+            label="Nombre"
+            labelPlacement="stacked"
+            autocomplete="given-name"
+            [(ngModel)]="nombre"
+            required
+          ></ion-input>
+        </div>
+
+        <div class="field">
+          <ion-input
+            name="apellido"
+            label="Apellido"
+            labelPlacement="stacked"
+            autocomplete="family-name"
+            [(ngModel)]="apellido"
+          ></ion-input>
+        </div>
+
+        <div class="field">
+          <ion-input
+            name="email"
+            label="Correo electrónico"
+            labelPlacement="stacked"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            placeholder="tu@email.com"
+            [(ngModel)]="email"
+            required
+            email
+          ></ion-input>
+        </div>
+
+        <div class="field">
+          <ion-input
+            name="telefono"
+            label="Teléfono"
+            labelPlacement="stacked"
+            type="tel"
+            autocomplete="tel"
+            [(ngModel)]="telefono"
+          ></ion-input>
+        </div>
+
+        <div class="field">
+          <ion-input
+            name="password"
+            label="Contraseña"
+            labelPlacement="stacked"
+            type="password"
+            autocomplete="new-password"
+            [(ngModel)]="password"
+            required
+            minlength="8"
+          ></ion-input>
+        </div>
+
+        <ion-text *ngIf="error" color="danger">
+          <p class="form-error" role="alert">{{ error }}</p>
+        </ion-text>
+
+        <ion-button
+          class="submit-button"
+          expand="block"
+          type="submit"
+          [disabled]="registerForm.invalid || loading"
+        >
+          <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+          <span *ngIf="!loading">Crear cuenta</span>
+        </ion-button>
+      </form>
+
+      <p class="switch-page">
+        ¿Ya tienes cuenta?
+        <a routerLink="/login">Inicia sesión</a>
+      </p>
+    </section>
+  </main>
+</ion-content>

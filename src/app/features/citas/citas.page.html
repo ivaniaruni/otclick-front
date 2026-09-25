@@ -1,0 +1,49 @@
+<ion-content>
+  <main class="page">
+    <img
+      class="logo"
+      src="assets/otclick-logo.jpg"
+      alt="OtClick"
+      width="64"
+      height="64"
+    >
+
+    <p class="eyebrow">Tu agenda</p>
+    <h1>Mis citas</h1>
+    <p class="intro">Aquí encontrarás tus reservas.</p>
+
+    <p *ngIf="cargando" role="status">Cargando tus citas…</p>
+
+    <div *ngIf="error" role="alert">
+      <p>{{ error }}</p>
+      <ion-button fill="outline" (click)="cargar()">
+        Reintentar
+      </ion-button>
+    </div>
+
+    <section class="empty" *ngIf="!cargando && !error && !citas.length">
+      <h2>Aún no tienes citas.</h2>
+      <p>Explora las empresas de OtClick para encontrar tu próxima cita.</p>
+      <a href="/tabs/empresas">Explorar empresas</a>
+    </section>
+
+    <div class="appointments" *ngIf="!cargando && !error && citas.length">
+      <article class="appointment" *ngFor="let cita of citas">
+        <div class="appointment-date">
+          <span>{{ cita.fecha }}</span>
+          <strong>{{ cita.horaInicio }}</strong>
+        </div>
+
+        <div>
+          <h2>{{ cita.servicioNombre || 'Servicio' }}</h2>
+          <p>{{ cita.empresaNombre || 'Empresa' }}</p>
+          <p *ngIf="cita.trabajadorNombre">
+            Te atiende {{ cita.trabajadorNombre }}
+          </p>
+        </div>
+
+        <span class="status">{{ cita.estado }}</span>
+      </article>
+    </div>
+  </main>
+</ion-content>

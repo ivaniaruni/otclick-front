@@ -1,0 +1,131 @@
+ion-content {
+  --background: #f5f7fa;
+}
+
+.auth-shell {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+}
+
+.auth-panel {
+  width: min(100%, 420px);
+  padding: 32px;
+  background: #ffffff;
+  border: 1px solid #d9e0e8;
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(25, 48, 82, 0.08);
+}
+
+.brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.brand-logo {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  border-radius: 20px;
+}
+
+.intro {
+  margin-bottom: 28px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  color: #17283f;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.intro p {
+  margin: 0;
+  color: #4e5e73;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.field {
+  margin-bottom: 16px;
+  padding: 10px 14px 8px;
+  background: #ffffff;
+  border: 1px solid #b8c4d2;
+  border-radius: 10px;
+
+  ion-input {
+    --color: #17283f;
+    --placeholder-color: #53657b;
+    --placeholder-opacity: 1;
+    --highlight-color-focused: #1266df;
+    --highlight-color-valid: #1266df;
+    --highlight-color-invalid: #c62828;
+  }
+
+  ion-input::part(label) {
+    color: #34465c;
+    font-weight: 600;
+  }
+}
+
+.submit-button {
+  margin-top: 20px;
+  min-height: 48px;
+  --background: #1266df;
+  --background-hover: #0955c4;
+  --background-activated: #0848a5;
+  --color: #ffffff;
+  --border-radius: 10px;
+}
+
+.form-error {
+  margin: 8px 0 0;
+  color: #b3261e;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.switch-page {
+  margin: 24px 0 0;
+  color: #4e5e73;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.switch-page a {
+  color: #0955c4;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.switch-page a:focus-visible,
+.switch-page a:hover {
+  color: #073e91;
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .auth-shell {
+    place-items: start center;
+    padding: 32px 16px 24px;
+  }
+
+  .auth-panel {
+    padding: 24px 20px;
+    box-shadow: none;
+  }
+
+  .brand-logo {
+    width: 88px;
+    height: 88px;
+  }
+
+  h1 {
+    font-size: 25px;
+  }
+}

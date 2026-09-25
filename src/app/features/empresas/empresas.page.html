@@ -1,0 +1,62 @@
+<ion-content>
+  <main class="page">
+    <header class="page-heading">
+      <img
+        src="assets/otclick-logo.jpg"
+        alt="OtClick"
+        width="64"
+        height="64"
+      >
+      <p class="eyebrow">Directorio</p>
+      <h1>Encuentra tu sitio.</h1>
+      <p>Explora los negocios que ya forman parte de OtClick.</p>
+    </header>
+
+    <div class="search">
+      <ion-input
+        name="busqueda"
+        label="Buscar empresas"
+        labelPlacement="stacked"
+        placeholder="Nombre o ubicación"
+        [(ngModel)]="busqueda"
+        [clearInput]="true"
+      ></ion-input>
+    </div>
+
+    <p *ngIf="cargando" role="status">Cargando empresas…</p>
+
+    <div *ngIf="error" role="alert">
+      <p>{{ error }}</p>
+      <ion-button fill="outline" (click)="cargar()">Reintentar</ion-button>
+    </div>
+
+    <p *ngIf="!cargando && !error && !resultados.length">
+      No hay empresas que coincidan con tu búsqueda.
+    </p>
+
+    <div class="grid" *ngIf="!cargando && !error">
+      <article class="business" *ngFor="let empresa of resultados">
+        <div class="business-image">
+          <img
+            *ngIf="empresa.logoUrl; else inicial"
+            [src]="empresa.logoUrl"
+            [alt]="'Logo de ' + empresa.nombre"
+            loading="lazy"
+          >
+
+          <ng-template #inicial>
+            <span aria-hidden="true">
+              {{ empresa.nombre.charAt(0).toUpperCase() }}
+            </span>
+          </ng-template>
+        </div>
+
+        <div class="business-copy">
+          <h2>{{ empresa.nombre }}</h2>
+          <p>{{ empresa.direccion || 'Ubicación no indicada' }}</p>
+          <p>{{ empresa.descripcion || 'Pronto podrás conocer sus servicios.' }}</p>
+        </div>
+      </article>
+    </div>
+  </main>
+</ion-content>

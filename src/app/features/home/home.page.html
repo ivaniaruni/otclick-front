@@ -1,0 +1,139 @@
+<ion-content>
+  <main>
+    <section class="welcome-band">
+      <div class="content-width">
+        <div class="top-row">
+          <img
+            class="logo"
+            src="assets/otclick-logo.jpg"
+            alt="OtClick"
+            width="72"
+            height="72"
+          >
+        </div>
+
+        <div class="welcome-layout">
+          <div>
+            <p class="eyebrow">Tu espacio para reservar</p>
+            <h1>Encuentra tiempo para lo que te importa.</h1>
+            <p class="intro">
+              Descubre negocios y elige cómo quieres disfrutar de tu próxima cita.
+            </p>
+          </div>
+
+          <form class="search" (ngSubmit)="buscar()">
+            <ion-input
+              name="busqueda"
+              label="¿Qué estás buscando?"
+              labelPlacement="stacked"
+              placeholder="Busca una empresa"
+              [(ngModel)]="busqueda"
+            ></ion-input>
+
+            <ion-button type="submit" aria-label="Buscar empresas">
+              <ion-icon name="search-outline"></ion-icon>
+            </ion-button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="main-section content-width">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">A un toque</p>
+          <h2>Organiza tus citas</h2>
+        </div>
+      </div>
+
+      <a class="appointment-link" routerLink="/tabs/citas">
+        <span class="appointment-icon">
+          <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
+        </span>
+        <span>
+          <strong>Mis citas</strong>
+          <small>Consulta tus próximas reservas y tu historial.</small>
+        </span>
+        <ion-icon
+          name="arrow-forward-outline"
+          aria-hidden="true"
+        ></ion-icon>
+      </a>
+    </section>
+
+    <section class="companies-band">
+      <div class="content-width">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Explora</p>
+            <h2>Descubre empresas</h2>
+          </div>
+
+          <a class="view-all" routerLink="/tabs/empresas">
+            Ver todas
+            <ion-icon
+              name="arrow-forward-outline"
+              aria-hidden="true"
+            ></ion-icon>
+          </a>
+        </div>
+
+        <p *ngIf="cargando" role="status">Cargando empresas…</p>
+
+        <div class="load-error" *ngIf="error" role="alert">
+          <span>{{ error }}</span>
+          <button type="button" (click)="cargarEmpresas()">Reintentar</button>
+        </div>
+
+        <p *ngIf="!cargando && !error && !empresasDestacadas.length">
+          Aún no hay empresas disponibles.
+        </p>
+
+        <div
+          class="companies-grid"
+          *ngIf="!cargando && !error && empresasDestacadas.length"
+        >
+          <a
+            class="company-card"
+            *ngFor="let empresa of empresasDestacadas"
+            routerLink="/tabs/empresas"
+          >
+            <div class="company-picture">
+              <img
+                *ngIf="empresa.logoUrl; else initial"
+                [src]="empresa.logoUrl"
+                [alt]="'Logo de ' + empresa.nombre"
+                loading="lazy"
+              >
+
+              <ng-template #initial>
+                <span aria-hidden="true">
+                  {{ empresa.nombre.charAt(0).toUpperCase() }}
+                </span>
+              </ng-template>
+            </div>
+
+            <div class="company-copy">
+              <h3>{{ empresa.nombre }}</h3>
+              <p>{{ empresa.direccion || 'Descubre sus servicios' }}</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="following-section content-width">
+      <div>
+        <p class="eyebrow">Próximamente</p>
+        <h2>Tus empresas, más cerca</h2>
+        <p>
+          Podrás seguir tus negocios favoritos y consultar sus huecos
+          disponibles en un calendario.
+        </p>
+      </div>
+      <div class="following-mark" aria-hidden="true">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </div>
+    </section>
+  </main>
+</ion-content>
