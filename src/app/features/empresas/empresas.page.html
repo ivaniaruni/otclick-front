@@ -1,62 +1,248 @@
 <ion-content>
-  <main class="page">
-    <header class="page-heading">
-      <img
-        src="assets/otclick-logo.jpg"
-        alt="OtClick"
-        width="64"
-        height="64"
-      >
-      <p class="eyebrow">Directorio</p>
-      <h1>Encuentra tu sitio.</h1>
-      <p>Explora los negocios que ya forman parte de OtClick.</p>
-    </header>
-
-    <div class="search">
-      <ion-input
-        name="busqueda"
-        label="Buscar empresas"
-        labelPlacement="stacked"
-        placeholder="Nombre o ubicación"
-        [(ngModel)]="busqueda"
-        [clearInput]="true"
-      ></ion-input>
-    </div>
-
-    <p *ngIf="cargando" role="status">Cargando empresas…</p>
-
-    <div *ngIf="error" role="alert">
-      <p>{{ error }}</p>
-      <ion-button fill="outline" (click)="cargar()">Reintentar</ion-button>
-    </div>
-
-    <p *ngIf="!cargando && !error && !resultados.length">
-      No hay empresas que coincidan con tu búsqueda.
-    </p>
-
-    <div class="grid" *ngIf="!cargando && !error">
-      <article class="business" *ngFor="let empresa of resultados">
-        <div class="business-image">
+  <main>
+    <section class="welcome-band" aria-labelledby="empresas-title">
+      <div class="content-width">
+        <div class="top-row">
           <img
-            *ngIf="empresa.logoUrl; else inicial"
+            class="logo"
+            src="assets/otclick-logo.jpg"
+            alt="OtClick"
+            width="72"
+            height="72"
+          >
+        </div>
+
+        <div class="welcome-layout">
+          <div>
+            <p class="eyebrow">Explora OtClick</p>
+            <h1 id="empresas-title">Empresas</h1>
+            <p class="intro">
+              Encuentra negocios y guarda los que más te interesen.
+            </p>
+          </div>
+
+          <form class="search" (ngSubmit)="buscar()">
+            <ion-input
+              name="busqueda"
+              label="Buscar empresas"
+              labelPlacement="stacked"
+              placeholder="Nombre o ubicación"
+              [(ngModel)]="busqueda"
+              [clearInput]="true"
+            ></ion-input>
+
+            <ion-button type="submit" aria-label="Buscar empresas">
+              <ion-icon
+                name="search-outline"
+                aria-hidden="true"
+              ></ion-icon>
+            </ion-button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="companies-band" aria-labelledby="listado-title">
+      <div class="content-width">
+        <div class="view-switch" aria-label="Qué empresas mostrar">
+          <button
+            type="button"
+            [class.active]="vista === 'todas'"
+            [attr.aria-pressed]="vista === 'todas'"
+            (click)="seleccionarVista('todas')"
+          >
+            Todas las empresas
+          </button>
+
+          <button
+            type="button"
+            [class.active]="vista === 'seguidas'"
+            [attr.aria-pressed]="vista === 'seguidas'"
+            (click)="seleccionarVista('seguidas')"
+          >
+            Mis empresas
+          </button>
+        </div>
+
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">
+              {{ vista === 'todas' ? 'Directorio' : 'Empresas que sigues' }}
+            </p>
+
+            <h2 id="listado-title">
+              {{
+                terminoBuscado
+                  ? 'Resultados'
+                  : vista === 'todas'
+                    ? 'Todas las empresas'
+                    : 'Mis empresas'
+              }}
+            </h2>
+          </div>
+
+          <span class="result-count" *ngIf="!cargando && !error">
+            {{ resultados.length }}
+            {{ resultados.length === 1 ? 'empresa' : 'empresas' }}
+          </span>
+        </div>
+
+        <div class="state-message" *ngIf="cargando" role="status">
+          Cargando empresas…
+        </div>
+
+        <div class="state-message error-message" *ngIf="error" role="alert">
+          <p>{{ error }}</p>
+
+          <ion-button fill="outline" (click)="cargar()">
+            Reintentar
+          </ion-button>
+        </div>
+
+        <div
+          class="state-message"
+          *ngIf="!cargando && !error && !resultados.length"
+        >
+          <h3>
+            {{
+              terminoBuscado
+                ? 'No encontramos resultados'
+                : vista === 'seguidas'
+                  ? 'Aún no sigues ninguna empresa'
+                  : 'Todavía no hay empresas'
+            }}
+          </h3>
+
+          <p>
+            {{
+              terminoBuscado
+                ? 'Prueba con otro nombre o ubicación.'
+                : vista === 'seguidas'
+                  ? 'Las empresas que sigas aparecerán aquí.'
+                  : 'Las empresas que se incorporen aparecerán aquí.'
+            }}
+          </p>
+
+          <button
+            class="empty-link"
+            type="button"
+            *ngIf="vista === 'seguidas' && !terminoBuscado"
+            (click)="seleccionarVista('todas')"
+          >
+            Explorar todas las empresas
+          </button>
+        </div>
+
+        <div
+          class="companies-grid"
+          *ngIf="!cargando && !error && resultados.length"
+        >
+          <button
+            class="company-card"
+            type="button"
+            *ngFor="let empresa of resultados"
+            (click)="abrirEmpresa(empresa)"
+            [attr.aria-label]="'Ver empresa ' + empresa.nombre"
+          >
+            <span class="company-picture">
+              <img
+                *ngIf="empresa.logoUrl; else initial"
+                [src]="empresa.logoUrl"
+                [alt]="'Logo de ' + empresa.nombre"
+                loading="lazy"
+              >
+
+              <ng-template #initial>
+                <span aria-hidden="true">
+                  {{ empresa.nombre.charAt(0).toUpperCase() }}
+                </span>
+              </ng-template>
+            </span>
+
+            <span class="company-copy">
+              <strong>{{ empresa.nombre }}</strong>
+              <small>
+                {{ empresa.direccion || 'Conoce este negocio' }}
+              </small>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="detail-overlay" *ngIf="empresaSeleccionada as empresa">
+    <button
+      class="overlay-backdrop"
+      type="button"
+      aria-label="Cerrar detalle de empresa"
+      (click)="cerrarEmpresa()"
+    ></button>
+
+    <section
+      class="detail-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="empresa-detail-title"
+    >
+      <div class="detail-top">
+        <p class="eyebrow">Empresa</p>
+
+        <button
+          class="close-button"
+          type="button"
+          (click)="cerrarEmpresa()"
+        >
+          Cerrar
+        </button>
+      </div>
+
+      <div class="detail-heading">
+        <span class="detail-logo">
+          <img
+            *ngIf="empresa.logoUrl; else initialDetail"
             [src]="empresa.logoUrl"
             [alt]="'Logo de ' + empresa.nombre"
-            loading="lazy"
           >
 
-          <ng-template #inicial>
+          <ng-template #initialDetail>
             <span aria-hidden="true">
               {{ empresa.nombre.charAt(0).toUpperCase() }}
             </span>
           </ng-template>
+        </span>
+
+        <h2 id="empresa-detail-title">{{ empresa.nombre }}</h2>
+      </div>
+
+      <p class="detail-description" *ngIf="empresa.descripcion">
+        {{ empresa.descripcion }}
+      </p>
+
+      <dl class="detail-data">
+        <div *ngIf="empresa.direccion">
+          <dt>Dirección</dt>
+          <dd>{{ empresa.direccion }}</dd>
         </div>
 
-        <div class="business-copy">
-          <h2>{{ empresa.nombre }}</h2>
-          <p>{{ empresa.direccion || 'Ubicación no indicada' }}</p>
-          <p>{{ empresa.descripcion || 'Pronto podrás conocer sus servicios.' }}</p>
+        <div *ngIf="empresa.telefono">
+          <dt>Teléfono</dt>
+          <dd>
+            <a [href]="'tel:' + empresa.telefono">
+              {{ empresa.telefono }}
+            </a>
+          </dd>
         </div>
-      </article>
-    </div>
-  </main>
+
+        <div *ngIf="empresa.email">
+          <dt>Correo</dt>
+          <dd>
+            <a [href]="'mailto:' + empresa.email">
+              {{ empresa.email }}
+            </a>
+          </dd>
+        </div>
+      </dl>
+    </section>
+  </div>
 </ion-content>

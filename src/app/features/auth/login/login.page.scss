@@ -62,8 +62,8 @@ h1 {
     --color: #17283f;
     --placeholder-color: #53657b;
     --placeholder-opacity: 1;
-    --highlight-color-focused: #1266df;
-    --highlight-color-valid: #1266df;
+    --highlight-color-focused: #0474fc;
+    --highlight-color-valid: #0474fc;
     --highlight-color-invalid: #c62828;
   }
 
@@ -76,7 +76,7 @@ h1 {
 .submit-button {
   margin-top: 20px;
   min-height: 48px;
-  --background: #1266df;
+  --background: #0474fc;
   --background-hover: #0955c4;
   --background-activated: #0848a5;
   --color: #ffffff;
@@ -98,7 +98,7 @@ h1 {
 }
 
 .switch-page a {
-  color: #0955c4;
+  color: #0474fc;
   font-weight: 700;
   text-decoration: none;
 }

@@ -1,6 +1,8 @@
 :host {
-  --blue: #1266df;
-  --blue-dark: #0955c4;
+  --blue: #0474fc;
+  --blue-dark: #0562d4;
+  --blue-soft: #eaf3ff;
+  --blue-image: #e5f0ff;
   --ink: #17283f;
   --muted: #4e5e73;
   --border: #d9e0e8;
@@ -90,11 +92,17 @@ h1 {
   --placeholder-color: #526177;
   --placeholder-opacity: 1;
   --highlight-color-focused: var(--blue);
+  --highlight-color-valid: var(--blue);
+  --caret-color: var(--blue);
 }
 
 .search ion-input::part(label) {
   color: #34465c;
   font-weight: 600;
+}
+.search:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(4, 116, 252, 0.12);
 }
 
 .search ion-button {
@@ -164,7 +172,7 @@ h1 {
   height: 48px;
   flex: 0 0 auto;
   color: var(--blue);
-  background: #eaf2fd;
+  background: var(--blue-soft);
   border-radius: 12px;
 }
 
@@ -213,7 +221,7 @@ h1 {
   place-items: center;
   height: 138px;
   color: var(--blue);
-  background: #edf3fc;
+  background: var(--blue-image);
 }
 
 .company-picture img {
@@ -263,7 +271,7 @@ h1 {
   height: 90px;
   flex: 0 0 auto;
   color: var(--blue);
-  background: #eaf2fd;
+  background: var(--blue-soft);
   border-radius: 20px;
 }
 

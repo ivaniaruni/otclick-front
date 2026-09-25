@@ -8,4 +8,6 @@ export interface Empresa {
   telefono: string | null;
   email: string | null;
   activa: boolean;
+  categoria: string | null;
+  siguiendo?: boolean;
 }

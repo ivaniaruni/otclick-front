@@ -10,6 +10,10 @@ export class EmpresaService {
     return this.api.get<Empresa[]>('/empresas');
   }
 
+  listarSeguidas(): Promise<Empresa[]> {
+    return this.api.get<Empresa[]>('/empresas/seguidas');
+  }
+
   obtenerPorId(id: string): Promise<Empresa> {
     return this.api.get<Empresa>(`/empresas/${id}`);
   }
