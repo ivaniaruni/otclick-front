@@ -207,6 +207,7 @@ h1 {
 }
 
 .company-card {
+  display: block;
   min-width: 0;
   overflow: hidden;
   color: var(--ink);
@@ -219,15 +220,19 @@ h1 {
 .company-picture {
   display: grid;
   place-items: center;
+  width: 100%;
   height: 138px;
+  overflow: hidden;
   color: var(--blue);
   background: var(--blue-image);
 }
 
 .company-picture img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
 .company-picture span {
@@ -236,18 +241,27 @@ h1 {
 }
 
 .company-copy {
+  display: grid;
+  gap: 6px;
+  min-height: 82px;
   padding: 16px;
+  background: #ffffff;
 }
 
 .company-copy h3 {
-  margin: 0 0 6px;
+  margin: 0;
+  color: var(--ink);
   font-size: 17px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .company-copy p {
   margin: 0;
   color: var(--muted);
   font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .following-section {
@@ -343,6 +357,7 @@ h1 {
   }
 
   .company-copy {
+    min-height: 76px;
     padding: 12px;
   }
 
