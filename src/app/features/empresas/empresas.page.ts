@@ -9,7 +9,7 @@ import {
   IonInput
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { searchOutline } from 'ionicons/icons';
+import { heart, heartOutline, searchOutline } from 'ionicons/icons';
 
 import { EmpresaService } from '../../core/services/empresa.service';
 import { Empresa } from '../../shared/models/empresa';
@@ -35,20 +35,22 @@ export class EmpresasPage implements OnInit {
   empresas: Empresa[] = [];
   empresasSeguidas: Empresa[] = [];
 
+  idsSeguidas = new Set<string>();
+  corazonesOcupados = new Set<string>();
+
   vista: VistaEmpresas = 'todas';
   busqueda = '';
   terminoBuscado = '';
 
   cargando = true;
   error = '';
-
-  private seguidasCargadas = false;
+  errorSeguimiento = '';
 
   constructor(
     private empresaService: EmpresaService,
     private route: ActivatedRoute
   ) {
-    addIcons({ searchOutline });
+    addIcons({ heart, heartOutline, searchOutline });
   }
 
   ngOnInit(): void {
@@ -83,38 +85,69 @@ export class EmpresasPage implements OnInit {
     this.terminoBuscado = this.busqueda.trim();
   }
 
-  async seleccionarVista(vista: VistaEmpresas): Promise<void> {
-    if (this.vista === vista) return;
-
+  seleccionarVista(vista: VistaEmpresas): void {
     this.vista = vista;
-    this.error = '';
-
-    if (vista === 'seguidas' && !this.seguidasCargadas) {
-      await this.cargar();
-    }
+    this.errorSeguimiento = '';
   }
 
   async cargar(): Promise<void> {
     this.cargando = true;
     this.error = '';
+    this.errorSeguimiento = '';
 
     try {
-      if (this.vista === 'todas') {
-        this.empresas = (await this.empresaService.listar())
-          .filter((empresa) => empresa.activa);
-      } else {
-        this.empresasSeguidas = (
-          await this.empresaService.listarSeguidas()
-        ).filter((empresa) => empresa.activa);
+      const [todas, seguidas] = await Promise.all([
+        this.empresaService.listar(),
+        this.empresaService.listarSeguidas()
+      ]);
 
-        this.seguidasCargadas = true;
-      }
+      this.empresas = todas.filter((empresa) => empresa.activa);
+      this.empresasSeguidas = seguidas.filter((empresa) => empresa.activa);
+      this.idsSeguidas = new Set(
+        this.empresasSeguidas.map((empresa) => empresa.id)
+      );
     } catch {
-      this.error = this.vista === 'seguidas'
-        ? 'No hemos podido cargar las empresas que sigues.'
-        : 'No hemos podido cargar las empresas.';
+      this.error = 'No hemos podido cargar las empresas.';
     } finally {
       this.cargando = false;
+    }
+  }
+
+  async alternarSeguimiento(empresa: Empresa): Promise<void> {
+    if (this.corazonesOcupados.has(empresa.id)) return;
+
+    const yaSeguida = this.idsSeguidas.has(empresa.id);
+    this.corazonesOcupados.add(empresa.id);
+    this.errorSeguimiento = '';
+
+    try {
+      if (yaSeguida) {
+        await this.empresaService.dejarDeSeguir(empresa.id);
+
+        this.idsSeguidas = new Set(
+          [...this.idsSeguidas].filter((id) => id !== empresa.id)
+        );
+        this.empresasSeguidas = this.empresasSeguidas.filter(
+          (item) => item.id !== empresa.id
+        );
+      } else {
+        await this.empresaService.seguir(empresa.id);
+
+        this.idsSeguidas = new Set([
+          ...this.idsSeguidas,
+          empresa.id
+        ]);
+        this.empresasSeguidas = [
+          ...this.empresasSeguidas,
+          empresa
+        ];
+      }
+    } catch {
+      this.errorSeguimiento = yaSeguida
+        ? `No hemos podido dejar de seguir a ${empresa.nombre}. Inténtalo de nuevo.`
+        : `No hemos podido seguir a ${empresa.nombre}. Inténtalo de nuevo.`;
+    } finally {
+      this.corazonesOcupados.delete(empresa.id);
     }
   }
 

@@ -10,6 +10,7 @@ import { ServicioService } from '../../../core/services/servicio.service';
 import { TrabajadorService } from '../../../core/services/trabajador.service';
 
 import { Empresa } from '../../../shared/models/empresa';
+import { EmpresaGoogle } from '../../../shared/models/empresa-google';
 import { Servicio } from '../../../shared/models/servicio';
 import { Trabajador } from '../../../shared/models/trabajador';
 
@@ -27,10 +28,12 @@ import { Trabajador } from '../../../shared/models/trabajador';
 })
 export class DetalleEmpresaPage implements OnInit {
   empresa: Empresa | null = null;
+  datosGoogle: EmpresaGoogle | null = null;
   trabajadores: Trabajador[] = [];
   servicios: Servicio[] = [];
 
   cargandoEmpresa = true;
+  cargandoGoogle = false;
   cargandoTrabajadores = false;
   cargandoServicios = false;
 
@@ -64,6 +67,11 @@ export class DetalleEmpresaPage implements OnInit {
     this.errorEmpresa = '';
     this.errorTrabajadores = '';
     this.errorServicios = '';
+
+    this.empresa = null;
+    this.datosGoogle = null;
+    this.trabajadores = [];
+    this.servicios = [];
 
     try {
       const empresa = await this.empresaService.obtenerPorId(id);
@@ -102,6 +110,19 @@ export class DetalleEmpresaPage implements OnInit {
       this.errorServicios = 'No hemos podido cargar los servicios.';
     } finally {
       this.cargandoServicios = false;
+    }
+
+    if (this.empresa?.googlePlaceId) {
+      this.cargandoGoogle = true;
+
+      try {
+        this.datosGoogle =
+          await this.empresaService.obtenerDatosGoogle(id);
+      } catch {
+        this.datosGoogle = null;
+      } finally {
+        this.cargandoGoogle = false;
+      }
     }
   }
 }

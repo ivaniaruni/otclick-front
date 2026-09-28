@@ -37,6 +37,8 @@ ion-content {
 
 .back-button:focus-visible,
 .page-state a:focus-visible,
+.google-rating a:focus-visible,
+.google-attributions a:focus-visible,
 address a:focus-visible {
   outline: 3px solid var(--blue);
   outline-offset: 3px;
@@ -72,7 +74,7 @@ address a:focus-visible {
 
 .cover > span {
   font-size: 80px;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .profile-title {
@@ -83,7 +85,7 @@ address a:focus-visible {
   margin: 0 0 8px;
   color: var(--blue-dark);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -106,6 +108,51 @@ h1 {
   margin: 0;
   color: var(--muted);
   line-height: 1.5;
+}
+
+.google-rating {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.rating-star {
+  color: #e3a008;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.google-rating strong {
+  color: var(--ink);
+  font-size: 17px;
+}
+
+.google-rating a,
+.google-attributions a {
+  color: var(--blue-dark);
+}
+
+.google-rating a {
+  margin-left: 6px;
+  font-weight: 400;
+  text-decoration: none;
+}
+
+.google-attributions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.google-attributions:empty {
+  display: none;
 }
 
 .section {
@@ -170,7 +217,7 @@ address {
   background: var(--blue-soft);
   border-radius: 50%;
   font-size: 21px;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .worker-copy {
@@ -216,7 +263,7 @@ address {
   display: block;
   margin-bottom: 5px;
   color: var(--blue-dark);
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .service p {

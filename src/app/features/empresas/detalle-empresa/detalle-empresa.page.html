@@ -11,13 +11,23 @@
       ></ion-icon>
     </a>
 
-    <div class="page-state" *ngIf="cargandoEmpresa" role="status">
+    <div
+      class="page-state"
+      *ngIf="cargandoEmpresa"
+      role="status"
+    >
       Cargando empresa…
     </div>
 
-    <div class="page-state error-state" *ngIf="errorEmpresa" role="alert">
+    <div
+      class="page-state error-state"
+      *ngIf="errorEmpresa"
+      role="alert"
+    >
       <p>{{ errorEmpresa }}</p>
-      <a routerLink="/tabs/empresas">Volver al directorio</a>
+      <a routerLink="/tabs/empresas">
+        Volver al directorio
+      </a>
     </div>
 
     <ng-container *ngIf="empresa as negocio">
@@ -41,21 +51,94 @@
             <p class="eyebrow">Empresa en OtClick</p>
             <h1>{{ negocio.nombre }}</h1>
 
-            <p class="address" *ngIf="negocio.direccion">
+            <p
+              class="address"
+              *ngIf="negocio.direccion"
+            >
               {{ negocio.direccion }}
             </p>
+
+            <div
+              class="google-rating"
+              *ngIf="
+                datosGoogle as google
+              "
+            >
+              <ng-container *ngIf="google.valoracion !== null">
+                <span
+                  class="rating-star"
+                  aria-hidden="true"
+                >
+                  ★
+                </span>
+
+                <strong>
+                  {{ google.valoracion | number:'1.1-1' }}
+                </strong>
+
+                <span *ngIf="google.numeroValoraciones !== null">
+                  · {{ google.numeroValoraciones }}
+                  valoraciones
+                </span>
+              </ng-container>
+
+              <a
+                *ngIf="google.googleMapsUrl"
+                [href]="google.googleMapsUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Ver en Google Maps
+              </a>
+            </div>
+
+            <div
+              class="google-attributions"
+              *ngIf="datosGoogle as google"
+            >
+              <ng-container
+                *ngFor="let atribucion of google.atribuciones"
+              >
+                <a
+                  *ngIf="
+                    atribucion.providerUri;
+                    else atribucionSinEnlace
+                  "
+                  [href]="atribucion.providerUri"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ atribucion.provider }}
+                </a>
+
+                <ng-template #atribucionSinEnlace>
+                  <span>{{ atribucion.provider }}</span>
+                </ng-template>
+              </ng-container>
+            </div>
           </div>
         </header>
 
-        <section class="section" *ngIf="negocio.descripcion">
+        <section
+          class="section"
+          *ngIf="negocio.descripcion"
+        >
           <h2>Sobre nosotros</h2>
-          <p class="body-text">{{ negocio.descripcion }}</p>
+          <p class="body-text">
+            {{ negocio.descripcion }}
+          </p>
         </section>
 
-        <section class="section" aria-labelledby="equipo-title">
+        <section
+          class="section"
+          aria-labelledby="equipo-title"
+        >
           <h2 id="equipo-title">Equipo</h2>
 
-          <p *ngIf="cargandoTrabajadores" role="status">
+          <p
+            *ngIf="cargandoTrabajadores"
+            role="status"
+          >
             Cargando equipo…
           </p>
 
@@ -78,12 +161,18 @@
             Esta empresa aún no ha publicado su equipo.
           </p>
 
-          <div class="workers" *ngIf="trabajadores.length">
+          <div
+            class="workers"
+            *ngIf="trabajadores.length"
+          >
             <article
               class="worker"
               *ngFor="let trabajador of trabajadores"
             >
-              <div class="worker-avatar" aria-hidden="true">
+              <div
+                class="worker-avatar"
+                aria-hidden="true"
+              >
                 {{
                   (trabajador.nombreCompleto || 'T')
                     .charAt(0)
@@ -93,7 +182,10 @@
 
               <div class="worker-copy">
                 <h3>
-                  {{ trabajador.nombreCompleto || 'Profesional' }}
+                  {{
+                    trabajador.nombreCompleto ||
+                    'Profesional'
+                  }}
                 </h3>
 
                 <p *ngIf="trabajador.especialidad">
@@ -111,10 +203,18 @@
           </div>
         </section>
 
-        <section class="section" aria-labelledby="servicios-title">
-          <h2 id="servicios-title">Servicios y precios</h2>
+        <section
+          class="section"
+          aria-labelledby="servicios-title"
+        >
+          <h2 id="servicios-title">
+            Servicios y precios
+          </h2>
 
-          <p *ngIf="cargandoServicios" role="status">
+          <p
+            *ngIf="cargandoServicios"
+            role="status"
+          >
             Cargando servicios…
           </p>
 
@@ -137,7 +237,10 @@
             Esta empresa aún no ha publicado servicios.
           </p>
 
-          <div class="services" *ngIf="servicios.length">
+          <div
+            class="services"
+            *ngIf="servicios.length"
+          >
             <article
               class="service"
               *ngFor="let servicio of servicios"
@@ -171,9 +274,15 @@
         <section
           class="section"
           aria-labelledby="contacto-title"
-          *ngIf="negocio.direccion || negocio.telefono || negocio.email"
+          *ngIf="
+            negocio.direccion ||
+            negocio.telefono ||
+            negocio.email
+          "
         >
-          <h2 id="contacto-title">Ubicación y contacto</h2>
+          <h2 id="contacto-title">
+            Ubicación y contacto
+          </h2>
 
           <address>
             <p *ngIf="negocio.direccion">

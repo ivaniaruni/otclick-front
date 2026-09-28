@@ -99,6 +99,14 @@
           </ion-button>
         </div>
 
+        <p
+          class="action-message"
+          *ngIf="errorSeguimiento"
+          role="alert"
+        >
+          {{ errorSeguimiento }}
+        </p>
+
         <div
           class="state-message"
           *ngIf="!cargando && !error && !resultados.length"
@@ -137,34 +145,56 @@
           class="companies-grid"
           *ngIf="!cargando && !error && resultados.length"
         >
-          <a
+          <div
             class="company-card"
             *ngFor="let empresa of resultados"
-            [routerLink]="['/tabs/empresas', empresa.id]"
-            [attr.aria-label]="'Ver empresa ' + empresa.nombre"
           >
-            <span class="company-picture">
-              <img
-                *ngIf="empresa.logoUrl; else initial"
-                [src]="empresa.logoUrl"
-                [alt]="'Logo de ' + empresa.nombre"
-                loading="lazy"
-              >
+            <a
+              class="company-card-link"
+              [routerLink]="['/tabs/empresas', empresa.id]"
+              [attr.aria-label]="'Ver empresa ' + empresa.nombre"
+            >
+              <span class="company-picture">
+                <img
+                  *ngIf="empresa.logoUrl; else initial"
+                  [src]="empresa.logoUrl"
+                  [alt]="'Logo de ' + empresa.nombre"
+                  loading="lazy"
+                >
 
-              <ng-template #initial>
-                <span aria-hidden="true">
-                  {{ empresa.nombre.charAt(0).toUpperCase() }}
-                </span>
-              </ng-template>
-            </span>
+                <ng-template #initial>
+                  <span aria-hidden="true">
+                    {{ empresa.nombre.charAt(0).toUpperCase() }}
+                  </span>
+                </ng-template>
+              </span>
 
-            <span class="company-copy">
-              <strong>{{ empresa.nombre }}</strong>
-              <small>
-                {{ empresa.direccion || 'Conoce este negocio' }}
-              </small>
-            </span>
-          </a>
+              <span class="company-copy">
+                <strong>{{ empresa.nombre }}</strong>
+                <small>
+                  {{ empresa.direccion || 'Conoce este negocio' }}
+                </small>
+              </span>
+            </a>
+
+            <button
+              class="follow-button"
+              type="button"
+              [disabled]="corazonesOcupados.has(empresa.id)"
+              [attr.aria-label]="
+                (idsSeguidas.has(empresa.id)
+                  ? 'Dejar de seguir a '
+                  : 'Seguir a ') + empresa.nombre
+              "
+              [attr.aria-pressed]="idsSeguidas.has(empresa.id)"
+              (click)="alternarSeguimiento(empresa)"
+            >
+              <ion-icon
+                [name]="idsSeguidas.has(empresa.id) ? 'heart' : 'heart-outline'"
+                aria-hidden="true"
+              ></ion-icon>
+            </button>
+          </div>
         </div>
       </div>
     </section>
