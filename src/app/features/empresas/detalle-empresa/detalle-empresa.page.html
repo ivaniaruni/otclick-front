@@ -1,0 +1,199 @@
+<ion-content>
+  <main class="page">
+    <a
+      class="back-button"
+      routerLink="/tabs/empresas"
+      aria-label="Volver a empresas"
+    >
+      <ion-icon
+        name="arrow-back-outline"
+        aria-hidden="true"
+      ></ion-icon>
+    </a>
+
+    <div class="page-state" *ngIf="cargandoEmpresa" role="status">
+      Cargando empresa…
+    </div>
+
+    <div class="page-state error-state" *ngIf="errorEmpresa" role="alert">
+      <p>{{ errorEmpresa }}</p>
+      <a routerLink="/tabs/empresas">Volver al directorio</a>
+    </div>
+
+    <ng-container *ngIf="empresa as negocio">
+      <article class="company-sheet">
+        <header class="profile-header">
+          <div class="cover">
+            <img
+              *ngIf="negocio.logoUrl; else sinLogo"
+              [src]="negocio.logoUrl"
+              [alt]="'Logo de ' + negocio.nombre"
+            >
+
+            <ng-template #sinLogo>
+              <span aria-hidden="true">
+                {{ negocio.nombre.charAt(0).toUpperCase() }}
+              </span>
+            </ng-template>
+          </div>
+
+          <div class="profile-title">
+            <p class="eyebrow">Empresa en OtClick</p>
+            <h1>{{ negocio.nombre }}</h1>
+
+            <p class="address" *ngIf="negocio.direccion">
+              {{ negocio.direccion }}
+            </p>
+          </div>
+        </header>
+
+        <section class="section" *ngIf="negocio.descripcion">
+          <h2>Sobre nosotros</h2>
+          <p class="body-text">{{ negocio.descripcion }}</p>
+        </section>
+
+        <section class="section" aria-labelledby="equipo-title">
+          <h2 id="equipo-title">Equipo</h2>
+
+          <p *ngIf="cargandoTrabajadores" role="status">
+            Cargando equipo…
+          </p>
+
+          <p
+            class="section-error"
+            *ngIf="errorTrabajadores"
+            role="alert"
+          >
+            {{ errorTrabajadores }}
+          </p>
+
+          <p
+            class="muted"
+            *ngIf="
+              !cargandoTrabajadores &&
+              !errorTrabajadores &&
+              !trabajadores.length
+            "
+          >
+            Esta empresa aún no ha publicado su equipo.
+          </p>
+
+          <div class="workers" *ngIf="trabajadores.length">
+            <article
+              class="worker"
+              *ngFor="let trabajador of trabajadores"
+            >
+              <div class="worker-avatar" aria-hidden="true">
+                {{
+                  (trabajador.nombreCompleto || 'T')
+                    .charAt(0)
+                    .toUpperCase()
+                }}
+              </div>
+
+              <div class="worker-copy">
+                <h3>
+                  {{ trabajador.nombreCompleto || 'Profesional' }}
+                </h3>
+
+                <p *ngIf="trabajador.especialidad">
+                  {{ trabajador.especialidad }}
+                </p>
+
+                <p
+                  class="worker-bio"
+                  *ngIf="trabajador.biografia"
+                >
+                  {{ trabajador.biografia }}
+                </p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="servicios-title">
+          <h2 id="servicios-title">Servicios y precios</h2>
+
+          <p *ngIf="cargandoServicios" role="status">
+            Cargando servicios…
+          </p>
+
+          <p
+            class="section-error"
+            *ngIf="errorServicios"
+            role="alert"
+          >
+            {{ errorServicios }}
+          </p>
+
+          <p
+            class="muted"
+            *ngIf="
+              !cargandoServicios &&
+              !errorServicios &&
+              !servicios.length
+            "
+          >
+            Esta empresa aún no ha publicado servicios.
+          </p>
+
+          <div class="services" *ngIf="servicios.length">
+            <article
+              class="service"
+              *ngFor="let servicio of servicios"
+            >
+              <div class="service-copy">
+                <small
+                  class="service-category"
+                  *ngIf="servicio.categoriaNombre"
+                >
+                  {{ servicio.categoriaNombre }}
+                </small>
+
+                <h3>{{ servicio.nombre }}</h3>
+
+                <p *ngIf="servicio.descripcion">
+                  {{ servicio.descripcion }}
+                </p>
+
+                <span class="service-duration">
+                  {{ servicio.duracionMinutos }} min
+                </span>
+              </div>
+
+              <strong class="service-price">
+                {{ servicio.precio | number:'1.2-2' }} €
+              </strong>
+            </article>
+          </div>
+        </section>
+
+        <section
+          class="section"
+          aria-labelledby="contacto-title"
+          *ngIf="negocio.direccion || negocio.telefono || negocio.email"
+        >
+          <h2 id="contacto-title">Ubicación y contacto</h2>
+
+          <address>
+            <p *ngIf="negocio.direccion">
+              {{ negocio.direccion }}
+            </p>
+
+            <p *ngIf="negocio.telefono">
+              <a [href]="'tel:' + negocio.telefono">
+                {{ negocio.telefono }}
+              </a>
+            </p>
+
+            <p *ngIf="negocio.email">
+              <a [href]="'mailto:' + negocio.email">
+                {{ negocio.email }}
+              </a>
+            </p>
+          </address>
+        </section>
+      </article>
+    </ng-container>
+  </main>
+</ion-content>

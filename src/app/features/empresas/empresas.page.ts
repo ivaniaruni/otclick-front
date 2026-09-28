@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   IonButton,
   IonContent,
@@ -24,6 +24,7 @@ type VistaEmpresas = 'todas' | 'seguidas';
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     IonButton,
     IonContent,
     IonIcon,
@@ -33,7 +34,6 @@ type VistaEmpresas = 'todas' | 'seguidas';
 export class EmpresasPage implements OnInit {
   empresas: Empresa[] = [];
   empresasSeguidas: Empresa[] = [];
-  empresaSeleccionada: Empresa | null = null;
 
   vista: VistaEmpresas = 'todas';
   busqueda = '';
@@ -103,31 +103,19 @@ export class EmpresasPage implements OnInit {
         this.empresas = (await this.empresaService.listar())
           .filter((empresa) => empresa.activa);
       } else {
-        this.empresasSeguidas = (await this.empresaService.listarSeguidas())
-          .filter((empresa) => empresa.activa);
+        this.empresasSeguidas = (
+          await this.empresaService.listarSeguidas()
+        ).filter((empresa) => empresa.activa);
 
         this.seguidasCargadas = true;
       }
     } catch {
       this.error = this.vista === 'seguidas'
-        ? 'Todavía no podemos cargar tus empresas seguidas. Falta conectar esta función con el servidor.'
+        ? 'No hemos podido cargar las empresas que sigues.'
         : 'No hemos podido cargar las empresas.';
     } finally {
       this.cargando = false;
     }
-  }
-
-  abrirEmpresa(empresa: Empresa): void {
-    this.empresaSeleccionada = empresa;
-  }
-
-  cerrarEmpresa(): void {
-    this.empresaSeleccionada = null;
-  }
-
-  @HostListener('document:keydown.escape')
-  cerrarConEscape(): void {
-    this.cerrarEmpresa();
   }
 
   private normalizar(valor: string): string {

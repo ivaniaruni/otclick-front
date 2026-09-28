@@ -17,7 +17,7 @@
             <p class="eyebrow">Tu espacio para reservar</p>
             <h1>Encuentra tiempo para lo que te importa.</h1>
             <p class="intro">
-              Descubre negocios y elige cómo quieres disfrutar de tu próxima cita.
+              Descubre negocios y organiza tus citas desde un solo lugar.
             </p>
           </div>
 
@@ -31,7 +31,10 @@
             ></ion-input>
 
             <ion-button type="submit" aria-label="Buscar empresas">
-              <ion-icon name="search-outline"></ion-icon>
+              <ion-icon
+                name="search-outline"
+                aria-hidden="true"
+              ></ion-icon>
             </ion-button>
           </form>
         </div>
@@ -41,24 +44,52 @@
     <section class="main-section content-width">
       <div class="section-title">
         <div>
-          <p class="eyebrow">A un toque</p>
-          <h2>Organiza tus citas</h2>
+          <p class="eyebrow">Tu espacio</p>
+          <h2>Todo a mano</h2>
         </div>
       </div>
 
-      <a class="appointment-link" routerLink="/tabs/citas">
-        <span class="appointment-icon">
-          <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
-        </span>
-        <span>
-          <strong>Mis citas</strong>
-          <small>Consulta tus próximas reservas y tu historial.</small>
-        </span>
-        <ion-icon
-          name="arrow-forward-outline"
-          aria-hidden="true"
-        ></ion-icon>
-      </a>
+      <div class="quick-links">
+        <a class="quick-link" routerLink="/tabs/citas">
+          <span class="quick-icon">
+            <ion-icon
+              name="calendar-outline"
+              aria-hidden="true"
+            ></ion-icon>
+          </span>
+
+          <span class="quick-copy">
+            Mis citas
+            <small>Consulta tus reservas y tu historial.</small>
+          </span>
+
+          <ion-icon
+            class="quick-arrow"
+            name="arrow-forward-outline"
+            aria-hidden="true"
+          ></ion-icon>
+        </a>
+
+        <a class="quick-link" routerLink="/tabs/mensajes">
+          <span class="quick-icon">
+            <ion-icon
+              name="chatbubbles-outline"
+              aria-hidden="true"
+            ></ion-icon>
+          </span>
+
+          <span class="quick-copy">
+            Mensajes
+            <small>Accede a tus conversaciones.</small>
+          </span>
+
+          <ion-icon
+            class="quick-arrow"
+            name="arrow-forward-outline"
+            aria-hidden="true"
+          ></ion-icon>
+        </a>
+      </div>
     </section>
 
     <section class="companies-band">
@@ -78,11 +109,15 @@
           </a>
         </div>
 
-        <p *ngIf="cargando" role="status">Cargando empresas…</p>
+        <p *ngIf="cargando" role="status">
+          Cargando empresas…
+        </p>
 
         <div class="load-error" *ngIf="error" role="alert">
           <span>{{ error }}</span>
-          <button type="button" (click)="cargarEmpresas()">Reintentar</button>
+          <button type="button" (click)="cargarEmpresas()">
+            Reintentar
+          </button>
         </div>
 
         <p *ngIf="!cargando && !error && !empresasDestacadas.length">
@@ -115,24 +150,12 @@
 
             <div class="company-copy">
               <h3>{{ empresa.nombre }}</h3>
-              <p>{{ empresa.direccion || 'Descubre sus servicios' }}</p>
+              <p>
+                {{ empresa.direccion || 'Descubre este negocio' }}
+              </p>
             </div>
           </a>
         </div>
-      </div>
-    </section>
-
-    <section class="following-section content-width">
-      <div>
-        <p class="eyebrow">Próximamente</p>
-        <h2>Tus empresas, más cerca</h2>
-        <p>
-          Podrás seguir tus negocios favoritos y consultar sus huecos
-          disponibles en un calendario.
-        </p>
-      </div>
-      <div class="following-mark" aria-hidden="true">
-        <ion-icon name="calendar-outline"></ion-icon>
       </div>
     </section>
   </main>

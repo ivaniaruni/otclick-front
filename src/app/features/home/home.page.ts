@@ -12,8 +12,7 @@ import { addIcons } from 'ionicons';
 import {
   arrowForwardOutline,
   calendarOutline,
-  searchOutline
-} from 'ionicons/icons';
+  searchOutline, chatbubblesOutline } from 'ionicons/icons';
 
 import { EmpresaService } from '../../core/services/empresa.service';
 import { Empresa } from '../../shared/models/empresa';
@@ -43,11 +42,7 @@ export class HomePage implements OnInit {
     private empresaService: EmpresaService,
     private router: Router
   ) {
-    addIcons({
-      arrowForwardOutline,
-      calendarOutline,
-      searchOutline
-    });
+    addIcons({searchOutline,calendarOutline,arrowForwardOutline,chatbubblesOutline});
   }
 
   ngOnInit(): void {

@@ -4,10 +4,13 @@ export interface Empresa {
   slug: string;
   descripcion: string | null;
   logoUrl: string | null;
+  googlePlaceId: string | null;
   direccion: string | null;
   telefono: string | null;
   email: string | null;
   activa: boolean;
-  categoria: string | null;
+
+  // Todavía no llegan en EmpresaResponse del backend.
+  categoria?: string | null;
   siguiendo?: boolean;
 }
