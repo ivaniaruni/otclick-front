@@ -37,9 +37,7 @@ ion-content {
 
 .back-button:focus-visible,
 .page-state a:focus-visible,
-.google-rating a:focus-visible,
-.google-attributions a:focus-visible,
-address a:focus-visible {
+.contact-links a:focus-visible {
   outline: 3px solid var(--blue);
   outline-offset: 3px;
 }
@@ -110,51 +108,6 @@ h1 {
   line-height: 1.5;
 }
 
-.google-rating {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-top: 16px;
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.rating-star {
-  color: #e3a008;
-  font-size: 20px;
-  line-height: 1;
-}
-
-.google-rating strong {
-  color: var(--ink);
-  font-size: 17px;
-}
-
-.google-rating a,
-.google-attributions a {
-  color: var(--blue-dark);
-}
-
-.google-rating a {
-  margin-left: 6px;
-  font-weight: 400;
-  text-decoration: none;
-}
-
-.google-attributions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.google-attributions:empty {
-  display: none;
-}
-
 .section {
   margin: 0;
   padding: 28px;
@@ -171,7 +124,7 @@ h1 {
 .muted,
 .worker p,
 .service p,
-address {
+.contact-links {
   color: var(--muted);
   line-height: 1.55;
 }
@@ -213,11 +166,19 @@ address {
   width: 52px;
   height: 52px;
   flex: 0 0 52px;
+  overflow: hidden;
   color: var(--blue);
   background: var(--blue-soft);
   border-radius: 50%;
   font-size: 21px;
   font-weight: 400;
+}
+
+.worker-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .worker-copy {
@@ -238,6 +199,30 @@ address {
 
 .worker .worker-bio {
   margin-top: 8px;
+}
+
+.calendar-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  color: var(--blue-dark);
+  background: var(--blue-soft);
+  border: 0;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 13px;
+}
+
+.calendar-button ion-icon {
+  font-size: 17px;
+}
+
+.calendar-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .services {
@@ -282,22 +267,45 @@ address {
   white-space: nowrap;
 }
 
-address {
+.contact-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   font-style: normal;
 }
 
-address p {
-  margin: 0 0 10px;
+.contact-links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 12px;
+  color: var(--ink);
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  text-decoration: none;
 }
 
-address p:last-child {
-  margin-bottom: 0;
+.contact-links a:hover {
+  border-color: var(--blue);
 }
 
-address a,
-.page-state a {
-  color: var(--blue-dark);
+.contact-links a span:last-child {
   overflow-wrap: anywhere;
+}
+
+.contact-links ion-icon,
+.tiktok-mark {
+  flex: 0 0 22px;
+  color: var(--blue-dark);
+  font-size: 22px;
+}
+
+.tiktok-mark {
+  font-weight: 700;
+  text-align: center;
 }
 
 .page-state {
@@ -310,6 +318,10 @@ address a,
 
 .page-state p {
   margin-top: 0;
+}
+
+.page-state a {
+  color: var(--blue-dark);
 }
 
 .error-state {
@@ -341,7 +353,8 @@ address a,
     padding: 20px;
   }
 
-  .workers {
+  .workers,
+  .contact-links {
     grid-template-columns: 1fr;
   }
 

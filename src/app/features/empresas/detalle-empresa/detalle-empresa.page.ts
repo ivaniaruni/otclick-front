@@ -3,16 +3,27 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline } from 'ionicons/icons';
+import {
+  arrowBackOutline,
+  calendarOutline,
+  callOutline,
+  locationOutline,
+  logoInstagram,
+  mailOutline
+} from 'ionicons/icons';
 
 import { EmpresaService } from '../../../core/services/empresa.service';
 import { ServicioService } from '../../../core/services/servicio.service';
 import { TrabajadorService } from '../../../core/services/trabajador.service';
 
 import { Empresa } from '../../../shared/models/empresa';
-import { EmpresaGoogle } from '../../../shared/models/empresa-google';
 import { Servicio } from '../../../shared/models/servicio';
 import { Trabajador } from '../../../shared/models/trabajador';
+
+type TrabajadorConFoto = Trabajador & {
+  fotoUrl?: string | null;
+  avatarUrl?: string | null;
+};
 
 @Component({
   selector: 'app-detalle-empresa',
@@ -28,12 +39,10 @@ import { Trabajador } from '../../../shared/models/trabajador';
 })
 export class DetalleEmpresaPage implements OnInit {
   empresa: Empresa | null = null;
-  datosGoogle: EmpresaGoogle | null = null;
   trabajadores: Trabajador[] = [];
   servicios: Servicio[] = [];
 
   cargandoEmpresa = true;
-  cargandoGoogle = false;
   cargandoTrabajadores = false;
   cargandoServicios = false;
 
@@ -47,7 +56,14 @@ export class DetalleEmpresaPage implements OnInit {
     private trabajadorService: TrabajadorService,
     private servicioService: ServicioService
   ) {
-    addIcons({ arrowBackOutline });
+    addIcons({
+      arrowBackOutline,
+      calendarOutline,
+      callOutline,
+      locationOutline,
+      logoInstagram,
+      mailOutline
+    });
   }
 
   ngOnInit(): void {
@@ -62,6 +78,37 @@ export class DetalleEmpresaPage implements OnInit {
     void this.cargarDetalle(id);
   }
 
+  get instagramUrl(): string | null {
+    return this.empresa?.slug === 'julia-nails'
+      ? 'https://www.instagram.com/julia_nails_oviedo/'
+      : null;
+  }
+
+  get tiktokUrl(): string | null {
+    return this.empresa?.slug === 'julia-nails'
+      ? 'https://www.tiktok.com/@julia_nails_oviedo'
+      : null;
+  }
+
+  get ubicacionUrl(): string | null {
+    const direccion = this.empresa?.direccion;
+
+    return direccion
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`
+      : null;
+  }
+
+  get telefonoUrl(): string | null {
+    const telefono = this.empresa?.telefono?.replace(/[^\d+]/g, '');
+
+    return telefono ? `tel:${telefono}` : null;
+  }
+
+  fotoTrabajador(trabajador: Trabajador): string | null {
+    const conFoto = trabajador as TrabajadorConFoto;
+    return conFoto.fotoUrl || conFoto.avatarUrl || null;
+  }
+
   private async cargarDetalle(id: string): Promise<void> {
     this.cargandoEmpresa = true;
     this.errorEmpresa = '';
@@ -69,7 +116,6 @@ export class DetalleEmpresaPage implements OnInit {
     this.errorServicios = '';
 
     this.empresa = null;
-    this.datosGoogle = null;
     this.trabajadores = [];
     this.servicios = [];
 
@@ -89,8 +135,16 @@ export class DetalleEmpresaPage implements OnInit {
       this.cargandoEmpresa = false;
     }
 
-    this.cargandoTrabajadores = true;
+        this.cargandoTrabajadores = true;
+    this.cargandoServicios = true;
 
+    await Promise.all([
+      this.cargarTrabajadores(id),
+      this.cargarServicios(id)
+    ]);
+  }
+
+  private async cargarTrabajadores(id: string): Promise<void> {
     try {
       this.trabajadores =
         await this.trabajadorService.listarActivosPorEmpresa(id);
@@ -99,30 +153,20 @@ export class DetalleEmpresaPage implements OnInit {
     } finally {
       this.cargandoTrabajadores = false;
     }
+  }
 
-    this.cargandoServicios = true;
-
+  private async cargarServicios(id: string): Promise<void> {
     try {
-      this.servicios = (
-        await this.servicioService.listarActivosPorEmpresa(id)
-      ).sort((a, b) => a.orden - b.orden);
+      const servicios: Servicio[] =
+        await this.servicioService.listarActivosPorEmpresa(id);
+
+      this.servicios = servicios.sort(
+        (a: Servicio, b: Servicio) => a.orden - b.orden
+      );
     } catch {
       this.errorServicios = 'No hemos podido cargar los servicios.';
     } finally {
       this.cargandoServicios = false;
-    }
-
-    if (this.empresa?.googlePlaceId) {
-      this.cargandoGoogle = true;
-
-      try {
-        this.datosGoogle =
-          await this.empresaService.obtenerDatosGoogle(id);
-      } catch {
-        this.datosGoogle = null;
-      } finally {
-        this.cargandoGoogle = false;
-      }
     }
   }
 }

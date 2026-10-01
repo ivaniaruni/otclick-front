@@ -37,7 +37,7 @@
             <img
               *ngIf="negocio.logoUrl; else sinLogo"
               [src]="negocio.logoUrl"
-              [alt]="'Logo de ' + negocio.nombre"
+              [alt]="'Imagen de ' + negocio.nombre"
             >
 
             <ng-template #sinLogo>
@@ -57,65 +57,6 @@
             >
               {{ negocio.direccion }}
             </p>
-
-            <div
-              class="google-rating"
-              *ngIf="
-                datosGoogle as google
-              "
-            >
-              <ng-container *ngIf="google.valoracion !== null">
-                <span
-                  class="rating-star"
-                  aria-hidden="true"
-                >
-                  ★
-                </span>
-
-                <strong>
-                  {{ google.valoracion | number:'1.1-1' }}
-                </strong>
-
-                <span *ngIf="google.numeroValoraciones !== null">
-                  · {{ google.numeroValoraciones }}
-                  valoraciones
-                </span>
-              </ng-container>
-
-              <a
-                *ngIf="google.googleMapsUrl"
-                [href]="google.googleMapsUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Ver en Google Maps
-              </a>
-            </div>
-
-            <div
-              class="google-attributions"
-              *ngIf="datosGoogle as google"
-            >
-              <ng-container
-                *ngFor="let atribucion of google.atribuciones"
-              >
-                <a
-                  *ngIf="
-                    atribucion.providerUri;
-                    else atribucionSinEnlace
-                  "
-                  [href]="atribucion.providerUri"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {{ atribucion.provider }}
-                </a>
-
-                <ng-template #atribucionSinEnlace>
-                  <span>{{ atribucion.provider }}</span>
-                </ng-template>
-              </ng-container>
-            </div>
           </div>
         </header>
 
@@ -135,10 +76,7 @@
         >
           <h2 id="equipo-title">Equipo</h2>
 
-          <p
-            *ngIf="cargandoTrabajadores"
-            role="status"
-          >
+          <p *ngIf="cargandoTrabajadores" role="status">
             Cargando equipo…
           </p>
 
@@ -169,23 +107,28 @@
               class="worker"
               *ngFor="let trabajador of trabajadores"
             >
-              <div
-                class="worker-avatar"
-                aria-hidden="true"
-              >
-                {{
-                  (trabajador.nombreCompleto || 'T')
-                    .charAt(0)
-                    .toUpperCase()
-                }}
+              <div class="worker-avatar">
+                <img
+                  *ngIf="fotoTrabajador(trabajador) as foto; else inicialTrabajador"
+                  [src]="foto"
+                  [alt]="'Foto de ' + (trabajador.nombreCompleto || 'profesional')"
+                  loading="lazy"
+                >
+
+                <ng-template #inicialTrabajador>
+                  <span aria-hidden="true">
+                    {{
+                      (trabajador.nombreCompleto || 'T')
+                        .charAt(0)
+                        .toUpperCase()
+                    }}
+                  </span>
+                </ng-template>
               </div>
 
               <div class="worker-copy">
                 <h3>
-                  {{
-                    trabajador.nombreCompleto ||
-                    'Profesional'
-                  }}
+                  {{ trabajador.nombreCompleto || 'Profesional' }}
                 </h3>
 
                 <p *ngIf="trabajador.especialidad">
@@ -198,6 +141,19 @@
                 >
                   {{ trabajador.biografia }}
                 </p>
+
+                <button
+                  class="calendar-button"
+                  type="button"
+                  disabled
+                  title="El calendario de esta profesional estará disponible próximamente"
+                >
+                  <ion-icon
+                    name="calendar-outline"
+                    aria-hidden="true"
+                  ></ion-icon>
+                  Ver calendario
+                </button>
               </div>
             </article>
           </div>
@@ -211,10 +167,7 @@
             Servicios y precios
           </h2>
 
-          <p
-            *ngIf="cargandoServicios"
-            role="status"
-          >
+          <p *ngIf="cargandoServicios" role="status">
             Cargando servicios…
           </p>
 
@@ -272,34 +225,76 @@
         </section>
 
         <section
-          class="section"
+          class="section contact-section"
           aria-labelledby="contacto-title"
           *ngIf="
             negocio.direccion ||
             negocio.telefono ||
-            negocio.email
+            negocio.email ||
+            instagramUrl ||
+            tiktokUrl
           "
         >
-          <h2 id="contacto-title">
-            Ubicación y contacto
-          </h2>
+          <h2 id="contacto-title">Encuéntranos</h2>
 
-          <address>
-            <p *ngIf="negocio.direccion">
-              {{ negocio.direccion }}
-            </p>
+          <address class="contact-links">
+            <a
+              *ngIf="ubicacionUrl"
+              [href]="ubicacionUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ion-icon
+                name="location-outline"
+                aria-hidden="true"
+              ></ion-icon>
+              <span>{{ negocio.direccion }}</span>
+            </a>
 
-            <p *ngIf="negocio.telefono">
-              <a [href]="'tel:' + negocio.telefono">
-                {{ negocio.telefono }}
-              </a>
-            </p>
+            <a
+              *ngIf="telefonoUrl"
+              [href]="telefonoUrl"
+            >
+              <ion-icon
+                name="call-outline"
+                aria-hidden="true"
+              ></ion-icon>
+              <span>{{ negocio.telefono }}</span>
+            </a>
 
-            <p *ngIf="negocio.email">
-              <a [href]="'mailto:' + negocio.email">
-                {{ negocio.email }}
-              </a>
-            </p>
+            <a
+              *ngIf="negocio.email"
+              [href]="'mailto:' + negocio.email"
+            >
+              <ion-icon
+                name="mail-outline"
+                aria-hidden="true"
+              ></ion-icon>
+              <span>{{ negocio.email }}</span>
+            </a>
+
+            <a
+              *ngIf="instagramUrl"
+              [href]="instagramUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ion-icon
+                name="logo-instagram"
+                aria-hidden="true"
+              ></ion-icon>
+              <span>Instagram · @julia_nails_oviedo</span>
+            </a>
+
+            <a
+              *ngIf="tiktokUrl"
+              [href]="tiktokUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="tiktok-mark" aria-hidden="true">♪</span>
+              <span>TikTok · @julia_nails_oviedo</span>
+            </a>
           </address>
         </section>
       </article>
