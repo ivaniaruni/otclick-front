@@ -5,17 +5,10 @@
       routerLink="/tabs/empresas"
       aria-label="Volver a empresas"
     >
-      <ion-icon
-        name="arrow-back-outline"
-        aria-hidden="true"
-      ></ion-icon>
+      <ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon>
     </a>
 
-    <div
-      class="page-state"
-      *ngIf="cargandoEmpresa"
-      role="status"
-    >
+    <div class="page-state" *ngIf="cargandoEmpresa" role="status">
       Cargando empresa…
     </div>
 
@@ -25,9 +18,7 @@
       role="alert"
     >
       <p>{{ errorEmpresa }}</p>
-      <a routerLink="/tabs/empresas">
-        Volver al directorio
-      </a>
+      <a routerLink="/tabs/empresas">Volver al directorio</a>
     </div>
 
     <ng-container *ngIf="empresa as negocio">
@@ -51,29 +42,110 @@
             <p class="eyebrow">Empresa en OtClick</p>
             <h1>{{ negocio.nombre }}</h1>
 
-            <p
-              class="address"
-              *ngIf="negocio.direccion"
-            >
+            <p class="address" *ngIf="negocio.direccion">
               {{ negocio.direccion }}
             </p>
           </div>
         </header>
 
-        <section
-          class="section"
-          *ngIf="negocio.descripcion"
-        >
+        <section class="section" *ngIf="negocio.descripcion">
           <h2>Sobre nosotros</h2>
-          <p class="body-text">
-            {{ negocio.descripcion }}
-          </p>
+          <p class="body-text">{{ negocio.descripcion }}</p>
         </section>
 
-        <section
-          class="section"
-          aria-labelledby="equipo-title"
-        >
+        <section class="section" aria-labelledby="trabajos-title">
+          <div class="gallery-heading">
+            <h2 id="trabajos-title">Trabajos realizados</h2>
+
+            <div class="gallery-controls" *ngIf="fotos.length > 1">
+              <button
+                type="button"
+                aria-label="Ver trabajos anteriores"
+                (click)="moverGaleria(-1)"
+              >
+                <ion-icon
+                  name="chevron-back-outline"
+                  aria-hidden="true"
+                ></ion-icon>
+              </button>
+
+              <button
+                type="button"
+                aria-label="Ver más trabajos"
+                (click)="moverGaleria(1)"
+              >
+                <ion-icon
+                  name="chevron-forward-outline"
+                  aria-hidden="true"
+                ></ion-icon>
+              </button>
+            </div>
+          </div>
+
+          <p *ngIf="cargandoFotos" role="status">
+            Cargando trabajos…
+          </p>
+
+          <p class="section-error" *ngIf="errorFotos" role="alert">
+            {{ errorFotos }}
+          </p>
+
+          <p
+            class="muted"
+            *ngIf="!cargandoFotos && !errorFotos && !fotos.length"
+          >
+            Esta empresa aún no ha publicado trabajos.
+          </p>
+
+          <div
+            #galeria
+            class="work-gallery"
+            *ngIf="fotos.length"
+            aria-label="Galería de trabajos realizados"
+          >
+            <button
+              class="work-photo"
+              type="button"
+              *ngFor="let foto of fotos"
+              [attr.aria-label]="
+                'Ampliar trabajo de ' +
+                (foto.trabajadorNombre || 'una profesional')
+              "
+              (click)="abrirFoto(foto)"
+            >
+              <img
+                class="work-image"
+                [src]="foto.imagenUrl"
+                [alt]="
+                  foto.descripcion ||
+                  'Trabajo realizado por ' +
+                  (foto.trabajadorNombre || 'una profesional')
+                "
+                loading="lazy"
+              >
+
+              <span
+                class="work-author"
+                [attr.title]="foto.trabajadorNombre || 'Profesional'"
+              >
+                <img
+                  *ngIf="foto.trabajadorAvatarUrl; else inicialFoto"
+                  [src]="foto.trabajadorAvatarUrl"
+                  alt=""
+                  loading="lazy"
+                >
+
+                <ng-template #inicialFoto>
+                  <span aria-hidden="true">
+                    {{ (foto.trabajadorNombre || 'P').charAt(0) }}
+                  </span>
+                </ng-template>
+              </span>
+            </button>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="equipo-title">
           <h2 id="equipo-title">Equipo</h2>
 
           <p *ngIf="cargandoTrabajadores" role="status">
@@ -99,19 +171,22 @@
             Esta empresa aún no ha publicado su equipo.
           </p>
 
-          <div
-            class="workers"
-            *ngIf="trabajadores.length"
-          >
+          <div class="workers" *ngIf="trabajadores.length">
             <article
               class="worker"
               *ngFor="let trabajador of trabajadores"
             >
               <div class="worker-avatar">
                 <img
-                  *ngIf="fotoTrabajador(trabajador) as foto; else inicialTrabajador"
+                  *ngIf="
+                    fotoTrabajador(trabajador) as foto;
+                    else inicialTrabajador
+                  "
                   [src]="foto"
-                  [alt]="'Foto de ' + (trabajador.nombreCompleto || 'profesional')"
+                  [alt]="
+                    'Foto de ' +
+                    (trabajador.nombreCompleto || 'profesional')
+                  "
                   loading="lazy"
                 >
 
@@ -146,7 +221,7 @@
                   class="calendar-button"
                   type="button"
                   disabled
-                  title="El calendario de esta profesional estará disponible próximamente"
+                  title="El calendario estará disponible próximamente"
                 >
                   <ion-icon
                     name="calendar-outline"
@@ -159,13 +234,8 @@
           </div>
         </section>
 
-        <section
-          class="section"
-          aria-labelledby="servicios-title"
-        >
-          <h2 id="servicios-title">
-            Servicios y precios
-          </h2>
+        <section class="section" aria-labelledby="servicios-title">
+          <h2 id="servicios-title">Servicios y precios</h2>
 
           <p *ngIf="cargandoServicios" role="status">
             Cargando servicios…
@@ -190,36 +260,101 @@
             Esta empresa aún no ha publicado servicios.
           </p>
 
-          <div
-            class="services"
-            *ngIf="servicios.length"
-          >
+          <div class="services" *ngIf="servicios.length">
             <article
               class="service"
               *ngFor="let servicio of servicios"
             >
-              <div class="service-copy">
-                <small
-                  class="service-category"
-                  *ngIf="servicio.categoriaNombre"
-                >
-                  {{ servicio.categoriaNombre }}
-                </small>
+              <button
+                class="service-toggle"
+                type="button"
+                [attr.aria-expanded]="servicioAbiertoId === servicio.id"
+                [attr.aria-controls]="'contenido-servicio-' + servicio.id"
+                (click)="alternarServicio(servicio.id)"
+              >
+                <span class="service-copy">
+                  <small
+                    class="service-category"
+                    *ngIf="servicio.categoriaNombre"
+                  >
+                    {{ servicio.categoriaNombre }}
+                  </small>
 
-                <h3>{{ servicio.nombre }}</h3>
+                  <span class="service-name">{{ servicio.nombre }}</span>
+                  <span class="service-duration">
+                    {{ servicio.duracionMinutos }} min
+                  </span>
+                </span>
+
+                <span class="service-summary">
+                  <strong class="service-price">
+                    {{ servicio.precio | number:'1.2-2' }} €
+                  </strong>
+                  <span class="service-more">
+                    {{ servicioAbiertoId === servicio.id
+                      ? 'Ocultar'
+                      : 'Ver detalles' }}
+                  </span>
+                </span>
+              </button>
+
+              <div
+                class="service-details"
+                [id]="'contenido-servicio-' + servicio.id"
+                *ngIf="servicioAbiertoId === servicio.id"
+              >
+                <img
+                  *ngIf="servicio.imagenUrl"
+                  class="service-image"
+                  [src]="servicio.imagenUrl"
+                  [alt]="'Imagen de ' + servicio.nombre"
+                  loading="lazy"
+                >
 
                 <p *ngIf="servicio.descripcion">
                   {{ servicio.descripcion }}
                 </p>
 
-                <span class="service-duration">
-                  {{ servicio.duracionMinutos }} min
-                </span>
-              </div>
+                <div
+                  class="service-workers"
+                  *ngIf="trabajadoresDeServicio(servicio).length"
+                >
+                  <p>Profesionales que realizan este servicio</p>
 
-              <strong class="service-price">
-                {{ servicio.precio | number:'1.2-2' }} €
-              </strong>
+                  <div class="service-worker-list">
+                    <span
+                      class="service-worker"
+                      *ngFor="
+                        let trabajador of trabajadoresDeServicio(servicio)
+                      "
+                    >
+                      <span class="service-worker-avatar">
+                        <img
+                          *ngIf="
+                            fotoTrabajador(trabajador) as foto;
+                            else inicialServicio
+                          "
+                          [src]="foto"
+                          alt=""
+                          loading="lazy"
+                        >
+
+                        <ng-template #inicialServicio>
+                          <span aria-hidden="true">
+                            {{
+                              (trabajador.nombreCompleto || 'T')
+                                .charAt(0)
+                                .toUpperCase()
+                            }}
+                          </span>
+                        </ng-template>
+                      </span>
+
+                      {{ trabajador.nombreCompleto || 'Profesional' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </article>
           </div>
         </section>
@@ -251,14 +386,8 @@
               <span>{{ negocio.direccion }}</span>
             </a>
 
-            <a
-              *ngIf="telefonoUrl"
-              [href]="telefonoUrl"
-            >
-              <ion-icon
-                name="call-outline"
-                aria-hidden="true"
-              ></ion-icon>
+            <a *ngIf="telefonoUrl" [href]="telefonoUrl">
+              <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
               <span>{{ negocio.telefono }}</span>
             </a>
 
@@ -266,10 +395,7 @@
               *ngIf="negocio.email"
               [href]="'mailto:' + negocio.email"
             >
-              <ion-icon
-                name="mail-outline"
-                aria-hidden="true"
-              ></ion-icon>
+              <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
               <span>{{ negocio.email }}</span>
             </a>
 
@@ -279,10 +405,7 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              <ion-icon
-                name="logo-instagram"
-                aria-hidden="true"
-              ></ion-icon>
+              <ion-icon name="logo-instagram" aria-hidden="true"></ion-icon>
               <span>Instagram · @julia_nails_oviedo</span>
             </a>
 
@@ -301,3 +424,82 @@
     </ng-container>
   </main>
 </ion-content>
+
+<ion-modal
+  [isOpen]="!!fotoAbierta"
+  (didDismiss)="cerrarFoto()"
+>
+  <ng-template>
+    <div class="photo-modal" *ngIf="fotoAbierta as foto">
+      <div class="photo-modal-top">
+        <p>Trabajos realizados</p>
+
+        <button
+          type="button"
+          aria-label="Cerrar imagen"
+          (click)="cerrarFoto()"
+        >
+          <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+        </button>
+      </div>
+
+      <div class="photo-modal-image">
+        <img
+          [src]="foto.imagenUrl"
+          [alt]="foto.descripcion || 'Trabajo realizado'"
+        >
+      </div>
+
+      <div class="photo-modal-bottom">
+        <div class="photo-modal-author">
+          <span class="modal-avatar">
+            <img
+              *ngIf="foto.trabajadorAvatarUrl; else inicialModal"
+              [src]="foto.trabajadorAvatarUrl"
+              alt=""
+            >
+
+            <ng-template #inicialModal>
+              <span aria-hidden="true">
+                {{ (foto.trabajadorNombre || 'P').charAt(0) }}
+              </span>
+            </ng-template>
+          </span>
+
+          <div>
+            <span class="author-name">
+              {{ foto.trabajadorNombre || 'Profesional' }}
+            </span>
+            <small>Calendario próximamente</small>
+          </div>
+        </div>
+
+        <p *ngIf="foto.descripcion">{{ foto.descripcion }}</p>
+
+        <div class="modal-navigation" *ngIf="fotos.length > 1">
+          <button
+            type="button"
+            aria-label="Foto anterior"
+            (click)="moverFoto(-1)"
+          >
+            <ion-icon
+              name="chevron-back-outline"
+              aria-hidden="true"
+            ></ion-icon>
+          </button>
+
+          <button
+            type="button"
+            aria-label="Foto siguiente"
+            (click)="moverFoto(1)"
+          >
+            <ion-icon
+              name="chevron-forward-outline"
+              aria-hidden="true"
+            ></ion-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

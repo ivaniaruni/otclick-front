@@ -9,6 +9,7 @@ export interface Servicio {
   duracionMinutos: number;
   precio: number;
   imagenUrl: string | null;
+  trabajadorIds?: string[] | null;
   activa: boolean;
   orden: number;
   fechaCreacion: string | null;
