@@ -1,10 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IonContent, IonIcon, IonModal } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -17,16 +12,23 @@ import {
   closeOutline,
   locationOutline,
   logoInstagram,
-  mailOutline
+  mailOutline,
+  star,
+  starOutline
 } from 'ionicons/icons';
 
 import { EmpresaService } from '../../../core/services/empresa.service';
 import { FotoTrabajoService } from '../../../core/services/foto-trabajo.service';
+import { ResenaService } from '../../../core/services/resena.service';
 import { ServicioService } from '../../../core/services/servicio.service';
 import { TrabajadorService } from '../../../core/services/trabajador.service';
 
 import { Empresa } from '../../../shared/models/empresa';
 import { FotoTrabajo } from '../../../shared/models/foto-trabajo';
+import {
+  Resena,
+  ResumenResenas
+} from '../../../shared/models/resena';
 import { Servicio } from '../../../shared/models/servicio';
 import { Trabajador } from '../../../shared/models/trabajador';
 
@@ -49,32 +51,37 @@ type TrabajadorConFoto = Trabajador & {
   ]
 })
 export class DetalleEmpresaPage implements OnInit {
-  @ViewChild('galeria') galeria?: ElementRef<HTMLElement>;
-
   empresa: Empresa | null = null;
   trabajadores: Trabajador[] = [];
   servicios: Servicio[] = [];
   fotos: FotoTrabajo[] = [];
+  resenas: Resena[] = [];
+  resumenResenas: ResumenResenas | null = null;
 
   fotoAbierta: FotoTrabajo | null = null;
   servicioAbiertoId: string | null = null;
+  indiceGaleria = 0;
+  claveGaleria = 0;
 
   cargandoEmpresa = true;
   cargandoTrabajadores = false;
   cargandoServicios = false;
   cargandoFotos = false;
+  cargandoResenas = false;
 
   errorEmpresa = '';
   errorTrabajadores = '';
   errorServicios = '';
   errorFotos = '';
+  errorResenas = '';
 
   constructor(
     private route: ActivatedRoute,
     private empresaService: EmpresaService,
     private trabajadorService: TrabajadorService,
     private servicioService: ServicioService,
-    private fotoTrabajoService: FotoTrabajoService
+    private fotoTrabajoService: FotoTrabajoService,
+    private resenaService: ResenaService
   ) {
     addIcons({
       arrowBackOutline,
@@ -85,7 +92,9 @@ export class DetalleEmpresaPage implements OnInit {
       closeOutline,
       locationOutline,
       logoInstagram,
-      mailOutline
+      mailOutline,
+      star,
+      starOutline
     });
   }
 
@@ -126,6 +135,67 @@ export class DetalleEmpresaPage implements OnInit {
     return telefono ? `tel:${telefono}` : null;
   }
 
+  get fotosPorVista(): number {
+    return window.innerWidth <= 600 ? 1 : 3;
+  }
+
+  get fotosVisibles(): FotoTrabajo[] {
+    return this.fotos.slice(
+      this.indiceGaleria,
+      this.indiceGaleria + this.fotosPorVista
+    );
+  }
+
+  get puedeVerAnteriorGaleria(): boolean {
+    return this.indiceGaleria > 0;
+  }
+
+  get puedeVerSiguienteGaleria(): boolean {
+    return this.indiceGaleria + this.fotosPorVista < this.fotos.length;
+  }
+
+  get resenasVisibles(): Resena[] {
+    return this.resenas.slice(0, 3);
+  }
+
+  get tieneResenas(): boolean {
+    return (this.resumenResenas?.totalResenas ?? 0) > 0;
+  }
+
+  estrellasResena(puntuacion: number): number[] {
+    return Array.from({ length: 5 }, (_, indice) => indice + 1);
+  }
+
+  fechaRelativa(fecha: string): string {
+    const fechaResena = new Date(fecha);
+
+    if (Number.isNaN(fechaResena.getTime())) {
+      return '';
+    }
+
+    const hoy = new Date();
+    const diferenciaMs = hoy.getTime() - fechaResena.getTime();
+    const diferenciaDias = Math.floor(
+      diferenciaMs / (1000 * 60 * 60 * 24)
+    );
+
+    if (diferenciaDias <= 0) return 'Hoy';
+    if (diferenciaDias === 1) return 'Hace 1 día';
+    if (diferenciaDias < 7) return `Hace ${diferenciaDias} días`;
+
+    const diferenciaSemanas = Math.floor(diferenciaDias / 7);
+
+    if (diferenciaSemanas === 1) return 'Hace 1 semana';
+    if (diferenciaSemanas < 5) {
+      return `Hace ${diferenciaSemanas} semanas`;
+    }
+
+    const diferenciaMeses = Math.floor(diferenciaDias / 30);
+
+    if (diferenciaMeses === 1) return 'Hace 1 mes';
+    return `Hace ${diferenciaMeses} meses`;
+  }
+
   fotoTrabajador(trabajador: Trabajador): string | null {
     const conFoto = trabajador as TrabajadorConFoto;
     return conFoto.avatarUrl || conFoto.fotoUrl || null;
@@ -133,6 +203,7 @@ export class DetalleEmpresaPage implements OnInit {
 
   trabajadoresDeServicio(servicio: Servicio): Trabajador[] {
     const ids = servicio.trabajadorIds || [];
+
     return this.trabajadores.filter((trabajador) =>
       ids.includes(trabajador.id)
     );
@@ -145,13 +216,19 @@ export class DetalleEmpresaPage implements OnInit {
   }
 
   moverGaleria(direccion: -1 | 1): void {
-    const elemento = this.galeria?.nativeElement;
-    if (!elemento) return;
+    const salto = this.fotosPorVista;
+    const ultimoIndice = Math.max(0, this.fotos.length - salto);
+    const nuevoIndice = Math.min(
+      ultimoIndice,
+      Math.max(0, this.indiceGaleria + direccion * salto)
+    );
 
-    elemento.scrollBy({
-      left: direccion * elemento.clientWidth * 0.8,
-      behavior: 'smooth'
-    });
+    if (nuevoIndice === this.indiceGaleria) {
+      return;
+    }
+
+    this.indiceGaleria = nuevoIndice;
+    this.claveGaleria += 1;
   }
 
   abrirFoto(foto: FotoTrabajo): void {
@@ -163,7 +240,9 @@ export class DetalleEmpresaPage implements OnInit {
   }
 
   moverFoto(direccion: -1 | 1): void {
-    if (!this.fotoAbierta || this.fotos.length < 2) return;
+    if (!this.fotoAbierta || this.fotos.length < 2) {
+      return;
+    }
 
     const indice = this.fotos.findIndex(
       (foto) => foto.id === this.fotoAbierta?.id
@@ -175,19 +254,32 @@ export class DetalleEmpresaPage implements OnInit {
     this.fotoAbierta = this.fotos[siguiente];
   }
 
+  abrirCalendarioDeServicio(_servicio: Servicio): void {
+    // Se conectará cuando exista la ruta de calendario y reserva.
+  }
+
+  abrirCalendarioDeFoto(_foto: FotoTrabajo): void {
+    // Se conectará cuando exista la ruta de calendario del trabajador.
+  }
+
   private async cargarDetalle(id: string): Promise<void> {
     this.cargandoEmpresa = true;
     this.errorEmpresa = '';
     this.errorTrabajadores = '';
     this.errorServicios = '';
     this.errorFotos = '';
+    this.errorResenas = '';
 
     this.empresa = null;
     this.trabajadores = [];
     this.servicios = [];
     this.fotos = [];
+    this.resenas = [];
+    this.resumenResenas = null;
     this.fotoAbierta = null;
     this.servicioAbiertoId = null;
+    this.indiceGaleria = 0;
+    this.claveGaleria = 0;
 
     try {
       const empresa = await this.empresaService.obtenerPorId(id);
@@ -208,11 +300,13 @@ export class DetalleEmpresaPage implements OnInit {
     this.cargandoTrabajadores = true;
     this.cargandoServicios = true;
     this.cargandoFotos = true;
+    this.cargandoResenas = true;
 
     await Promise.all([
       this.cargarTrabajadores(id),
       this.cargarServicios(id),
-      this.cargarFotos(id)
+      this.cargarFotos(id),
+      this.cargarResenas(id)
     ]);
   }
 
@@ -229,7 +323,7 @@ export class DetalleEmpresaPage implements OnInit {
 
   private async cargarServicios(id: string): Promise<void> {
     try {
-      const servicios: Servicio[] =
+      const servicios =
         await this.servicioService.listarActivosPorEmpresa(id);
 
       this.servicios = servicios.sort(
@@ -249,6 +343,22 @@ export class DetalleEmpresaPage implements OnInit {
       this.errorFotos = 'No hemos podido cargar los trabajos realizados.';
     } finally {
       this.cargandoFotos = false;
+    }
+  }
+
+  private async cargarResenas(id: string): Promise<void> {
+    try {
+      const [resenas, resumen] = await Promise.all([
+        this.resenaService.listarPorEmpresa(id),
+        this.resenaService.obtenerResumen(id)
+      ]);
+
+      this.resenas = resenas;
+      this.resumenResenas = resumen;
+    } catch {
+      this.errorResenas = 'No hemos podido cargar las opiniones.';
+    } finally {
+      this.cargandoResenas = false;
     }
   }
 }

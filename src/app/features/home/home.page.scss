@@ -86,6 +86,9 @@ h1 {
   background: #ffffff;
   border: 1px solid #b8c4d2;
   border-radius: 12px;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .search:focus-within {
@@ -114,6 +117,14 @@ h1 {
   --background: var(--blue);
   --color: #ffffff;
   --border-radius: 9px;
+  transition:
+    transform 160ms ease,
+    filter 160ms ease;
+}
+
+.search ion-button:hover {
+  filter: brightness(0.94);
+  transform: translateY(-1px);
 }
 
 .main-section {
@@ -152,6 +163,16 @@ h1 {
   border: 1px solid var(--border);
   border-radius: 14px;
   text-decoration: none;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.quick-link:hover {
+  border-color: #b8c4d2;
+  box-shadow: 0 8px 22px rgba(25, 48, 82, 0.08);
+  transform: translateY(-2px);
 }
 
 .quick-link:focus-visible,
@@ -170,6 +191,14 @@ h1 {
   color: var(--blue);
   background: var(--blue-soft);
   border-radius: 12px;
+  transition:
+    color 180ms ease,
+    background 180ms ease;
+}
+
+.quick-link:hover .quick-icon {
+  color: #ffffff;
+  background: var(--blue);
 }
 
 .quick-icon ion-icon {
@@ -198,6 +227,11 @@ h1 {
   flex: 0 0 auto;
   color: var(--blue-dark);
   font-size: 20px;
+  transition: transform 180ms ease;
+}
+
+.quick-link:hover .quick-arrow {
+  transform: translateX(3px);
 }
 
 .companies-band {
@@ -215,6 +249,15 @@ h1 {
   font-weight: 400;
   text-decoration: none;
   white-space: nowrap;
+  transition:
+    color 160ms ease,
+    text-decoration-color 160ms ease;
+}
+
+.view-all:hover {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .companies-grid {
@@ -232,9 +275,20 @@ h1 {
   border: 1px solid var(--border);
   border-radius: 14px;
   text-decoration: none;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.company-card:hover {
+  border-color: #b8c4d2;
+  box-shadow: 0 8px 22px rgba(25, 48, 82, 0.08);
+  transform: translateY(-2px);
 }
 
 .company-picture {
+  position: relative;
   display: grid;
   place-items: center;
   width: 100%;
@@ -250,6 +304,11 @@ h1 {
   height: 100%;
   object-fit: cover;
   object-position: center;
+  transition: transform 180ms ease;
+}
+
+.company-card:hover .company-picture img {
+  transform: scale(1.025);
 }
 
 .company-picture span {
@@ -296,6 +355,48 @@ h1 {
   border: 1px solid var(--border);
   border-radius: 8px;
   cursor: pointer;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.load-error button:hover {
+  color: #ffffff;
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+.quick-links > *,
+.companies-grid > * {
+  animation: content-enter 360ms ease both;
+}
+
+.quick-links > *:nth-child(2),
+.companies-grid > *:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.quick-links > *:nth-child(3),
+.companies-grid > *:nth-child(3) {
+  animation-delay: 120ms;
+}
+
+.quick-links > *:nth-child(4),
+.companies-grid > *:nth-child(4) {
+  animation-delay: 180ms;
+}
+
+@keyframes content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 900px) {
@@ -362,5 +463,16 @@ h1 {
 
   .company-copy h3 {
     font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
   }
 }
