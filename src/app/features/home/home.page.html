@@ -3,13 +3,18 @@
     <section class="welcome-band">
       <div class="content-width">
         <div class="top-row">
-          <img
-            class="logo"
-            src="assets/otclick-logo.jpg"
-            alt="OtClick"
-            width="72"
-            height="72"
-          >
+          <img class="logo" src="assets/otclick-logo.jpg" alt="OtClick" width="72" height="72">
+
+          <button class="profile-access" type="button" (click)="abrirPerfil()" aria-label="Abrir mi perfil">
+            <span class="profile-copy">
+              <small>Hola{{ usuario?.nombre ? ',' : '' }}</small>
+              <strong>{{ usuario?.nombre || 'Mi perfil' }}</strong>
+            </span>
+
+            <span class="profile-avatar" aria-hidden="true">
+              {{ usuario?.nombre?.charAt(0)?.toUpperCase() || '?' }}
+            </span>
+          </button>
         </div>
 
         <div class="welcome-layout">
@@ -22,19 +27,11 @@
           </div>
 
           <form class="search" (ngSubmit)="buscar()">
-            <ion-input
-              name="busqueda"
-              label="¿Qué estás buscando?"
-              labelPlacement="stacked"
-              placeholder="Busca una empresa"
-              [(ngModel)]="busqueda"
-            ></ion-input>
+            <ion-input name="busqueda" label="¿Qué estás buscando?" labelPlacement="stacked"
+              placeholder="Busca una empresa" [(ngModel)]="busqueda"></ion-input>
 
             <ion-button type="submit" aria-label="Buscar empresas">
-              <ion-icon
-                name="search-outline"
-                aria-hidden="true"
-              ></ion-icon>
+              <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
             </ion-button>
           </form>
         </div>
@@ -52,10 +49,7 @@
       <div class="quick-links">
         <a class="quick-link" routerLink="/tabs/citas">
           <span class="quick-icon">
-            <ion-icon
-              name="calendar-outline"
-              aria-hidden="true"
-            ></ion-icon>
+            <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
           </span>
 
           <span class="quick-copy">
@@ -63,19 +57,12 @@
             <small>Consulta tus reservas y tu historial.</small>
           </span>
 
-          <ion-icon
-            class="quick-arrow"
-            name="arrow-forward-outline"
-            aria-hidden="true"
-          ></ion-icon>
+          <ion-icon class="quick-arrow" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
         </a>
 
         <a class="quick-link" routerLink="/tabs/mensajes">
           <span class="quick-icon">
-            <ion-icon
-              name="chatbubbles-outline"
-              aria-hidden="true"
-            ></ion-icon>
+            <ion-icon name="chatbubbles-outline" aria-hidden="true"></ion-icon>
           </span>
 
           <span class="quick-copy">
@@ -83,11 +70,7 @@
             <small>Accede a tus conversaciones.</small>
           </span>
 
-          <ion-icon
-            class="quick-arrow"
-            name="arrow-forward-outline"
-            aria-hidden="true"
-          ></ion-icon>
+          <ion-icon class="quick-arrow" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
         </a>
       </div>
     </section>
@@ -102,10 +85,7 @@
 
           <a class="view-all" routerLink="/tabs/empresas">
             Ver todas
-            <ion-icon
-              name="arrow-forward-outline"
-              aria-hidden="true"
-            ></ion-icon>
+            <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
           </a>
         </div>
 
@@ -124,22 +104,11 @@
           Aún no hay empresas disponibles.
         </p>
 
-        <div
-          class="companies-grid"
-          *ngIf="!cargando && !error && empresasDestacadas.length"
-        >
-          <a
-            class="company-card"
-            *ngFor="let empresa of empresasDestacadas"
-            routerLink="/tabs/empresas"
-          >
+        <div class="companies-grid" *ngIf="!cargando && !error && empresasDestacadas.length">
+          <a class="company-card" *ngFor="let empresa of empresasDestacadas" routerLink="/tabs/empresas">
             <div class="company-picture">
-              <img
-                *ngIf="empresa.logoUrl; else initial"
-                [src]="empresa.logoUrl"
-                [alt]="'Logo de ' + empresa.nombre"
-                loading="lazy"
-              >
+              <img *ngIf="empresa.logoUrl; else initial" [src]="empresa.logoUrl" [alt]="'Logo de ' + empresa.nombre"
+                loading="lazy">
 
               <ng-template #initial>
                 <span aria-hidden="true">

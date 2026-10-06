@@ -6,23 +6,27 @@ import { AuthService } from '../services/auth.service';
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const authService = inject(AuthService);
 
-  // Login y registro no necesitan token.
-  if (
-    request.url.endsWith('/auth/login') ||
-    request.url.endsWith('/auth/register')
-  ) {
+  const isPublicAuthRequest =
+    request.url.includes('/auth/login') ||
+    request.url.includes('/auth/register');
+
+  if (isPublicAuthRequest) {
     return next(request);
   }
 
   return from(authService.getToken()).pipe(
     switchMap((token) => {
-      const outgoing = token
-        ? request.clone({
-            setHeaders: { Authorization: `Bearer ${token}` }
-          })
-        : request;
+      if (!token) {
+        return next(request);
+      }
 
-      return next(outgoing);
+      const authenticatedRequest = request.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      return next(authenticatedRequest);
     })
   );
 };

@@ -1,0 +1,168 @@
+<ion-header class="page-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button
+        defaultHref="/tabs/home"
+        text=""
+      ></ion-back-button>
+    </ion-buttons>
+
+    <ion-title>Mi perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <main class="profile-shell">
+    <section class="profile-panel" aria-labelledby="profile-title">
+      <div class="page-copy">
+        <p class="eyebrow">Tu cuenta</p>
+        <h1 id="profile-title">Mi perfil</h1>
+        <p>Actualiza tus datos para que empresas y profesionales puedan identificarte.</p>
+      </div>
+
+      <div class="loading-state" *ngIf="cargando" role="status">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Cargando perfil…</span>
+      </div>
+
+      <ng-container *ngIf="!cargando && perfil">
+        <div class="profile-summary">
+          <div class="avatar" aria-hidden="true">
+            <img
+              *ngIf="avatarUrl; else initials"
+              [src]="avatarUrl"
+              alt=""
+            >
+
+            <ng-template #initials>
+              <span>{{ iniciales }}</span>
+            </ng-template>
+          </div>
+
+          <div class="summary-copy">
+            <h2>{{ nombre || 'Tu perfil' }}</h2>
+            <p>{{ perfil.email }}</p>
+            <span class="role-tag">{{ perfil.rol }}</span>
+          </div>
+        </div>
+
+        <form #profileForm="ngForm" (ngSubmit)="guardar()">
+          <div class="field">
+            <ion-input
+              name="nombre"
+              label="Nombre"
+              labelPlacement="stacked"
+              autocomplete="given-name"
+              [(ngModel)]="nombre"
+              required
+              maxlength="100"
+            ></ion-input>
+          </div>
+
+          <div class="field">
+            <ion-input
+              name="apellido"
+              label="Apellido"
+              labelPlacement="stacked"
+              autocomplete="family-name"
+              [(ngModel)]="apellido"
+              maxlength="100"
+            ></ion-input>
+          </div>
+
+          <div class="field">
+            <ion-input
+              name="telefono"
+              label="Teléfono"
+              labelPlacement="stacked"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              [(ngModel)]="telefono"
+              maxlength="30"
+            ></ion-input>
+          </div>
+
+          <div class="field">
+            <ion-input
+              name="avatarUrl"
+              label="URL de tu foto"
+              labelPlacement="stacked"
+              type="url"
+              inputmode="url"
+              autocomplete="url"
+              placeholder="https://..."
+              [(ngModel)]="avatarUrl"
+              maxlength="500"
+            ></ion-input>
+
+            <p class="field-help">
+              Puedes dejarlo vacío. Más adelante añadiremos subida de foto desde cámara o galería.
+            </p>
+          </div>
+
+          <div class="readonly-info">
+            <div>
+              <span>Correo electrónico</span>
+              <strong>{{ perfil.email }}</strong>
+            </div>
+
+            <div>
+              <span>Tipo de cuenta</span>
+              <strong>{{ perfil.rol }}</strong>
+            </div>
+          </div>
+
+          <ion-text *ngIf="error" color="danger">
+            <p class="form-message error" role="alert">{{ error }}</p>
+          </ion-text>
+
+          <ion-text *ngIf="mensaje" color="success">
+            <p class="form-message success" role="status">{{ mensaje }}</p>
+          </ion-text>
+
+          <ion-button
+            class="save-button"
+            expand="block"
+            type="submit"
+            [disabled]="profileForm.invalid || guardando"
+          >
+            <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
+            <ion-icon
+              *ngIf="!guardando"
+              name="save-outline"
+              slot="start"
+              aria-hidden="true"
+            ></ion-icon>
+            <span>{{ guardando ? 'Guardando…' : 'Guardar cambios' }}</span>
+          </ion-button>
+        </form>
+
+        <ion-button
+          class="logout-button"
+          expand="block"
+          fill="outline"
+          color="danger"
+          [disabled]="cerrandoSesion"
+          (click)="cerrarSesion()"
+        >
+          <ion-spinner *ngIf="cerrandoSesion" name="crescent"></ion-spinner>
+          <ion-icon
+            *ngIf="!cerrandoSesion"
+            name="log-out-outline"
+            slot="start"
+            aria-hidden="true"
+          ></ion-icon>
+          <span>{{ cerrandoSesion ? 'Cerrando sesión…' : 'Cerrar sesión' }}</span>
+        </ion-button>
+      </ng-container>
+
+      <div class="error-state" *ngIf="!cargando && error && !perfil" role="alert">
+        <p>{{ error }}</p>
+        <ion-button fill="outline" (click)="cargarPerfil()">
+          Reintentar
+        </ion-button>
+      </div>
+    </section>
+  </main>
+</ion-content>

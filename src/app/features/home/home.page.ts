@@ -12,8 +12,11 @@ import { addIcons } from 'ionicons';
 import {
   arrowForwardOutline,
   calendarOutline,
-  searchOutline, chatbubblesOutline } from 'ionicons/icons';
-
+  chatbubblesOutline,
+  personCircleOutline,
+  searchOutline
+} from 'ionicons/icons';
+import { AuthResponse, AuthService } from '../../core/services/auth.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { Empresa } from '../../shared/models/empresa';
 
@@ -37,20 +40,39 @@ export class HomePage implements OnInit {
   busqueda = '';
   cargando = true;
   error = '';
+  usuario: AuthResponse | null = null;
 
   constructor(
     private empresaService: EmpresaService,
+    private authService: AuthService,
     private router: Router
   ) {
-    addIcons({searchOutline,calendarOutline,arrowForwardOutline,chatbubblesOutline});
+    addIcons({
+      arrowForwardOutline,
+      calendarOutline,
+      chatbubblesOutline,
+      personCircleOutline,
+      searchOutline
+    });
   }
 
   ngOnInit(): void {
-    void this.cargarEmpresas();
+    void this.inicializarPagina();
   }
 
   get empresasDestacadas(): Empresa[] {
     return this.empresas.slice(0, 4);
+  }
+
+  async inicializarPagina(): Promise<void> {
+    await Promise.all([
+      this.cargarUsuario(),
+      this.cargarEmpresas()
+    ]);
+  }
+
+  async cargarUsuario(): Promise<void> {
+    this.usuario = await this.authService.getCurrentUser();
   }
 
   async cargarEmpresas(): Promise<void> {
@@ -73,5 +95,9 @@ export class HomePage implements OnInit {
         ? { q: this.busqueda.trim() }
         : {}
     });
+  }
+
+  async abrirPerfil(): Promise<void> {
+    await this.router.navigateByUrl('/tabs/perfil');
   }
 }

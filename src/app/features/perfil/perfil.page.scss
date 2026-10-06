@@ -1,0 +1,251 @@
+:host {
+  --blue: #0474fc;
+  --blue-dark: #0955c4;
+  --blue-soft: #eaf3ff;
+  --ink: #17283f;
+  --muted: #4e5e73;
+  --border: #d9e0e8;
+}
+
+ion-content {
+  --background: #f5f7fa;
+}
+
+.page-header ion-toolbar {
+  --background: #ffffff;
+  --color: var(--ink);
+  --border-color: var(--border);
+}
+
+.page-header ion-title {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.profile-shell {
+  min-height: 100%;
+  padding: 28px 20px 44px;
+}
+
+.profile-panel {
+  width: min(100%, 620px);
+  margin: 0 auto;
+  padding: 30px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(25, 48, 82, 0.08);
+}
+
+.page-copy {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--blue-dark);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  overflow-wrap: anywhere;
+}
+
+h1 {
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.page-copy > p:last-child {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.profile-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding: 18px;
+  background: #f5f9ff;
+  border: 1px solid #d7e8ff;
+  border-radius: 14px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 70px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  color: #ffffff;
+  background: var(--blue);
+  border-radius: 50%;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar span {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.summary-copy {
+  min-width: 0;
+}
+
+.summary-copy h2 {
+  margin: 0 0 4px;
+  color: var(--ink);
+  font-size: 19px;
+}
+
+.summary-copy p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.role-tag {
+  display: inline-flex;
+  padding: 4px 8px;
+  color: var(--blue-dark);
+  background: #ffffff;
+  border: 1px solid #cfe2ff;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field {
+  margin-bottom: 16px;
+  padding: 10px 14px 8px;
+  background: #ffffff;
+  border: 1px solid #b8c4d2;
+  border-radius: 10px;
+}
+
+.field ion-input {
+  --color: var(--ink);
+  --placeholder-color: #53657b;
+  --placeholder-opacity: 1;
+  --highlight-color-focused: var(--blue);
+  --highlight-color-valid: var(--blue);
+  --highlight-color-invalid: #c62828;
+}
+
+.field ion-input::part(label) {
+  color: #34465c;
+  font-weight: 600;
+}
+
+.field:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(4, 116, 252, 0.12);
+}
+
+.field-help {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.readonly-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.readonly-info div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.readonly-info span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.readonly-info strong {
+  color: var(--ink);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.form-message {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.form-message.error {
+  color: #b3261e;
+}
+
+.form-message.success {
+  color: #1d6f42;
+}
+
+.save-button {
+  min-height: 48px;
+  --background: var(--blue);
+  --background-hover: var(--blue-dark);
+  --background-activated: #0848a5;
+  --color: #ffffff;
+  --border-radius: 10px;
+}
+
+.logout-button {
+  margin-top: 14px;
+  min-height: 46px;
+  --border-radius: 10px;
+}
+
+.loading-state,
+.error-state {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 38px 16px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.error-state p {
+  margin: 0;
+  color: #b3261e;
+}
+
+@media (max-width: 520px) {
+  .profile-shell {
+    padding: 20px 16px 32px;
+  }
+
+  .profile-panel {
+    padding: 24px 20px;
+    box-shadow: none;
+  }
+
+  .readonly-info {
+    grid-template-columns: 1fr;
+  }
+}
