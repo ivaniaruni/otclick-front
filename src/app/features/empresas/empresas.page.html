@@ -10,6 +10,22 @@
             width="72"
             height="72"
           >
+
+          <button
+            class="profile-access"
+            type="button"
+            (click)="abrirPerfil()"
+            aria-label="Abrir mi perfil"
+          >
+            <span class="profile-copy">
+              <small>Hola{{ usuario?.nombre ? ',' : '' }}</small>
+              <strong>{{ usuario?.nombre || 'Mi perfil' }}</strong>
+            </span>
+
+            <span class="profile-avatar" aria-hidden="true">
+              {{ usuario?.nombre?.charAt(0)?.toUpperCase() || '?' }}
+            </span>
+          </button>
         </div>
 
         <div class="welcome-layout">
@@ -31,7 +47,10 @@
               [clearInput]="true"
             ></ion-input>
 
-            <ion-button type="submit" aria-label="Buscar empresas">
+            <ion-button
+              type="submit"
+              aria-label="Buscar empresas"
+            >
               <ion-icon
                 name="search-outline"
                 aria-hidden="true"
@@ -91,7 +110,11 @@
           Cargando empresas…
         </div>
 
-        <div class="state-message error-message" *ngIf="error" role="alert">
+        <div
+          class="state-message error-message"
+          *ngIf="error"
+          role="alert"
+        >
           <p>{{ error }}</p>
 
           <ion-button fill="outline" (click)="cargar()">
@@ -171,6 +194,7 @@
 
               <span class="company-copy">
                 <strong>{{ empresa.nombre }}</strong>
+
                 <small>
                   {{ empresa.direccion || 'Conoce este negocio' }}
                 </small>
@@ -190,7 +214,11 @@
               (click)="alternarSeguimiento(empresa)"
             >
               <ion-icon
-                [name]="idsSeguidas.has(empresa.id) ? 'heart' : 'heart-outline'"
+                [name]="
+                  idsSeguidas.has(empresa.id)
+                    ? 'heart'
+                    : 'heart-outline'
+                "
                 aria-hidden="true"
               ></ion-icon>
             </button>

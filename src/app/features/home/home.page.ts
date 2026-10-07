@@ -13,10 +13,12 @@ import {
   arrowForwardOutline,
   calendarOutline,
   chatbubblesOutline,
-  personCircleOutline,
   searchOutline
 } from 'ionicons/icons';
-import { AuthResponse, AuthService } from '../../core/services/auth.service';
+import {
+  AuthResponse,
+  AuthService
+} from '../../core/services/auth.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { Empresa } from '../../shared/models/empresa';
 
@@ -37,10 +39,11 @@ import { Empresa } from '../../shared/models/empresa';
 })
 export class HomePage implements OnInit {
   empresas: Empresa[] = [];
+  usuario: AuthResponse | null = null;
+
   busqueda = '';
   cargando = true;
   error = '';
-  usuario: AuthResponse | null = null;
 
   constructor(
     private empresaService: EmpresaService,
@@ -51,7 +54,6 @@ export class HomePage implements OnInit {
       arrowForwardOutline,
       calendarOutline,
       chatbubblesOutline,
-      personCircleOutline,
       searchOutline
     });
   }
@@ -81,7 +83,10 @@ export class HomePage implements OnInit {
 
     try {
       const respuesta = await this.empresaService.listar();
-      this.empresas = respuesta.filter((empresa) => empresa.activa);
+
+      this.empresas = respuesta.filter(
+        (empresa) => empresa.activa
+      );
     } catch {
       this.error = 'No hemos podido cargar las empresas.';
     } finally {

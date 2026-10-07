@@ -33,31 +33,26 @@ ion-content {
   transition:
     color 160ms ease,
     background 160ms ease,
-    border-color 160ms ease;
-}
-
-.back-button ion-icon {
-  font-size: 22px;
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
 .back-button:hover {
   color: #ffffff;
   background: var(--blue);
   border-color: var(--blue);
+  transform: translateX(-2px);
 }
 
 .back-button:focus-visible,
-.page-state a:focus-visible,
-.contact-links a:focus-visible,
-.work-photo:focus-visible,
-.gallery-controls button:focus-visible,
-.service-toggle:focus-visible,
-.service-calendar-button:focus-visible,
-.photo-calendar-button:focus-visible,
-.modal-close:focus-visible,
-.modal-navigation button:focus-visible {
+.save-button:focus-visible,
+.logout-button:focus-visible {
   outline: 3px solid var(--blue);
   outline-offset: 3px;
+}
+
+.back-button ion-icon {
+  font-size: 22px;
 }
 
 .company-sheet {

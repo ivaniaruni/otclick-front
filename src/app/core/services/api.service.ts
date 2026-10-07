@@ -10,18 +10,32 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   get<T>(path: string): Promise<T> {
-    return firstValueFrom(this.http.get<T>(`${this.baseUrl}${path}`));
+    return firstValueFrom(
+      this.http.get<T>(`${this.baseUrl}${path}`)
+    );
   }
 
   post<T>(path: string, body: unknown): Promise<T> {
-    return firstValueFrom(this.http.post<T>(`${this.baseUrl}${path}`, body));
+    return firstValueFrom(
+      this.http.post<T>(`${this.baseUrl}${path}`, body)
+    );
+  }
+
+  postFormData<T>(path: string, body: FormData): Promise<T> {
+    return firstValueFrom(
+      this.http.post<T>(`${this.baseUrl}${path}`, body)
+    );
   }
 
   put<T>(path: string, body: unknown): Promise<T> {
-    return firstValueFrom(this.http.put<T>(`${this.baseUrl}${path}`, body));
+    return firstValueFrom(
+      this.http.put<T>(`${this.baseUrl}${path}`, body)
+    );
   }
 
   delete<T>(path: string): Promise<T> {
-    return firstValueFrom(this.http.delete<T>(`${this.baseUrl}${path}`));
+    return firstValueFrom(
+      this.http.delete<T>(`${this.baseUrl}${path}`)
+    );
   }
 }

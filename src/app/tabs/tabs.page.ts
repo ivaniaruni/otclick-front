@@ -8,10 +8,10 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
-  homeOutline,
-  storefrontOutline,
   calendarOutline,
-  chatbubblesOutline
+  chatbubblesOutline,
+  homeOutline,
+  storefrontOutline
 } from 'ionicons/icons';
 
 @Component({

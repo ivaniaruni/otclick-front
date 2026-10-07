@@ -1,0 +1,15 @@
+<button
+  class="profile-access"
+  type="button"
+  (click)="abrirPerfil()"
+  aria-label="Abrir mi perfil"
+>
+  <span class="profile-copy">
+    <small>Hola{{ usuario?.nombre ? ',' : '' }}</small>
+    <strong>{{ usuario?.nombre || 'Mi perfil' }}</strong>
+  </span>
+
+  <span class="profile-avatar" aria-hidden="true">
+    {{ inicial }}
+  </span>
+</button>

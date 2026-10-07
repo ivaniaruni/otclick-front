@@ -1,0 +1,31 @@
+<header class="app-header">
+  <a
+    class="brand-link"
+    routerLink="/tabs/home"
+    aria-label="Ir al inicio de OtClick"
+  >
+    <img
+      class="brand-logo"
+      src="assets/otclick-logo.jpg"
+      alt="OtClick"
+      width="48"
+      height="48"
+    >
+  </a>
+
+  <button
+    class="profile-access"
+    type="button"
+    (click)="abrirPerfil()"
+    aria-label="Abrir mi perfil"
+  >
+    <span class="profile-copy">
+      <small>Hola{{ usuario?.nombre ? ',' : '' }}</small>
+      <strong>{{ usuario?.nombre || 'Mi perfil' }}</strong>
+    </span>
+
+    <span class="profile-avatar" aria-hidden="true">
+      {{ inicial }}
+    </span>
+  </button>
+</header>

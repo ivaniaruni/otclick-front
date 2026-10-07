@@ -1,30 +1,30 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import {
-  IonBackButton,
   IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
   IonIcon,
   IonInput,
   IonSpinner,
-  IonText,
-  IonTitle,
-  IonToolbar
+  IonText
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
-  cameraOutline,
+  arrowBackOutline,
+  closeOutline,
+  imageOutline,
   logOutOutline,
-  personCircleOutline,
   saveOutline
 } from 'ionicons/icons';
+import { ArchivoService } from '../../core/services/archivo.service';
 import { AuthService } from '../../core/services/auth.service';
 import { UsuarioService } from '../../core/services/usuario.service';
-import { Usuario } from '../../shared/models/usuario';
+import {
+  ActualizarPerfilRequest,
+  Usuario
+} from '../../shared/models/usuario';
 
 @Component({
   selector: 'app-perfil',
@@ -34,26 +34,25 @@ import { Usuario } from '../../shared/models/usuario';
   imports: [
     CommonModule,
     FormsModule,
-    IonBackButton,
+    RouterLink,
     IonButton,
-    IonButtons,
     IonContent,
-    IonHeader,
     IonIcon,
     IonInput,
     IonSpinner,
-    IonText,
-    IonTitle,
-    IonToolbar
+    IonText
   ]
 })
-export class PerfilPage implements OnInit {
+export class PerfilPage implements OnInit, OnDestroy {
   perfil: Usuario | null = null;
 
   nombre = '';
   apellido = '';
   telefono = '';
   avatarUrl = '';
+
+  archivoSeleccionado: File | null = null;
+  vistaPreviaArchivo: string | null = null;
 
   cargando = true;
   guardando = false;
@@ -63,14 +62,15 @@ export class PerfilPage implements OnInit {
   mensaje = '';
 
   constructor(
+    private archivoService: ArchivoService,
     private usuarioService: UsuarioService,
-    private authService: AuthService,
-    private router: Router
+    private authService: AuthService
   ) {
     addIcons({
-      cameraOutline,
+      arrowBackOutline,
+      closeOutline,
+      imageOutline,
       logOutOutline,
-      personCircleOutline,
       saveOutline
     });
   }
@@ -79,11 +79,26 @@ export class PerfilPage implements OnInit {
     void this.cargarPerfil();
   }
 
-  get iniciales(): string {
-    const nombre = this.nombre.trim().charAt(0);
-    const apellido = this.apellido.trim().charAt(0);
+  ngOnDestroy(): void {
+    this.liberarVistaPrevia();
+  }
 
-    return `${nombre}${apellido}`.toUpperCase() || '?';
+  get imagenMostrada(): string {
+    return this.vistaPreviaArchivo || this.avatarUrl;
+  }
+
+  get iniciales(): string {
+    const nombreInicial = this.nombre.trim().charAt(0);
+    const apellidoInicial = this.apellido.trim().charAt(0);
+
+    return `${nombreInicial}${apellidoInicial}`.toUpperCase() || '?';
+  }
+
+  get nombreCompleto(): string {
+    return [this.nombre, this.apellido]
+      .map((valor) => valor.trim())
+      .filter(Boolean)
+      .join(' ');
   }
 
   async cargarPerfil(): Promise<void> {
@@ -108,6 +123,39 @@ export class PerfilPage implements OnInit {
     }
   }
 
+  seleccionarArchivo(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const archivo = input.files?.[0] ?? null;
+
+    input.value = '';
+
+    if (!archivo) {
+      return;
+    }
+
+    this.error = '';
+    this.mensaje = '';
+
+    const errorArchivo = this.validarArchivo(archivo);
+
+    if (errorArchivo) {
+      this.error = errorArchivo;
+      return;
+    }
+
+    this.liberarVistaPrevia();
+
+    this.archivoSeleccionado = archivo;
+    this.vistaPreviaArchivo = URL.createObjectURL(archivo);
+  }
+
+  quitarImagenSeleccionada(): void {
+    this.liberarVistaPrevia();
+
+    this.archivoSeleccionado = null;
+    this.vistaPreviaArchivo = null;
+  }
+
   async guardar(): Promise<void> {
     if (this.guardando || !this.nombre.trim()) {
       return;
@@ -118,18 +166,33 @@ export class PerfilPage implements OnInit {
     this.guardando = true;
 
     try {
-      const actualizado = await this.usuarioService.actualizarMiPerfil({
+      let avatarUrlFinal = this.normalizarOpcional(this.avatarUrl);
+
+      if (this.archivoSeleccionado) {
+        const respuesta = await this.archivoService.subirAvatar(
+          this.archivoSeleccionado
+        );
+
+        avatarUrlFinal = this.construirUrlArchivo(respuesta.url);
+      }
+
+      const request: ActualizarPerfilRequest = {
         nombre: this.nombre.trim(),
         apellido: this.normalizarOpcional(this.apellido),
         telefono: this.normalizarOpcional(this.telefono),
-        avatarUrl: this.normalizarOpcional(this.avatarUrl)
-      });
+        avatarUrl: avatarUrlFinal
+      };
+
+      const actualizado =
+        await this.usuarioService.actualizarMiPerfil(request);
 
       this.perfil = actualizado;
       this.nombre = actualizado.nombre ?? '';
       this.apellido = actualizado.apellido ?? '';
       this.telefono = actualizado.telefono ?? '';
       this.avatarUrl = actualizado.avatarUrl ?? '';
+
+      this.quitarImagenSeleccionada();
 
       await this.authService.updateStoredUser(actualizado);
 
@@ -150,17 +213,53 @@ export class PerfilPage implements OnInit {
 
     this.cerrandoSesion = true;
 
-    await this.authService.logout();
+    try {
+      await this.authService.logout();
+      window.location.href = '/login';
+    } finally {
+      this.cerrandoSesion = false;
+    }
+  }
 
-    await this.router.navigateByUrl('/login', {
-      replaceUrl: true
-    });
+  private validarArchivo(archivo: File): string | null {
+    const tiposPermitidos = [
+      'image/jpeg',
+      'image/png',
+      'image/webp'
+    ];
 
-    this.cerrandoSesion = false;
+    const maximoBytes = 5 * 1024 * 1024;
+
+    if (!tiposPermitidos.includes(archivo.type)) {
+      return 'Selecciona una imagen JPG, PNG o WEBP.';
+    }
+
+    if (archivo.size > maximoBytes) {
+      return 'La imagen no puede superar 5 MB.';
+    }
+
+    return null;
+  }
+
+  private construirUrlArchivo(ruta: string): string {
+    if (ruta.startsWith('http://') || ruta.startsWith('https://')) {
+      return ruta;
+    }
+
+    const origenBackend = 'http://localhost:8090';
+
+    return `${origenBackend}${ruta}`;
+  }
+
+  private liberarVistaPrevia(): void {
+    if (this.vistaPreviaArchivo) {
+      URL.revokeObjectURL(this.vistaPreviaArchivo);
+    }
   }
 
   private normalizarOpcional(valor: string): string | null {
     const texto = valor.trim();
+
     return texto ? texto : null;
   }
 }
