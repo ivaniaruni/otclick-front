@@ -1,49 +1,229 @@
 <ion-content>
-  <main class="page">
-    <img
-      class="logo"
-      src="assets/otclick-logo.jpg"
-      alt="OtClick"
-      width="64"
-      height="64"
-    >
+  <main>
+    <section class="welcome-band" aria-labelledby="citas-title">
+      <div class="content-width">
+        <div class="top-row">
+          <img
+            class="logo"
+            src="assets/otclick-logo.jpg"
+            alt="OtClick"
+            width="72"
+            height="72"
+          >
 
-    <p class="eyebrow">Tu agenda</p>
-    <h1>Mis citas</h1>
-    <p class="intro">Aquí encontrarás tus reservas.</p>
+          <button
+            class="profile-access"
+            type="button"
+            (click)="abrirPerfil()"
+            aria-label="Abrir mi perfil"
+          >
+            <span class="profile-copy">
+              <small>Hola{{ usuario?.nombre ? ',' : '' }}</small>
+              <strong>{{ usuario?.nombre || 'Mi perfil' }}</strong>
+            </span>
 
-    <p *ngIf="cargando" role="status">Cargando tus citas…</p>
+            <span class="profile-avatar" aria-hidden="true">
+              {{ usuario?.nombre?.charAt(0)?.toUpperCase() || '?' }}
+            </span>
+          </button>
+        </div>
 
-    <div *ngIf="error" role="alert">
-      <p>{{ error }}</p>
-      <ion-button fill="outline" (click)="cargar()">
-        Reintentar
-      </ion-button>
-    </div>
-
-    <section class="empty" *ngIf="!cargando && !error && !citas.length">
-      <h2>Aún no tienes citas.</h2>
-      <p>Explora las empresas de OtClick para encontrar tu próxima cita.</p>
-      <a href="/tabs/empresas">Explorar empresas</a>
+        <div class="welcome-layout">
+          <div>
+            <p class="eyebrow">Tu agenda</p>
+            <h1 id="citas-title">Mis citas</h1>
+            <p class="intro">
+              Consulta tus próximas reservas y las citas anteriores.
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <div class="appointments" *ngIf="!cargando && !error && citas.length">
-      <article class="appointment" *ngFor="let cita of citas">
-        <div class="appointment-date">
-          <span>{{ cita.fecha }}</span>
-          <strong>{{ cita.horaInicio }}</strong>
+    <section class="appointments-band" aria-labelledby="listado-title">
+      <div class="content-width">
+        <div class="view-switch" aria-label="Filtrar citas">
+          <button
+            type="button"
+            [class.active]="vista === 'proximas'"
+            [attr.aria-pressed]="vista === 'proximas'"
+            (click)="seleccionarVista('proximas')"
+          >
+            Próximas
+            <span class="filter-count">{{ proximasCount }}</span>
+          </button>
+
+          <button
+            type="button"
+            [class.active]="vista === 'historial'"
+            [attr.aria-pressed]="vista === 'historial'"
+            (click)="seleccionarVista('historial')"
+          >
+            Historial
+            <span class="filter-count">{{ historialCount }}</span>
+          </button>
+
+          <button
+            type="button"
+            [class.active]="vista === 'todas'"
+            [attr.aria-pressed]="vista === 'todas'"
+            (click)="seleccionarVista('todas')"
+          >
+            Todas
+            <span class="filter-count">{{ citas.length }}</span>
+          </button>
         </div>
 
-        <div>
-          <h2>{{ cita.servicioNombre || 'Servicio' }}</h2>
-          <p>{{ cita.empresaNombre || 'Empresa' }}</p>
-          <p *ngIf="cita.trabajadorNombre">
-            Te atiende {{ cita.trabajadorNombre }}
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">
+              {{
+                vista === 'proximas'
+                  ? 'Lo que viene'
+                  : vista === 'historial'
+                    ? 'Citas anteriores'
+                    : 'Tu actividad'
+              }}
+            </p>
+
+            <h2 id="listado-title">
+              {{
+                vista === 'proximas'
+                  ? 'Próximas citas'
+                  : vista === 'historial'
+                    ? 'Historial de citas'
+                    : 'Todas tus citas'
+              }}
+            </h2>
+          </div>
+
+          <span class="result-count" *ngIf="!cargando && !error">
+            {{ citasVisibles.length }}
+            {{ citasVisibles.length === 1 ? 'cita' : 'citas' }}
+          </span>
+        </div>
+
+        <div class="state-message" *ngIf="cargando" role="status">
+          Cargando tus citas…
+        </div>
+
+        <div
+          class="state-message error-message"
+          *ngIf="error"
+          role="alert"
+        >
+          <p>{{ error }}</p>
+
+          <ion-button fill="outline" (click)="cargar()">
+            <ion-icon
+              slot="start"
+              name="refresh-outline"
+              aria-hidden="true"
+            ></ion-icon>
+            Reintentar
+          </ion-button>
+        </div>
+
+        <section
+          class="state-message empty-state"
+          *ngIf="!cargando && !error && citas.length === 0"
+        >
+          <span class="empty-icon" aria-hidden="true">
+            <ion-icon name="calendar-clear-outline"></ion-icon>
+          </span>
+
+          <h3>Aún no tienes citas</h3>
+          <p>
+            Explora las empresas de OtClick para encontrar un servicio y
+            reservar tu primera cita.
           </p>
-        </div>
 
-        <span class="status">{{ cita.estado }}</span>
-      </article>
-    </div>
+          <a class="empty-link" routerLink="/tabs/empresas">
+            Explorar empresas
+          </a>
+        </section>
+
+        <section
+          class="state-message empty-state"
+          *ngIf="
+            !cargando &&
+            !error &&
+            citas.length > 0 &&
+            citasVisibles.length === 0
+          "
+        >
+          <span class="empty-icon" aria-hidden="true">
+            <ion-icon name="calendar-outline"></ion-icon>
+          </span>
+
+          <h3>
+            {{
+              vista === 'proximas'
+                ? 'No tienes próximas citas'
+                : 'Todavía no hay citas en el historial'
+            }}
+          </h3>
+
+          <p>
+            {{
+              vista === 'proximas'
+                ? 'Cuando reserves una cita, aparecerá aquí.'
+                : 'Las citas completadas o anteriores aparecerán aquí.'
+            }}
+          </p>
+        </section>
+
+        <div
+          class="appointments-grid"
+          *ngIf="!cargando && !error && citasVisibles.length > 0"
+        >
+          <article
+            class="appointment-card"
+            *ngFor="let cita of citasVisibles"
+          >
+            <div class="appointment-date">
+              <span>{{ fechaEnEspanol(cita.fecha) }}</span>
+              <strong>{{ horaFormateada(cita.horaInicio) }}</strong>
+            </div>
+
+            <div class="appointment-copy">
+              <div class="appointment-heading">
+                <p class="service-label">Servicio</p>
+
+                <span
+                  class="status"
+                  [ngClass]="claseEstado(cita.estado)"
+                >
+                  {{ estadoEnEspanol(cita.estado) }}
+                </span>
+              </div>
+
+              <h3>{{ cita.servicioNombre || 'Servicio' }}</h3>
+
+              <p class="company-name">
+                {{ cita.empresaNombre || 'Empresa' }}
+              </p>
+
+              <p class="worker-name" *ngIf="cita.trabajadorNombre">
+                Te atiende {{ cita.trabajadorNombre }}
+              </p>
+            </div>
+
+            <div
+              class="appointment-price"
+              *ngIf="
+                cita.precioTotal !== null &&
+                cita.precioTotal !== undefined
+              "
+            >
+              {{
+                cita.precioTotal
+                  | currency:'EUR':'symbol':'1.2-2':'es-ES'
+              }}
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
   </main>
 </ion-content>

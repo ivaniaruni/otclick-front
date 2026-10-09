@@ -155,8 +155,7 @@
                   {{ trabajador.biografia }}
                 </p>
 
-                <button class="calendar-button" type="button" disabled
-                  title="El calendario estará disponible próximamente">
+                <button class="calendar-button" type="button" (click)="verCalendarioTrabajador(trabajador)">
                   <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
                   Ver calendario
                 </button>
@@ -253,9 +252,9 @@
                   </div>
                 </div>
 
-                <button class="service-calendar-button" type="button" (click)="abrirCalendarioDeServicio(servicio)">
+                <button class="service-calendar-button" type="button" (click)="reservarServicio(servicio)">
                   <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
-                  Ver calendario
+                  Reservar
                 </button>
               </div>
             </article>

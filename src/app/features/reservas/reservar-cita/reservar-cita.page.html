@@ -1,0 +1,471 @@
+<ion-content>
+  <main class="page">
+    <a
+      class="back-button"
+      [routerLink]="['/tabs/empresas', empresaId]"
+      aria-label="Volver a la empresa"
+    >
+      <ion-icon
+        name="arrow-back-outline"
+        aria-hidden="true"
+      ></ion-icon>
+    </a>
+
+    <div
+      class="page-state"
+      *ngIf="cargando"
+      role="status"
+    >
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando opciones de reserva…</p>
+    </div>
+
+    <div
+      class="page-state error-state"
+      *ngIf="!cargando && error && !empresa"
+      role="alert"
+    >
+      <p>{{ error }}</p>
+    </div>
+
+    <article
+      class="booking-sheet"
+      *ngIf="!cargando && empresa"
+    >
+      <header class="booking-header">
+        <p class="eyebrow">Reserva en OtClick</p>
+
+        <h1>{{ empresa.nombre }}</h1>
+
+        <p class="intro">
+          Selecciona un servicio, un profesional y una hora disponible.
+        </p>
+      </header>
+
+      <section class="section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Paso 1</p>
+            <h2>Servicio</h2>
+          </div>
+        </div>
+
+        <div
+          class="empty-state"
+          *ngIf="!serviciosFiltrados.length"
+        >
+          <h3>No hay servicios para esta selección</h3>
+          <p>
+            Esta empresa todavía no ha publicado servicios disponibles
+            para el profesional seleccionado.
+          </p>
+        </div>
+
+        <div
+          class="option-list"
+          *ngIf="serviciosFiltrados.length"
+        >
+          <button
+            class="option-card"
+            type="button"
+            *ngFor="let servicio of serviciosFiltrados"
+            [class.selected]="servicioSeleccionado?.id === servicio.id"
+            [attr.aria-pressed]="servicioSeleccionado?.id === servicio.id"
+            (click)="seleccionarServicio(servicio)"
+          >
+            <span class="option-copy">
+              <strong>{{ servicio.nombre }}</strong>
+              <small>{{ servicio.duracionMinutos }} min</small>
+            </span>
+
+            <span class="option-price">
+              {{ servicio.precio | number: '1.2-2' }} €
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Paso 2</p>
+            <h2>Profesional</h2>
+          </div>
+        </div>
+
+        <div
+          class="empty-state"
+          *ngIf="!trabajadoresFiltrados.length"
+        >
+          <h3>No hay profesionales disponibles</h3>
+          <p>
+            No hay profesionales asociados al servicio seleccionado.
+          </p>
+        </div>
+
+        <div
+          class="worker-list"
+          *ngIf="trabajadoresFiltrados.length"
+        >
+          <button
+            class="worker-card"
+            type="button"
+            *ngFor="let trabajador of trabajadoresFiltrados"
+            [class.selected]="trabajadorSeleccionado?.id === trabajador.id"
+            [attr.aria-pressed]="trabajadorSeleccionado?.id === trabajador.id"
+            (click)="seleccionarTrabajador(trabajador)"
+          >
+            <span class="worker-avatar">
+              <img
+                *ngIf="
+                  trabajador.avatarUrl &&
+                  !imagenesTrabajadorFallidas.has(trabajador.id)
+                "
+                [src]="trabajador.avatarUrl"
+                [alt]="trabajador.nombreCompleto || 'Profesional'"
+                loading="lazy"
+                (error)="marcarImagenTrabajadorFallida(trabajador.id)"
+              >
+
+              <span
+                *ngIf="
+                  !trabajador.avatarUrl ||
+                  imagenesTrabajadorFallidas.has(trabajador.id)
+                "
+                aria-hidden="true"
+              >
+                {{ trabajador.nombreCompleto?.charAt(0)?.toUpperCase() || '?' }}
+              </span>
+            </span>
+
+            <span class="worker-copy">
+              <strong>
+                {{ trabajador.nombreCompleto || 'Profesional' }}
+              </strong>
+
+              <small>
+                {{
+                  trabajador.especialidad ||
+                  'Profesional de la empresa'
+                }}
+              </small>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section
+        class="section"
+        *ngIf="servicioSeleccionado && trabajadorSeleccionado"
+      >
+        <div class="section-heading calendar-heading">
+          <div>
+            <p class="eyebrow">Paso 3</p>
+            <h2>Fechas y horas disponibles</h2>
+            <p class="calendar-instruction">
+              Los días marcados en azul tienen al menos una hora libre.
+            </p>
+          </div>
+
+          <div class="month-navigation">
+            <button
+              type="button"
+              aria-label="Mes anterior"
+              [disabled]="!puedeIrAlMesAnterior || cargandoCalendario"
+              (click)="irMesAnterior()"
+            >
+              <ion-icon
+                name="chevron-back-outline"
+                aria-hidden="true"
+              ></ion-icon>
+            </button>
+
+            <span>{{ tituloCalendario }}</span>
+
+            <button
+              type="button"
+              aria-label="Mes siguiente"
+              [disabled]="!puedeIrAlMesSiguiente || cargandoCalendario"
+              (click)="irMesSiguiente()"
+            >
+              <ion-icon
+                name="chevron-forward-outline"
+                aria-hidden="true"
+              ></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="calendar-loading"
+          *ngIf="cargandoCalendario"
+          role="status"
+        >
+          <ion-spinner name="crescent"></ion-spinner>
+          <span>Buscando días con disponibilidad…</span>
+        </div>
+
+        <div class="calendar">
+          <div
+            class="calendar-weekdays"
+            aria-hidden="true"
+          >
+            <span>L</span>
+            <span>M</span>
+            <span>X</span>
+            <span>J</span>
+            <span>V</span>
+            <span>S</span>
+            <span>D</span>
+          </div>
+
+          <div class="calendar-days">
+            <button
+              class="calendar-day"
+              type="button"
+              *ngFor="let dia of diasCalendario"
+              [class.outside-month]="!dia.perteneceAlMes"
+              [class.unavailable]="
+                dia.pasado ||
+                dia.fueraDeVentana ||
+                (!dia.tieneDisponibilidad && !dia.cargando)
+              "
+              [class.has-availability]="dia.tieneDisponibilidad"
+              [class.selected]="esFechaSeleccionada(dia.fecha)"
+              [disabled]="
+                dia.pasado ||
+                dia.fueraDeVentana ||
+                dia.cargando ||
+                !dia.tieneDisponibilidad
+              "
+              [attr.aria-label]="
+                dia.fecha +
+                (
+                  dia.tieneDisponibilidad
+                    ? ', hay horas disponibles'
+                    : ', sin horas disponibles'
+                )
+              "
+              [attr.aria-pressed]="esFechaSeleccionada(dia.fecha)"
+              (click)="seleccionarFecha(dia.fecha)"
+            >
+              <span>{{ dia.numero }}</span>
+
+              <span
+                class="availability-dot"
+                *ngIf="dia.tieneDisponibilidad"
+                aria-hidden="true"
+              ></span>
+
+              <ion-spinner
+                *ngIf="dia.cargando"
+                name="crescent"
+              ></ion-spinner>
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="selected-date-heading"
+          *ngIf="fechaSeleccionada"
+        >
+          <h3>{{ fechaLegible(fechaSeleccionada) }}</h3>
+
+          <span>
+            {{ disponibilidad?.slots?.length || 0 }}
+            {{
+              disponibilidad?.slots?.length === 1
+                ? 'hora libre'
+                : 'horas libres'
+            }}
+          </span>
+        </div>
+
+        <div
+          class="state-message"
+          *ngIf="cargandoSlots"
+          role="status"
+        >
+          <ion-spinner name="crescent"></ion-spinner>
+          <span>Buscando horas libres…</span>
+        </div>
+
+        <div
+          class="state-message error-message"
+          *ngIf="!cargandoSlots && errorSlots"
+          role="alert"
+        >
+          {{ errorSlots }}
+        </div>
+
+        <div
+          class="empty-state"
+          *ngIf="
+            !cargandoCalendario &&
+            !cargandoSlots &&
+            !errorSlots &&
+            !fechaSeleccionada
+          "
+        >
+          <h3>No encontramos fechas con horas libres</h3>
+          <p>
+            Prueba otro profesional o vuelve a consultar más adelante.
+          </p>
+        </div>
+
+        <div
+          class="empty-state"
+          *ngIf="
+            !cargandoSlots &&
+            !errorSlots &&
+            fechaSeleccionada &&
+            disponibilidad &&
+            !disponibilidad.slots.length
+          "
+        >
+          <h3>Ese día se ha ocupado</h3>
+          <p>
+            Selecciona otro día marcado en azul.
+          </p>
+        </div>
+
+        <div
+          class="slot-list"
+          *ngIf="
+            !cargandoSlots &&
+            !errorSlots &&
+            disponibilidad?.slots?.length
+          "
+        >
+          <button
+            class="slot-card"
+            type="button"
+            *ngFor="let slot of disponibilidad?.slots"
+            [class.selected]="horaSeleccionada === slot.horaInicio"
+            [attr.aria-pressed]="horaSeleccionada === slot.horaInicio"
+            (click)="seleccionarHora(slot.horaInicio)"
+          >
+            {{ formatearHora(slot.horaInicio) }}
+          </button>
+        </div>
+      </section>
+
+      <section
+        class="section summary-section"
+        *ngIf="servicioSeleccionado && trabajadorSeleccionado"
+      >
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Resumen</p>
+            <h2>Tu solicitud</h2>
+          </div>
+        </div>
+
+        <div class="summary">
+          <p>
+            <span>Empresa</span>
+            <strong>{{ empresa.nombre }}</strong>
+          </p>
+
+          <p>
+            <span>Servicio</span>
+            <strong>{{ servicioSeleccionado.nombre }}</strong>
+          </p>
+
+          <p>
+            <span>Profesional</span>
+            <strong>
+              {{ trabajadorSeleccionado.nombreCompleto || 'Profesional' }}
+            </strong>
+          </p>
+
+          <p *ngIf="fechaSeleccionada">
+            <span>Fecha</span>
+            <strong>{{ fechaLegible(fechaSeleccionada) }}</strong>
+          </p>
+
+          <p *ngIf="horaSeleccionada">
+            <span>Hora</span>
+            <strong>{{ formatearHora(horaSeleccionada) }}</strong>
+          </p>
+
+          <p>
+            <span>Duración</span>
+            <strong>{{ servicioSeleccionado.duracionMinutos }} min</strong>
+          </p>
+
+          <p>
+            <span>Precio</span>
+            <strong>
+              {{ servicioSeleccionado.precio | number: '1.2-2' }} €
+            </strong>
+          </p>
+        </div>
+
+        <div class="notes-field">
+          <ion-input
+            name="notas"
+            label="Notas para la empresa"
+            labelPlacement="stacked"
+            placeholder="Opcional"
+            [(ngModel)]="notas"
+          ></ion-input>
+        </div>
+
+        <p class="note-caption">
+          La nota se enviará junto con la solicitud de cita.
+        </p>
+
+        <ion-text *ngIf="error" color="danger">
+          <p
+            class="form-message error"
+            role="alert"
+          >
+            {{ error }}
+          </p>
+        </ion-text>
+
+        <ion-text *ngIf="mensaje" color="success">
+          <p
+            class="form-message success"
+            role="status"
+          >
+            {{ mensaje }}
+          </p>
+        </ion-text>
+
+        <ion-button
+          class="confirm-button"
+          expand="block"
+          type="button"
+          [disabled]="!puedeConfirmar"
+          (click)="confirmarReserva()"
+        >
+          <ion-spinner
+            *ngIf="confirmando"
+            name="crescent"
+          ></ion-spinner>
+
+          <ion-icon
+            *ngIf="!confirmando"
+            name="checkmark-circle-outline"
+            slot="start"
+            aria-hidden="true"
+          ></ion-icon>
+
+          <span>
+            {{
+              confirmando
+                ? 'Enviando solicitud…'
+                : 'Solicitar cita'
+            }}
+          </span>
+        </ion-button>
+
+        <p class="pending-caption">
+          La cita quedará pendiente hasta que la empresa la confirme.
+        </p>
+      </section>
+    </article>
+  </main>
+</ion-content>

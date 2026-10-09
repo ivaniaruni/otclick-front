@@ -4,6 +4,7 @@ export interface Trabajador {
   empresaNombre: string | null;
   usuarioId: string;
   nombreCompleto: string | null;
+  avatarUrl: string | null;
   email: string | null;
   especialidad: string | null;
   biografia: string | null;
