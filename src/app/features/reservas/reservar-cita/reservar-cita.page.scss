@@ -6,6 +6,14 @@
   --ink: #17283f;
   --muted: #4e5e73;
   --border: #d9e0e8;
+
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-weight: 400;
 }
 
 ion-content {
@@ -98,6 +106,7 @@ p {
   margin: 0;
   color: var(--muted);
   font-size: 16px;
+  font-weight: 400;
   line-height: 1.55;
 }
 
@@ -131,6 +140,7 @@ p {
   margin: 8px 0 0;
   color: var(--muted);
   font-size: 14px;
+  font-weight: 400;
   line-height: 1.45;
 }
 
@@ -148,6 +158,7 @@ p {
   min-width: 140px;
   color: var(--ink);
   font-size: 16px;
+  font-weight: 400;
   text-align: center;
   text-transform: capitalize;
 }
@@ -162,6 +173,9 @@ p {
   border: 1px solid var(--border);
   border-radius: 10px;
   cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
 }
 
 .month-navigation button:hover:not(:disabled) {
@@ -206,6 +220,7 @@ p {
   margin-bottom: 14px;
   color: var(--muted);
   font-size: 14px;
+  font-weight: 400;
 }
 
 .calendar {
@@ -232,7 +247,7 @@ p {
   min-height: 32px;
   color: var(--muted);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .calendar-day {
@@ -247,6 +262,8 @@ p {
   border: 1px solid transparent;
   border-radius: 11px;
   font: inherit;
+  font-size: 14px;
+  font-weight: 400;
   cursor: pointer;
   transition:
     background 160ms ease,
@@ -255,9 +272,9 @@ p {
     transform 160ms ease;
 }
 
-.calendar-day:hover:not(:disabled) {
-  background: var(--blue-soft);
-  border-color: #b9d8ff;
+.calendar-day:hover:not(:disabled):not(.selected) {
+  background: #e1efff;
+  border-color: var(--blue);
   transform: translateY(-1px);
 }
 
@@ -273,8 +290,8 @@ p {
 .calendar-day.has-availability {
   color: var(--blue-dark);
   background: #f3f8ff;
-  border: 1px solid #9cc7ff;
-  font-weight: 700;
+  border-color: #9cc7ff;
+  font-weight: 400;
 }
 
 .calendar-day.selected {
@@ -283,10 +300,10 @@ p {
   background: var(--blue-dark);
   border: 2px solid #073e91;
   box-shadow:
-    0 0 0 3px rgba(4, 116, 252, 0.2),
-    0 4px 10px rgba(7, 62, 145, 0.2);
-  font-weight: 700;
-  transform: scale(1.04);
+    0 0 0 3px rgba(4, 116, 252, 0.18),
+    0 4px 10px rgba(7, 62, 145, 0.14);
+  font-weight: 500;
+  transform: scale(1.03);
 }
 
 .availability-dot {
@@ -307,12 +324,6 @@ p {
   height: 15px;
 }
 
-.calendar-day:hover:not(:disabled):not(.selected) {
-  background: #e1efff;
-  border-color: var(--blue);
-  transform: translateY(-1px);
-}
-
 .selected-date-heading {
   display: flex;
   justify-content: space-between;
@@ -325,13 +336,14 @@ p {
   margin: 0;
   color: var(--ink);
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 400;
   text-transform: capitalize;
 }
 
 .selected-date-heading span {
   color: var(--muted);
   font-size: 13px;
+  font-weight: 400;
 }
 
 .note-caption,
@@ -339,6 +351,7 @@ p {
   margin: -8px 0 16px;
   color: var(--muted);
   font-size: 13px;
+  font-weight: 400;
   line-height: 1.45;
 }
 
@@ -352,10 +365,12 @@ p {
   --highlight-color-valid: var(--blue);
   --highlight-color-invalid: #c62828;
   --highlight-height: 2px;
+  font-weight: 400;
 }
 
 .notes-field ion-input::part(label) {
   color: var(--muted);
+  font-weight: 400;
 }
 
 .notes-field ion-input.has-value::part(label),
@@ -395,7 +410,7 @@ p {
 .option-card.selected {
   background: #f8fbff;
   border-color: var(--blue);
-  box-shadow: 0 4px 14px rgba(25, 48, 82, 0.06);
+  box-shadow: 0 4px 14px rgba(25, 48, 82, 0.05);
 }
 
 .option-card:hover {
@@ -418,6 +433,7 @@ p {
 .option-copy small {
   color: var(--muted);
   font-size: 13px;
+  font-weight: 400;
 }
 
 .option-price {
@@ -456,24 +472,11 @@ p {
 .worker-card.selected {
   background: #f8fbff;
   border-color: var(--blue);
-  box-shadow: 0 6px 16px rgba(25, 48, 82, 0.06);
+  box-shadow: 0 6px 16px rgba(25, 48, 82, 0.05);
 }
 
 .worker-card:hover {
   transform: translateY(-1px);
-}
-
-.worker-avatar {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  flex: 0 0 auto;
-  color: var(--blue);
-  background: var(--blue-image);
-  border-radius: 50%;
-  font-size: 21px;
-  font-weight: 400;
 }
 
 .worker-copy {
@@ -492,6 +495,7 @@ p {
 .worker-copy small {
   color: var(--muted);
   font-size: 14px;
+  font-weight: 400;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
@@ -517,6 +521,7 @@ p {
   border-radius: 12px;
   font: inherit;
   font-size: 14px;
+  font-weight: 400;
   text-transform: capitalize;
   cursor: pointer;
   transition:
@@ -532,7 +537,7 @@ p {
   color: var(--blue-dark);
   background: var(--blue-soft);
   border-color: var(--blue);
-  box-shadow: 0 3px 10px rgba(25, 48, 82, 0.06);
+  box-shadow: 0 3px 10px rgba(25, 48, 82, 0.05);
 }
 
 .date-card:hover {
@@ -554,6 +559,7 @@ p {
   border-radius: 10px;
   font: inherit;
   font-size: 15px;
+  font-weight: 400;
   cursor: pointer;
   transition:
     background 160ms ease,
@@ -568,7 +574,7 @@ p {
   color: #ffffff;
   background: var(--blue);
   border-color: var(--blue);
-  box-shadow: 0 4px 12px rgba(4, 116, 252, 0.18);
+  box-shadow: 0 4px 12px rgba(4, 116, 252, 0.14);
 }
 
 .slot-card:hover {
@@ -592,6 +598,7 @@ p {
   margin: 0;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
+  font-weight: 400;
   line-height: 1.45;
 }
 
@@ -602,7 +609,7 @@ p {
 
 .summary strong {
   color: var(--ink);
-  font-weight: 500;
+  font-weight: 400;
   text-align: right;
   overflow-wrap: anywhere;
 }
@@ -625,6 +632,7 @@ p {
   --placeholder-color: #53657b;
   --placeholder-opacity: 1;
   --highlight-color-focused: var(--blue);
+  font-weight: 400;
 }
 
 .confirm-button {
@@ -635,6 +643,7 @@ p {
   --background-activated: #0848a5;
   --color: #ffffff;
   --border-radius: 10px;
+  font-weight: 400;
 }
 
 .confirm-button:disabled {
@@ -662,6 +671,7 @@ p {
 .page-state p {
   margin: 0;
   color: var(--muted);
+  font-weight: 400;
   line-height: 1.55;
 }
 
@@ -680,6 +690,7 @@ p {
 .form-message {
   margin: 0 0 16px;
   font-size: 14px;
+  font-weight: 400;
   line-height: 1.45;
 }
 

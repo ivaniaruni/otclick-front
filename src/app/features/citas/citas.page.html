@@ -124,6 +124,22 @@
           </ion-button>
         </div>
 
+        <p
+          class="action-message success"
+          *ngIf="mensajeAccion"
+          role="status"
+        >
+          {{ mensajeAccion }}
+        </p>
+
+        <p
+          class="action-message error"
+          *ngIf="errorAccion"
+          role="alert"
+        >
+          {{ errorAccion }}
+        </p>
+
         <section
           class="state-message empty-state"
           *ngIf="!cargando && !error && citas.length === 0"
@@ -220,6 +236,39 @@
                 cita.precioTotal
                   | currency:'EUR':'symbol':'1.2-2':'es-ES'
               }}
+            </div>
+
+            <div
+              class="cancellation-area"
+              *ngIf="esProxima(cita) && esCancelable(cita)"
+            >
+              <p class="cancellation-reminder">
+                Puedes cancelar esta cita hasta 24 horas antes de su inicio.
+              </p>
+
+              <ion-button
+                class="cancel-appointment-button"
+                fill="outline"
+                size="small"
+                [disabled]="cancelandoId === cita.id"
+                (click)="cancelarCita(cita)"
+              >
+                {{
+                  cancelandoId === cita.id
+                    ? 'Cancelando…'
+                    : 'Cancelar cita'
+                }}
+              </ion-button>
+            </div>
+
+            <div
+              class="cancellation-area cancellation-closed"
+              *ngIf="esProxima(cita) && !esCancelable(cita)"
+            >
+              <p class="cancellation-reminder">
+                Ya no se puede cancelar desde la aplicación porque faltan
+                menos de 24 horas para la cita.
+              </p>
             </div>
           </article>
         </div>

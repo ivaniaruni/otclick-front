@@ -33,6 +33,12 @@ export class ApiService {
     );
   }
 
+  patch<T>(path: string, body: unknown): Promise<T> {
+    return firstValueFrom(
+      this.http.patch<T>(`${this.baseUrl}${path}`, body)
+    );
+  }
+
   delete<T>(path: string): Promise<T> {
     return firstValueFrom(
       this.http.delete<T>(`${this.baseUrl}${path}`)

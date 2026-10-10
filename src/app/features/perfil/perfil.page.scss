@@ -6,6 +6,14 @@
   --ink: #17283f;
   --muted: #4e5e73;
   --border: #d9e0e8;
+
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-weight: 400;
 }
 
 ion-content {
@@ -126,7 +134,7 @@ p {
   border: 1px solid #cfe2ff;
   border-radius: 999px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .section {
@@ -185,6 +193,7 @@ p {
   overflow: hidden;
   color: var(--ink);
   font-size: 15px;
+  font-weight: 400;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -192,6 +201,7 @@ p {
 .upload-copy span {
   color: var(--muted);
   font-size: 13px;
+  font-weight: 400;
 }
 
 .upload-actions {
@@ -211,6 +221,7 @@ p {
   border-radius: 9px;
   font: inherit;
   font-size: 14px;
+  font-weight: 400;
   cursor: pointer;
 }
 
@@ -304,17 +315,19 @@ p {
   --highlight-color-focused: var(--blue);
   --highlight-color-valid: var(--blue);
   --highlight-color-invalid: #c62828;
+  font-weight: 400;
 }
 
 .field ion-input::part(label) {
   color: #34465c;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .field-help {
   margin: 8px 0 0;
   color: var(--muted);
   font-size: 13px;
+  font-weight: 400;
   line-height: 1.4;
 }
 
@@ -338,17 +351,20 @@ p {
 .readonly-info span {
   color: var(--muted);
   font-size: 12px;
+  font-weight: 400;
 }
 
 .readonly-info strong {
   color: var(--ink);
   font-size: 14px;
+  font-weight: 400;
   overflow-wrap: anywhere;
 }
 
 .form-message {
   margin: 0;
   font-size: 14px;
+  font-weight: 400;
   line-height: 1.45;
 }
 
@@ -368,6 +384,7 @@ p {
   --background-activated: #0848a5;
   --color: #ffffff;
   --border-radius: 10px;
+  font-weight: 400;
 }
 
 .account-section {
@@ -382,17 +399,20 @@ p {
 .account-text {
   margin: 0;
   color: var(--muted);
+  font-weight: 400;
   line-height: 1.5;
 }
 
 .account-text strong {
   color: var(--ink);
+  font-weight: 400;
 }
 
 .logout-button {
   min-height: 46px;
   margin: 0;
   --border-radius: 10px;
+  font-weight: 400;
 }
 
 .page-state {
@@ -418,6 +438,7 @@ p {
 .error-state ion-button {
   --color: var(--blue-dark);
   --border-color: var(--blue-dark);
+  font-weight: 400;
 }
 
 @media (max-width: 600px) {

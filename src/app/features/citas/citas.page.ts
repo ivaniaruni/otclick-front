@@ -1,7 +1,9 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
+  AlertController,
   IonButton,
   IonContent,
   IonIcon
@@ -44,6 +46,10 @@ export class CitasPage {
   cargando = true;
   error = '';
 
+  cancelandoId: string | null = null;
+  mensajeAccion = '';
+  errorAccion = '';
+
   private readonly estadosFinales = new Set([
     'COMPLETED',
     'CANCELLED',
@@ -56,7 +62,8 @@ export class CitasPage {
     private api: ApiService,
     private reservaService: ReservaService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private alertController: AlertController
   ) {
     addIcons({
       calendarClearOutline,
@@ -121,6 +128,72 @@ export class CitasPage {
     this.vista = vista;
   }
 
+  esProxima(cita: Reserva): boolean {
+    return !this.esFinal(cita);
+  }
+
+  esCancelable(cita: Reserva): boolean {
+    const estado = this.normalizarEstado(cita.estado);
+
+    if (estado !== 'PENDING' && estado !== 'CONFIRMED') {
+      return false;
+    }
+
+    const inicioCita = this.fechaHoraCita(cita);
+
+    if (Number.isNaN(inicioCita)) {
+      return false;
+    }
+
+    return inicioCita >= Date.now() + 24 * 60 * 60 * 1000;
+  }
+
+  async cancelarCita(cita: Reserva): Promise<void> {
+    if (!this.esCancelable(cita) || this.cancelandoId !== null) {
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: 'Cancelar cita',
+      message:
+        `¿Quieres cancelar ${cita.servicioNombre || 'esta cita'} ` +
+        `con ${cita.empresaNombre || 'la empresa'}?`,
+      buttons: [
+        {
+          text: 'Mantener cita',
+          role: 'cancel'
+        },
+        {
+          text: 'Sí, cancelar',
+          role: 'destructive'
+        }
+      ]
+    });
+
+    await alert.present();
+
+    const { role } = await alert.onDidDismiss();
+
+    if (role !== 'destructive') {
+      return;
+    }
+
+    this.cancelandoId = cita.id;
+    this.mensajeAccion = '';
+    this.errorAccion = '';
+
+    try {
+      await this.reservaService.cancelar(cita.id);
+
+      this.mensajeAccion = 'La cita se ha cancelado correctamente.';
+      await this.cargar();
+    } catch (error: unknown) {
+      this.errorAccion = this.mensajeErrorCancelacion(error);
+    } finally {
+      this.cancelandoId = null;
+    }
+  }
+
   estadoEnEspanol(estado: string | null | undefined): string {
     const normalizado = this.normalizarEstado(estado);
 
@@ -160,7 +233,6 @@ export class CitasPage {
       return fecha;
     }
 
-    // Fecha local para evitar desfases de zona horaria.
     const fechaLocal = new Date(year, month - 1, day);
 
     return new Intl.DateTimeFormat('es-ES', {
@@ -181,13 +253,26 @@ export class CitasPage {
       return true;
     }
 
-    const fechaHora = `${cita.fecha}T${this.horaFormateada(cita.horaInicio)}`;
-    const fechaCita = new Date(fechaHora);
+    const inicioCita = this.fechaHoraCita(cita);
 
-    return (
-      !Number.isNaN(fechaCita.getTime()) &&
-      fechaCita.getTime() < Date.now()
-    );
+    return !Number.isNaN(inicioCita) && inicioCita < Date.now();
+  }
+
+  private fechaHoraCita(cita: Reserva): number {
+    const [year, month, day] = cita.fecha.split('-').map(Number);
+    const [hour, minute] = cita.horaInicio.split(':').map(Number);
+
+    if (!year || !month || !day) {
+      return Number.NaN;
+    }
+
+    return new Date(
+      year,
+      month - 1,
+      day,
+      hour || 0,
+      minute || 0
+    ).getTime();
   }
 
   private normalizarEstado(estado: string | null | undefined): string {
@@ -208,5 +293,37 @@ export class CitasPage {
       .replace(/(^|\s)\p{L}/gu, (letra) =>
         letra.toLocaleUpperCase('es-ES')
       );
+  }
+
+  private mensajeErrorCancelacion(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const body = error.error as {
+        message?: string;
+        detail?: string;
+        error?: string;
+      } | null;
+
+      if (body?.detail) {
+        return body.detail;
+      }
+
+      if (body?.message) {
+        return body.message;
+      }
+
+      if (body?.error) {
+        return body.error;
+      }
+
+      if (error.status === 409) {
+        return 'La cita ya no se puede cancelar o quedan menos de 24 horas.';
+      }
+
+      if (error.status === 403) {
+        return 'No tienes permiso para cancelar esta cita.';
+      }
+    }
+
+    return 'No hemos podido cancelar la cita. Inténtalo de nuevo.';
   }
 }
