@@ -1,15 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import {
-  ActivatedRoute,
-  Router,
-  RouterLink
-} from '@angular/router';
-import {
-  IonContent,
-  IonIcon,
-  IonModal
-} from '@ionic/angular/standalone';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { IonContent, IonIcon, IonModal } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   arrowBackOutline,
@@ -22,7 +14,7 @@ import {
   logoInstagram,
   mailOutline,
   star,
-  starOutline
+  starOutline,
 } from 'ionicons/icons';
 import { EmpresaService } from '../../../core/services/empresa.service';
 import { FotoTrabajoService } from '../../../core/services/foto-trabajo.service';
@@ -31,10 +23,7 @@ import { ServicioService } from '../../../core/services/servicio.service';
 import { TrabajadorService } from '../../../core/services/trabajador.service';
 import { Empresa } from '../../../shared/models/empresa';
 import { FotoTrabajo } from '../../../shared/models/foto-trabajo';
-import {
-  Resena,
-  ResumenResenas
-} from '../../../shared/models/resena';
+import { Resena, ResumenResenas } from '../../../shared/models/resena';
 import { Servicio } from '../../../shared/models/servicio';
 import { Trabajador } from '../../../shared/models/trabajador';
 
@@ -48,13 +37,7 @@ type TrabajadorConFoto = Trabajador & {
   standalone: true,
   templateUrl: './detalle-empresa.page.html',
   styleUrls: ['./detalle-empresa.page.scss'],
-  imports: [
-    CommonModule,
-    RouterLink,
-    IonContent,
-    IonIcon,
-    IonModal
-  ]
+  imports: [CommonModule, RouterLink, IonContent, IonIcon, IonModal],
 })
 export class DetalleEmpresaPage implements OnInit {
   empresa: Empresa | null = null;
@@ -89,7 +72,7 @@ export class DetalleEmpresaPage implements OnInit {
     private trabajadorService: TrabajadorService,
     private servicioService: ServicioService,
     private fotoTrabajoService: FotoTrabajoService,
-    private resenaService: ResenaService
+    private resenaService: ResenaService,
   ) {
     addIcons({
       arrowBackOutline,
@@ -102,7 +85,7 @@ export class DetalleEmpresaPage implements OnInit {
       logoInstagram,
       mailOutline,
       star,
-      starOutline
+      starOutline,
     });
   }
 
@@ -139,10 +122,7 @@ export class DetalleEmpresaPage implements OnInit {
   }
 
   get telefonoUrl(): string | null {
-    const telefono = this.empresa?.telefono?.replace(
-      /[^\d+]/g,
-      ''
-    );
+    const telefono = this.empresa?.telefono?.replace(/[^\d+]/g, '');
 
     return telefono ? `tel:${telefono}` : null;
   }
@@ -154,7 +134,7 @@ export class DetalleEmpresaPage implements OnInit {
   get fotosVisibles(): FotoTrabajo[] {
     return this.fotos.slice(
       this.indiceGaleria,
-      this.indiceGaleria + this.fotosPorVista
+      this.indiceGaleria + this.fotosPorVista,
     );
   }
 
@@ -163,10 +143,7 @@ export class DetalleEmpresaPage implements OnInit {
   }
 
   get puedeVerSiguienteGaleria(): boolean {
-    return (
-      this.indiceGaleria + this.fotosPorVista <
-      this.fotos.length
-    );
+    return this.indiceGaleria + this.fotosPorVista < this.fotos.length;
   }
 
   get resenasVisibles(): Resena[] {
@@ -178,10 +155,7 @@ export class DetalleEmpresaPage implements OnInit {
   }
 
   estrellasResena(_puntuacion: number): number[] {
-    return Array.from(
-      { length: 5 },
-      (_, indice) => indice + 1
-    );
+    return Array.from({ length: 5 }, (_, indice) => indice + 1);
   }
 
   fechaRelativa(fecha: string): string {
@@ -193,12 +167,9 @@ export class DetalleEmpresaPage implements OnInit {
 
     const hoy = new Date();
 
-    const diferenciaMs =
-      hoy.getTime() - fechaResena.getTime();
+    const diferenciaMs = hoy.getTime() - fechaResena.getTime();
 
-    const diferenciaDias = Math.floor(
-      diferenciaMs / (1000 * 60 * 60 * 24)
-    );
+    const diferenciaDias = Math.floor(diferenciaMs / (1000 * 60 * 60 * 24));
 
     if (diferenciaDias <= 0) {
       return 'Hoy';
@@ -212,9 +183,7 @@ export class DetalleEmpresaPage implements OnInit {
       return `Hace ${diferenciaDias} días`;
     }
 
-    const diferenciaSemanas = Math.floor(
-      diferenciaDias / 7
-    );
+    const diferenciaSemanas = Math.floor(diferenciaDias / 7);
 
     if (diferenciaSemanas === 1) {
       return 'Hace 1 semana';
@@ -224,9 +193,7 @@ export class DetalleEmpresaPage implements OnInit {
       return `Hace ${diferenciaSemanas} semanas`;
     }
 
-    const diferenciaMeses = Math.floor(
-      diferenciaDias / 30
-    );
+    const diferenciaMeses = Math.floor(diferenciaDias / 30);
 
     if (diferenciaMeses === 1) {
       return 'Hace 1 mes';
@@ -245,30 +212,21 @@ export class DetalleEmpresaPage implements OnInit {
     const ids = servicio.trabajadorIds ?? [];
 
     return this.trabajadores.filter((trabajador) =>
-      ids.includes(trabajador.id)
+      ids.includes(trabajador.id),
     );
   }
 
   alternarServicio(id: string): void {
-    this.servicioAbiertoId =
-      this.servicioAbiertoId === id
-        ? null
-        : id;
+    this.servicioAbiertoId = this.servicioAbiertoId === id ? null : id;
   }
 
   moverGaleria(direccion: -1 | 1): void {
     const salto = this.fotosPorVista;
-    const ultimoIndice = Math.max(
-      0,
-      this.fotos.length - salto
-    );
+    const ultimoIndice = Math.max(0, this.fotos.length - salto);
 
     const nuevoIndice = Math.min(
       ultimoIndice,
-      Math.max(
-        0,
-        this.indiceGaleria + direccion * salto
-      )
+      Math.max(0, this.indiceGaleria + direccion * salto),
     );
 
     if (nuevoIndice === this.indiceGaleria) {
@@ -293,12 +251,11 @@ export class DetalleEmpresaPage implements OnInit {
     }
 
     const indice = this.fotos.findIndex(
-      (foto) => foto.id === this.fotoAbierta?.id
+      (foto) => foto.id === this.fotoAbierta?.id,
     );
 
     const siguiente =
-      (indice + direccion + this.fotos.length) %
-      this.fotos.length;
+      (indice + direccion + this.fotos.length) % this.fotos.length;
 
     this.fotoAbierta = this.fotos[siguiente];
   }
@@ -308,14 +265,11 @@ export class DetalleEmpresaPage implements OnInit {
       return;
     }
 
-    void this.router.navigate(
-      ['/tabs/empresas', this.empresa.id, 'reservar'],
-      {
-        queryParams: {
-          servicioId: servicio.id
-        }
-      }
-    );
+    void this.router.navigate(['/tabs/empresas', this.empresa.id, 'reservar'], {
+      queryParams: {
+        servicioId: servicio.id,
+      },
+    });
   }
 
   verCalendarioTrabajador(trabajador: Trabajador): void {
@@ -323,19 +277,29 @@ export class DetalleEmpresaPage implements OnInit {
       return;
     }
 
-    void this.router.navigate(
-      ['/tabs/empresas', this.empresa.id, 'reservar'],
-      {
-        queryParams: {
-          trabajadorId: trabajador.id
-        }
-      }
-    );
+    void this.router.navigate(['/tabs/empresas', this.empresa.id, 'reservar'], {
+      queryParams: {
+        trabajadorId: trabajador.id,
+      },
+    });
   }
 
   abrirCalendarioDeFoto(_foto: FotoTrabajo): void {
     // En esta primera fase, la reserva se inicia desde
     // el servicio o desde la profesional.
+  }
+
+  async irAResenar(): Promise<void> {
+    if (!this.empresa) {
+      return;
+    }
+
+    await this.router.navigate(['/tabs/citas'], {
+      queryParams: {
+        empresaId: this.empresa.id,
+        vista: 'historial',
+      },
+    });
   }
 
   private async cargarDetalle(id: string): Promise<void> {
@@ -363,15 +327,13 @@ export class DetalleEmpresaPage implements OnInit {
       const empresa = await this.empresaService.obtenerPorId(id);
 
       if (!empresa.activa) {
-        this.errorEmpresa =
-          'Esta empresa no está disponible.';
+        this.errorEmpresa = 'Esta empresa no está disponible.';
         return;
       }
 
       this.empresa = empresa;
     } catch {
-      this.errorEmpresa =
-        'No hemos podido cargar esta empresa.';
+      this.errorEmpresa = 'No hemos podido cargar esta empresa.';
       return;
     } finally {
       this.cargandoEmpresa = false;
@@ -386,77 +348,57 @@ export class DetalleEmpresaPage implements OnInit {
       this.cargarTrabajadores(id),
       this.cargarServicios(id),
       this.cargarFotos(id),
-      this.cargarResenas(id)
+      this.cargarResenas(id),
     ]);
   }
 
-  private async cargarTrabajadores(
-    empresaId: string
-  ): Promise<void> {
+  private async cargarTrabajadores(empresaId: string): Promise<void> {
     try {
       this.trabajadores =
-        await this.trabajadorService.listarActivosPorEmpresa(
-          empresaId
-        );
+        await this.trabajadorService.listarActivosPorEmpresa(empresaId);
     } catch {
-      this.errorTrabajadores =
-        'No hemos podido cargar el equipo.';
+      this.errorTrabajadores = 'No hemos podido cargar el equipo.';
     } finally {
       this.cargandoTrabajadores = false;
     }
   }
 
-  private async cargarServicios(
-    empresaId: string
-  ): Promise<void> {
+  private async cargarServicios(empresaId: string): Promise<void> {
     try {
       const servicios =
-        await this.servicioService.listarActivosPorEmpresa(
-          empresaId
-        );
+        await this.servicioService.listarActivosPorEmpresa(empresaId);
 
       this.servicios = servicios.sort(
-        (primero, segundo) =>
-          primero.orden - segundo.orden
+        (primero, segundo) => primero.orden - segundo.orden,
       );
     } catch {
-      this.errorServicios =
-        'No hemos podido cargar los servicios.';
+      this.errorServicios = 'No hemos podido cargar los servicios.';
     } finally {
       this.cargandoServicios = false;
     }
   }
 
-  private async cargarFotos(
-    empresaId: string
-  ): Promise<void> {
+  private async cargarFotos(empresaId: string): Promise<void> {
     try {
-      this.fotos =
-        await this.fotoTrabajoService.listarPorEmpresa(
-          empresaId
-        );
+      this.fotos = await this.fotoTrabajoService.listarPorEmpresa(empresaId);
     } catch {
-      this.errorFotos =
-        'No hemos podido cargar los trabajos realizados.';
+      this.errorFotos = 'No hemos podido cargar los trabajos realizados.';
     } finally {
       this.cargandoFotos = false;
     }
   }
 
-  private async cargarResenas(
-    empresaId: string
-  ): Promise<void> {
+  private async cargarResenas(empresaId: string): Promise<void> {
     try {
       const [resenas, resumen] = await Promise.all([
         this.resenaService.listarPorEmpresa(empresaId),
-        this.resenaService.obtenerResumen(empresaId)
+        this.resenaService.obtenerResumen(empresaId),
       ]);
 
       this.resenas = resenas;
       this.resumenResenas = resumen;
     } catch {
-      this.errorResenas =
-        'No hemos podido cargar las opiniones.';
+      this.errorResenas = 'No hemos podido cargar las opiniones.';
     } finally {
       this.cargandoResenas = false;
     }

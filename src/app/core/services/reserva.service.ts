@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+
 import { ApiService } from './api.service';
 import { CrearReservaRequest, Reserva } from '../../shared/models/reserva';
 
@@ -41,5 +42,14 @@ export class ReservaService {
       `/reservas/${encodeURIComponent(id)}/cancelar${query}`,
       {},
     );
+  }
+
+  ocultarParaCliente(id: string): Promise<void> {
+    return this.api
+      .patch<null>(
+        `/reservas/${encodeURIComponent(id)}/ocultar-para-cliente`,
+        {},
+      )
+      .then(() => undefined);
   }
 }

@@ -15,3 +15,9 @@ export interface ResumenResenas {
   valoracionMedia: number | null;
   totalResenas: number;
 }
+
+export interface CrearResenaRequest {
+  reservaId: string;
+  puntuacion: number;
+  comentario?: string | null;
+}

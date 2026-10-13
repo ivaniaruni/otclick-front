@@ -60,6 +60,7 @@ ion-content {
   background: #ffffff;
   border: 1px solid var(--border);
   border-radius: 999px;
+  font: inherit;
   cursor: pointer;
   transition:
     border-color 180ms ease,
@@ -132,6 +133,7 @@ ion-content {
 h1,
 h2,
 h3,
+h4,
 p {
   overflow-wrap: anywhere;
 }
@@ -216,7 +218,9 @@ h1 {
 }
 
 .view-switch button:focus-visible,
-.empty-link:focus-visible {
+.empty-link:focus-visible,
+.close-review-button:focus-visible,
+.star-button:focus-visible {
   outline: 3px solid var(--blue);
   outline-offset: 3px;
 }
@@ -399,6 +403,158 @@ h1 {
   font-weight: 400;
 }
 
+.cancellation-area,
+.appointment-actions,
+.review-form {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--border);
+}
+
+.cancellation-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 14px;
+}
+
+.cancellation-reminder {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.cancel-appointment-button {
+  flex: 0 0 auto;
+  margin: 0;
+  text-transform: none;
+  --color: #8c4545;
+  --border-color: #e6c7c5;
+  --border-radius: 9px;
+  font-weight: 400;
+}
+
+.cancel-appointment-button:hover {
+  --background: #fff3f2;
+}
+
+.appointment-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 14px;
+}
+
+.appointment-action-button {
+  margin: 0;
+  text-transform: none;
+  --color: var(--blue-dark);
+  --border-color: #b9d8ff;
+  --border-radius: 9px;
+  font-weight: 400;
+}
+
+.review-form {
+  display: grid;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+.review-form-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.review-form-heading h4 {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.close-review-button {
+  min-height: 36px;
+  padding: 6px 8px;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.close-review-button:hover {
+  color: var(--blue-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rating-picker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.star-button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: #aab4c1;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.star-button.selected,
+.star-button:hover:not(:disabled) {
+  color: #d59400;
+  background: #fff9e8;
+}
+
+.star-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.star-button ion-icon {
+  font-size: 25px;
+}
+
+.review-comment {
+  padding: 10px 12px;
+  border: 1px solid #b8c4d2;
+  border-radius: 10px;
+  --color: var(--ink);
+  --placeholder-color: #53657b;
+  --placeholder-opacity: 1;
+  --highlight-color-focused: var(--blue);
+  --highlight-color-valid: var(--blue);
+}
+
+.review-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.review-form-actions ion-button {
+  margin: 0;
+  text-transform: none;
+  --border-radius: 9px;
+}
+
 .state-message {
   padding: 28px;
   color: var(--muted);
@@ -476,54 +632,6 @@ h1 {
   text-underline-offset: 4px;
 }
 
-.appointments-grid > * {
-  animation: appointment-enter 300ms ease both;
-}
-
-.appointments-grid > *:nth-child(2) {
-  animation-delay: 50ms;
-}
-
-.appointments-grid > *:nth-child(3) {
-  animation-delay: 100ms;
-}
-
-.appointments-grid > *:nth-child(4) {
-  animation-delay: 150ms;
-}
-
-.cancellation-area {
-  display: flex;
-  grid-column: 1 / -1;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-}
-
-.cancellation-reminder {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1.45;
-}
-
-.cancel-appointment-button {
-  flex: 0 0 auto;
-  margin: 0;
-  text-transform: none;
-  --color: #8c4545;
-  --border-color: #e6c7c5;
-  --border-radius: 9px;
-  font-weight: 400;
-}
-
-.cancel-appointment-button:hover {
-  --background: #fff3f2;
-}
-
 .action-message {
   margin: 0 0 16px;
   padding: 12px 16px;
@@ -546,15 +654,117 @@ h1 {
   border-color: #efd7d4;
 }
 
+.appointments-grid > * {
+  animation: appointment-enter 300ms ease both;
+}
+
+.appointments-grid > *:nth-child(2) {
+  animation-delay: 50ms;
+}
+
+.appointments-grid > *:nth-child(3) {
+  animation-delay: 100ms;
+}
+
+.appointments-grid > *:nth-child(4) {
+  animation-delay: 150ms;
+}
+
+.review-published {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: #286249;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.review-published ion-icon {
+  font-size: 18px;
+}
+
+
+.automatic-cancellation-note {
+  grid-column: 1 / -1;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.automatic-cancellation-note p {
+  margin: 0;
+  color: #765713;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.remove-appointment-button {
+  --color: #8c4545;
+  --border-color: #e6c7c5;
+}
+
+.remove-appointment-button:hover {
+  --background: #fff3f2;
+}
+
+.message-worker-button {
+  --color: var(--blue-dark);
+  --border-color: #b9d8ff;
+}
+
+.appointment-action-button:disabled {
+  opacity: 0.62;
+}
+
+.coming-soon {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.company-filter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -12px 0 24px;
+  padding: 12px 14px;
+  color: var(--muted);
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.company-filter button {
+  min-height: 36px;
+  padding: 4px 8px;
+  color: var(--blue-dark);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.company-filter button:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.company-filter button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+
 @media (max-width: 600px) {
-  .cancellation-area {
+  .company-filter {
     align-items: flex-start;
     flex-direction: column;
-    grid-column: 1 / -1;
-  }
-
-  .cancel-appointment-button {
-    width: 100%;
   }
 }
 
@@ -675,6 +885,29 @@ h1 {
   .appointment-price {
     grid-column: 2;
     grid-row: 2;
+  }
+
+  .cancellation-area,
+  .appointment-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cancel-appointment-button,
+  .appointment-action-button {
+    width: 100%;
+  }
+
+  .review-form-actions {
+    justify-content: stretch;
+  }
+
+  .review-form-actions ion-button {
+    flex: 1;
+  }
+
+  .coming-soon {
+    padding-left: 2px;
   }
 }
 

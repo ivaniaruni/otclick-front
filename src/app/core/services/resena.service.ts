@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
+
 import { ApiService } from './api.service';
 import {
+  CrearResenaRequest,
   Resena,
   ResumenResenas
 } from '../../shared/models/resena';
@@ -19,5 +21,9 @@ export class ResenaService {
     return this.api.get<ResumenResenas>(
       `/resenas/resumen?empresaId=${encodeURIComponent(empresaId)}`
     );
+  }
+
+  crear(request: CrearResenaRequest): Promise<Resena> {
+    return this.api.post<Resena>('/resenas', request);
   }
 }

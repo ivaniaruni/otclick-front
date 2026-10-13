@@ -7,20 +7,32 @@ export type EstadoReserva =
 
 export interface Reserva {
   id: string;
+
   empresaId: string;
   empresaNombre: string | null;
+
   clienteId: string;
   clienteNombre: string | null;
+
   trabajadorId: string;
   trabajadorNombre: string | null;
+
   servicioId: string;
   servicioNombre: string | null;
+
   fecha: string;
   horaInicio: string;
   horaFin: string;
+
   estado: EstadoReserva;
   precioTotal: number | null;
   notas: string | null;
+
+  canceladoPor?: string | null;
+  fechaCancelacion?: string | null;
+  motivoCancelacion?: string | null;
+  ocultaParaCliente?: boolean;
+
   fechaCreacion: string | null;
   fechaActualizacion: string | null;
 }

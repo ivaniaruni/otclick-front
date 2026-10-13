@@ -352,10 +352,16 @@
             </article>
           </div>
 
-          <button class="review-action" type="button" disabled
-            title="La publicación de opiniones desde OtClick estará disponible próximamente">
-            Escribir una opinión
-          </button>
+          <div class="review-entry">
+            <p class="review-entry-note">
+              Puedes escribir una reseña después de completar una cita con esta empresa.
+            </p>
+
+            <button class="review-action" type="button" (click)="irAResenar()">
+              <ion-icon name="star-outline" aria-hidden="true"></ion-icon>
+              Escribir una opinión
+            </button>
+          </div>
         </section>
 
         <section class="section contact-section" aria-labelledby="contacto-title" *ngIf="
