@@ -49,15 +49,22 @@
             Todas
             <span class="filter-count">{{ totalCitasFiltro }}</span>
           </button>
-          <div class="company-filter" *ngIf="empresaFiltroId">
-            <span>
-              Citas de {{ nombreEmpresaFiltro }}
+        </div>
+
+        <div class="company-filter" *ngIf="empresaFiltroId">
+          <div class="company-filter-copy">
+            <span class="company-filter-label">
+              Mostrando citas de
             </span>
 
-            <button type="button" (click)="quitarFiltroEmpresa()">
-              Ver todas mis citas
-            </button>
+            <span class="company-filter-name">
+              {{ nombreEmpresaFiltro || 'Esta empresa' }}
+            </span>
           </div>
+
+          <button class="clear-company-filter" type="button" (click)="quitarFiltroEmpresa()">
+            Ver todas mis citas
+          </button>
         </div>
 
         <div class="section-title">
