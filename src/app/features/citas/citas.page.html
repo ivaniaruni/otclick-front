@@ -250,14 +250,14 @@
               </ion-button>
             </div>
 
-            <div class="appointment-actions" *ngIf="esPendiente(cita)">
-              <ion-button class="appointment-action-button message-worker-button" fill="outline" size="small" disabled
-                title="Los mensajes estarán disponibles próximamente">
-                <ion-icon slot="start" name="chatbubble-outline" aria-hidden="true"></ion-icon>
-                Hablar con el trabajador
-              </ion-button>
+            <div class="appointment-chat-access" *ngIf="cita.empresaId">
+              <button class="company-chat-button" type="button" (click)="abrirChatEmpresa(cita)">
+                <ion-icon name="chatbubble-outline" aria-hidden="true"></ion-icon>
 
-              <span class="coming-soon">Próximamente</span>
+                <span>
+                  Hablar con {{ cita.empresaNombre || 'la empresa' }}
+                </span>
+              </button>
             </div>
 
             <div class="appointment-actions" *ngIf="

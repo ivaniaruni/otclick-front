@@ -240,6 +240,14 @@ export class CitasPage implements OnDestroy {
     }
   }
 
+  async abrirChatEmpresa(cita: Reserva): Promise<void> {
+  await this.router.navigate(['/tabs/mensajes'], {
+    queryParams: {
+      reservaId: cita.id,
+    },
+  });
+}
+
   async abrirPerfil(): Promise<void> {
     await this.router.navigateByUrl('/tabs/perfil');
   }

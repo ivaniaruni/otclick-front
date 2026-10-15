@@ -761,6 +761,56 @@ h1 {
   outline-offset: 3px;
 }
 
+.appointment-chat-access {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-start;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.company-chat-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  color: var(--blue-dark);
+  background: var(--blue-soft);
+  border: 1px solid #d3e5ff;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.company-chat-button ion-icon {
+  flex: 0 0 auto;
+  font-size: 20px;
+}
+
+.company-chat-button span {
+  overflow-wrap: anywhere;
+}
+
+.company-chat-button:hover {
+  background: #deecff;
+}
+
+.company-chat-button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .company-chat-button {
+    width: 100%;
+  }
+}
+
 @media (max-width: 600px) {
   .company-filter {
     align-items: flex-start;

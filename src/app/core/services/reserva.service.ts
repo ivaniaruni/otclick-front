@@ -52,4 +52,22 @@ export class ReservaService {
       )
       .then(() => undefined);
   }
+
+  confirmar(id: string): Promise<Reserva> {
+    return this.api.patch<Reserva>(
+      `/reservas/${encodeURIComponent(id)}/confirmar`,
+      {},
+    );
+  }
+
+  cancelarPorEmpresa(id: string, motivo?: string): Promise<Reserva> {
+    const query = motivo?.trim()
+      ? `?motivo=${encodeURIComponent(motivo.trim())}`
+      : '';
+
+    return this.api.patch<Reserva>(
+      `/reservas/${encodeURIComponent(id)}/cancelar-por-empresa${query}`,
+      {},
+    );
+  }
 }

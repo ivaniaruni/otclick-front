@@ -16,14 +16,18 @@ export const routes: Routes = [
       {
         path: 'empresas/:id/reservar',
         loadComponent: () =>
-          import('../features/reservas/reservar-cita/reservar-cita.page').then(
+          import(
+            '../features/reservas/reservar-cita/reservar-cita.page'
+          ).then(
             (m) => m.ReservarCitaPage
           ),
       },
       {
         path: 'empresas/:id',
         loadComponent: () =>
-          import('../features/empresas/detalle-empresa/detalle-empresa.page').then(
+          import(
+            '../features/empresas/detalle-empresa/detalle-empresa.page'
+          ).then(
             (m) => m.DetalleEmpresaPage
           ),
       },
@@ -39,6 +43,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('../features/citas/citas.page').then(
             (m) => m.CitasPage
+          ),
+      },
+      {
+        path: 'mensajes/:chatId',
+        loadComponent: () =>
+          import('../features/mensajes/mensajes.page').then(
+            (m) => m.MensajesPage
           ),
       },
       {

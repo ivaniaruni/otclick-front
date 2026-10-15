@@ -3,7 +3,11 @@ import { Storage } from '@ionic/storage-angular';
 import { ApiService } from './api.service';
 import { Usuario } from '../../shared/models/usuario';
 
-export type RolUsuario = 'ADMIN' | 'TRABAJADOR' | 'CLIENTE';
+export type RolUsuario =
+  | 'ADMIN'
+  | 'EMPRESARIO'
+  | 'TRABAJADOR'
+  | 'CLIENTE';
 
 export interface AuthResponse {
   token?: string;

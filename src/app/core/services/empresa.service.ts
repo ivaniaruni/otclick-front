@@ -30,4 +30,8 @@ export class EmpresaService {
   dejarDeSeguir(id: string): Promise<void> {
     return this.api.delete<void>(`/empresas/${id}/seguir`);
   }
+
+  listarMias(): Promise<Empresa[]> {
+    return this.api.get<Empresa[]>('/empresas/mias');
+  }
 }

@@ -1,24 +1,489 @@
-<ion-content>
-  <main class="page-shell">
-    <header class="page-heading">
-      <img
-        class="logo"
-        src="assets/otclick-logo.jpg"
-        alt="OtClick"
-        width="72"
-        height="72"
+<ion-content [scrollY]="seleccionada === null">
+  <main
+    class="messages-page"
+    [class.conversation-active]="seleccionada !== null"
+  >
+    <ng-container *ngIf="!seleccionada; else vistaConversacion">
+      <header
+        class="welcome-band"
+        aria-labelledby="mensajes-title"
       >
+        <div class="content-width">
+          <div class="top-row">
+            <img
+              class="logo"
+              src="assets/otclick-logo.jpg"
+              alt="OtClick"
+              width="72"
+              height="72"
+            >
 
-      <p class="eyebrow">Conversaciones</p>
-      <h1>Mensajes</h1>
-      <p class="intro">
-        Aquí encontrarás tus conversaciones con las empresas.
-      </p>
-    </header>
+            <button
+              class="profile-access"
+              type="button"
+              (click)="abrirPerfil()"
+              aria-label="Abrir mi perfil"
+            >
+              <span class="profile-copy">
+                <small>
+                  Hola{{ usuario?.nombre ? ',' : '' }}
+                </small>
 
-    <section class="empty-state">
-      <h2>Aún no hay mensajes</h2>
-      <p>Cuando tengas conversaciones, aparecerán aquí.</p>
-    </section>
+                <strong>
+                  {{ usuario?.nombre || 'Mi perfil' }}
+                </strong>
+              </span>
+
+              <span
+                class="profile-avatar"
+                aria-hidden="true"
+              >
+                {{ usuario?.nombre?.charAt(0)?.toUpperCase() || '?' }}
+              </span>
+            </button>
+          </div>
+
+          <div class="welcome-layout">
+            <div>
+              <p class="eyebrow">Tus conversaciones</p>
+
+              <h1 id="mensajes-title">Mensajes</h1>
+
+              <p class="intro">
+                Consulta tus citas y habla con las empresas desde aquí.
+              </p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section
+        class="inbox-band"
+        aria-label="Conversaciones"
+        [attr.aria-busy]="cargando"
+      >
+        <div class="content-width">
+          <div
+            class="error-banner inbox-error"
+            *ngIf="error"
+            role="alert"
+          >
+            <p>{{ error }}</p>
+
+            <button
+              type="button"
+              (click)="cargar()"
+              [disabled]="cargando"
+            >
+              Reintentar
+            </button>
+          </div>
+
+          <div
+            class="empty-state"
+            *ngIf="cargando && !conversaciones.length"
+            role="status"
+          >
+            <p>Cargando conversaciones…</p>
+          </div>
+
+          <div
+            class="empty-state"
+            *ngIf="
+              !cargando &&
+              !error &&
+              !conversaciones.length
+            "
+          >
+            <span class="empty-symbol" aria-hidden="true">
+              ···
+            </span>
+
+            <h2>Tus conversaciones empiezan aquí</h2>
+
+            <p>
+              Al solicitar una cita, tendrás un chat con la empresa
+              para hablar de los detalles.
+            </p>
+          </div>
+
+          <div class="chat-list" *ngIf="conversaciones.length">
+            <button
+              class="chat-row"
+              type="button"
+              *ngFor="
+                let chat of conversaciones;
+                trackBy: trackConversacion
+              "
+              (click)="abrir(chat)"
+              [disabled]="cargando"
+              [attr.aria-label]="
+                'Abrir conversación con ' + nombre(chat)
+              "
+            >
+              <span
+                class="chat-avatar"
+                [class.has-logo]="logoChat(chat)"
+                aria-hidden="true"
+              >
+                <img
+                  *ngIf="logoChat(chat) as logo; else inicialLista"
+                  [src]="logo"
+                  alt=""
+                  loading="lazy"
+                  (error)="marcarLogoFallido(chat)"
+                >
+
+                <ng-template #inicialLista>
+                  {{ nombre(chat).charAt(0).toUpperCase() }}
+                </ng-template>
+              </span>
+
+              <span class="chat-preview">
+                <span class="chat-row-heading">
+                  <span class="chat-name">
+                    {{ nombre(chat) }}
+                  </span>
+
+                  <time [attr.datetime]="chat.ultimaActividad">
+                    {{ chat.ultimaActividad | date:'dd/MM' }}
+                  </time>
+                </span>
+
+                <span
+                  class="chat-company"
+                  *ngIf="chat.clienteId !== usuario?.userId"
+                >
+                  {{ chat.empresaNombre }}
+                </span>
+
+                <span class="last-message">
+                  {{
+                    chat.ultimoMensaje ||
+                    'Conversación iniciada'
+                  }}
+                </span>
+              </span>
+
+              <span class="row-chevron" aria-hidden="true">
+                ›
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+
+    <ng-template #vistaConversacion>
+      <ng-container *ngIf="seleccionada as chat">
+        <header class="conversation-header">
+          <button
+            class="back-button"
+            type="button"
+            (click)="volver()"
+            [disabled]="enviando || gestionando"
+            aria-label="Volver a conversaciones"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path d="M15 5L8 12L15 19"></path>
+            </svg>
+          </button>
+
+          <span
+            class="chat-avatar header-avatar"
+            [class.has-logo]="logoChat(chat)"
+            aria-hidden="true"
+          >
+            <img
+              *ngIf="logoChat(chat) as logo; else inicialCabecera"
+              [src]="logo"
+              alt=""
+              (error)="marcarLogoFallido(chat)"
+            >
+
+            <ng-template #inicialCabecera>
+              {{ nombre(chat).charAt(0).toUpperCase() }}
+            </ng-template>
+          </span>
+
+          <div class="conversation-title">
+            <h1>{{ nombre(chat) }}</h1>
+
+            <p>
+              {{
+                chat.clienteId === usuario?.userId
+                  ? 'Conversación con la empresa'
+                  : chat.empresaNombre
+              }}
+            </p>
+          </div>
+
+          <button
+            class="icon-button"
+            type="button"
+            (click)="actualizarChat()"
+            [disabled]="
+              cargandoChat ||
+              enviando ||
+              gestionando
+            "
+            aria-label="Actualizar mensajes"
+            title="Actualizar mensajes"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path d="M20 7V3M20 7H16"></path>
+              <path d="M20 7A8 8 0 1 0 21 14"></path>
+            </svg>
+          </button>
+        </header>
+
+        <div
+          class="error-banner"
+          *ngIf="errorChat"
+          role="alert"
+        >
+          {{ errorChat }}
+        </div>
+
+        <section
+          #historial
+          class="message-history"
+          aria-label="Historial de mensajes"
+          [attr.aria-busy]="cargandoChat"
+        >
+          <button
+            class="older-button"
+            type="button"
+            *ngIf="hayMas"
+            (click)="anteriores()"
+            [disabled]="
+              cargandoChat ||
+              enviando ||
+              gestionando
+            "
+          >
+            Ver mensajes anteriores
+          </button>
+
+          <p
+            class="history-state"
+            *ngIf="cargandoChat"
+            role="status"
+          >
+            Cargando mensajes…
+          </p>
+
+          <p
+            class="history-state"
+            *ngIf="
+              !cargandoChat &&
+              !errorChat &&
+              !mensajes.length
+            "
+          >
+            Todavía no hay mensajes en esta conversación.
+          </p>
+
+          <div
+            class="message"
+            *ngFor="
+              let mensaje of mensajes;
+              trackBy: trackMensaje
+            "
+            [class.mine]="
+              mensaje.remitenteId === usuario?.userId
+            "
+            [class.booking-message]="
+              mensaje.tipo === 'SOLICITUD_RESERVA'
+            "
+          >
+            <div class="bubble">
+              <ng-container
+                *ngIf="
+                  mensaje.tipo === 'SOLICITUD_RESERVA';
+                  else mensajeTexto
+                "
+              >
+                <div class="booking-heading">
+                  <span
+                    class="booking-icon"
+                    aria-hidden="true"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <rect
+                        x="4"
+                        y="5"
+                        width="16"
+                        height="16"
+                        rx="3"
+                      ></rect>
+
+                      <path d="M8 3V7M16 3V7M4 11H20"></path>
+                    </svg>
+                  </span>
+
+                  <p class="booking-label">
+                    Solicitud de cita
+                  </p>
+                </div>
+
+                <h2 class="booking-title">
+                  {{ mensaje.servicioNombre || 'Servicio' }}
+                </h2>
+
+                <div class="booking-details">
+                  <span *ngIf="mensaje.reservaFecha">
+                    {{
+                      mensaje.reservaFecha
+                        | date:'dd/MM/yyyy'
+                    }}
+                  </span>
+
+                  <span *ngIf="mensaje.reservaHoraInicio">
+                    {{ mensaje.reservaHoraInicio?.slice(0, 5) }}
+                  </span>
+
+                  <span
+                    class="booking-price"
+                    *ngIf="mensaje.reservaPrecio != null"
+                  >
+                    {{
+                      mensaje.reservaPrecio
+                        | number:'1.2-2'
+                    }} €
+                  </span>
+                </div>
+
+                <p
+                  class="booking-note"
+                  *ngIf="mensaje.contenido"
+                >
+                  {{ mensaje.contenido }}
+                </p>
+
+                <p
+                  class="booking-status"
+                  [attr.data-estado]="mensaje.reservaEstado"
+                >
+                  <span
+                    class="status-dot"
+                    aria-hidden="true"
+                  ></span>
+
+                  {{ estado(mensaje.reservaEstado) }}
+                </p>
+
+                <div
+                  class="cancellation-reason"
+                  *ngIf="
+                    mensaje.reservaEstado === 'CANCELLED' &&
+                    mensaje.motivoCancelacion
+                  "
+                >
+                  <span>Motivo de cancelación</span>
+                  <p>{{ mensaje.motivoCancelacion }}</p>
+                </div>
+
+                <div
+                  class="booking-actions"
+                  *ngIf="
+                    chat.puedeGestionarReservas &&
+                    mensaje.reservaEstado === 'PENDING'
+                  "
+                >
+                  <button
+                    class="accept-button"
+                    type="button"
+                    [disabled]="gestionando || cargandoChat"
+                    (click)="gestionar(mensaje, true)"
+                  >
+                    Aceptar cita
+                  </button>
+
+                  <button
+                    class="reject-button"
+                    type="button"
+                    [disabled]="gestionando || cargandoChat"
+                    (click)="gestionar(mensaje, false)"
+                  >
+                    Rechazar
+                  </button>
+                </div>
+              </ng-container>
+
+              <ng-template #mensajeTexto>
+                <p class="message-text">
+                  {{ mensaje.contenido }}
+                </p>
+              </ng-template>
+
+              <time
+                class="message-time"
+                [attr.datetime]="mensaje.fechaCreacion"
+              >
+                {{ mensaje.fechaCreacion | date:'dd/MM HH:mm' }}
+              </time>
+            </div>
+          </div>
+        </section>
+
+        <form class="composer" (ngSubmit)="enviar()">
+          <label class="sr-only" for="chat-text">
+            Escribe un mensaje
+          </label>
+
+          <textarea
+            id="chat-text"
+            name="mensaje"
+            rows="1"
+            maxlength="2000"
+            placeholder="Escribe un mensaje…"
+            [(ngModel)]="texto"
+            [disabled]="enviando"
+          ></textarea>
+
+          <button
+            class="send-button"
+            type="submit"
+            [disabled]="
+              !texto.trim() ||
+              enviando ||
+              cargandoChat ||
+              gestionando
+            "
+            [attr.aria-label]="
+              enviando
+                ? 'Enviando mensaje'
+                : 'Enviar mensaje'
+            "
+          >
+            <span
+              *ngIf="enviando"
+              class="sending-dots"
+              aria-hidden="true"
+            >
+              ···
+            </span>
+
+            <svg
+              *ngIf="!enviando"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path d="M12 19V5M5 12L12 5L19 12"></path>
+            </svg>
+          </button>
+        </form>
+      </ng-container>
+    </ng-template>
   </main>
 </ion-content>
