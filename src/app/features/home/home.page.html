@@ -18,15 +18,33 @@
             aria-label="Abrir mi perfil"
           >
             <span class="profile-copy">
-              <small>Hola{{ usuario?.nombre ? ',' : '' }}</small>
-              <strong>{{ usuario?.nombre || 'Mi perfil' }}</strong>
+              <small>
+                Hola{{ usuario?.nombre ? ',' : '' }}
+              </small>
+
+              <strong>
+                {{ usuario?.nombre || 'Mi perfil' }}
+              </strong>
             </span>
 
             <span
               class="profile-avatar"
+              [class.has-photo]="fotoPerfil && !avatarFallido"
               aria-hidden="true"
             >
-              {{ usuario?.nombre?.charAt(0)?.toUpperCase() || '?' }}
+              <img
+                *ngIf="
+                  fotoPerfil && !avatarFallido;
+                  else inicialAvatar
+                "
+                [src]="fotoPerfil"
+                alt=""
+                (error)="marcarAvatarFallido()"
+              >
+
+              <ng-template #inicialAvatar>
+                {{ inicialPerfil }}
+              </ng-template>
             </span>
           </button>
         </div>
@@ -44,10 +62,7 @@
             </p>
           </div>
 
-          <form
-            class="search"
-            (ngSubmit)="buscar()"
-          >
+          <form class="search" (ngSubmit)="buscar()">
             <ion-input
               name="busqueda"
               label="¿Qué estás buscando?"
@@ -79,10 +94,7 @@
       </div>
 
       <div class="quick-links">
-        <a
-          class="quick-link"
-          routerLink="/tabs/citas"
-        >
+        <a class="quick-link" routerLink="/tabs/citas">
           <span class="quick-icon">
             <ion-icon
               name="calendar-outline"
@@ -92,9 +104,7 @@
 
           <span class="quick-copy">
             Mis citas
-            <small>
-              Consulta tus reservas y tu historial.
-            </small>
+            <small>Consulta tus reservas y tu historial.</small>
           </span>
 
           <ion-icon
@@ -104,10 +114,7 @@
           ></ion-icon>
         </a>
 
-        <a
-          class="quick-link"
-          routerLink="/tabs/mensajes"
-        >
+        <a class="quick-link" routerLink="/tabs/mensajes">
           <span class="quick-icon">
             <ion-icon
               name="chatbubbles-outline"
@@ -117,9 +124,7 @@
 
           <span class="quick-copy">
             Mensajes
-            <small>
-              Accede a tus conversaciones.
-            </small>
+            <small>Accede a tus conversaciones.</small>
           </span>
 
           <ion-icon
@@ -139,10 +144,7 @@
             <h2>Descubre empresas</h2>
           </div>
 
-          <a
-            class="view-all"
-            routerLink="/tabs/empresas"
-          >
+          <a class="view-all" routerLink="/tabs/empresas">
             Ver todas
 
             <ion-icon
@@ -152,24 +154,14 @@
           </a>
         </div>
 
-        <p
-          *ngIf="cargando"
-          role="status"
-        >
+        <p *ngIf="cargando" role="status">
           Cargando empresas…
         </p>
 
-        <div
-          class="load-error"
-          *ngIf="error"
-          role="alert"
-        >
+        <div class="load-error" *ngIf="error" role="alert">
           <span>{{ error }}</span>
 
-          <button
-            type="button"
-            (click)="cargarEmpresas()"
-          >
+          <button type="button" (click)="cargarEmpresas()">
             Reintentar
           </button>
         </div>
@@ -207,9 +199,7 @@
 
               <ng-template #initial>
                 <span aria-hidden="true">
-                  {{
-                    empresa.nombre.charAt(0).toUpperCase()
-                  }}
+                  {{ empresa.nombre.charAt(0).toUpperCase() }}
                 </span>
               </ng-template>
             </div>

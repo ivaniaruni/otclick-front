@@ -95,14 +95,30 @@ ion-content {
 .profile-avatar {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+
+  width: 30px;
+  height: 30px;
   flex: 0 0 auto;
+  overflow: hidden;
+
   color: #ffffff;
   background: var(--blue);
   border-radius: 50%;
+
   font-size: 15px;
   font-weight: 400;
+}
+
+.profile-avatar.has-photo {
+  background: var(--blue-soft);
+}
+
+.profile-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .logo {

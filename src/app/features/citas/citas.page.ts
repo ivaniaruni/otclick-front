@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
 import {
   AlertController,
   IonButton,
@@ -11,7 +12,9 @@ import {
   IonIcon,
   IonTextarea,
 } from '@ionic/angular/standalone';
+
 import { addIcons } from 'ionicons';
+
 import {
   calendarClearOutline,
   calendarOutline,
@@ -24,9 +27,13 @@ import {
 } from 'ionicons/icons';
 
 import { ApiService } from '../../core/services/api.service';
-import { AuthResponse, AuthService } from '../../core/services/auth.service';
+import {
+  AuthResponse,
+  AuthService,
+} from '../../core/services/auth.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { ResenaService } from '../../core/services/resena.service';
+import { UsuarioService } from '../../core/services/usuario.service';
 import { Reserva } from '../../shared/models/reserva';
 
 registerLocaleData(localeEs, 'es-ES');
@@ -53,6 +60,7 @@ export class CitasPage implements OnDestroy {
   citasVisibles: Reserva[] = [];
 
   usuario: AuthResponse | null = null;
+  avatarFallido = false;
   vista: VistaCitas = 'proximas';
 
   empresaFiltroId: string | null = null;
@@ -118,6 +126,7 @@ export class CitasPage implements OnDestroy {
     private reservaService: ReservaService,
     private resenaService: ResenaService,
     private authService: AuthService,
+    private usuarioService: UsuarioService,
     private router: Router,
     private route: ActivatedRoute,
     private alertController: AlertController,
@@ -142,7 +151,11 @@ export class CitasPage implements OnDestroy {
 
     this.empresaFiltroId = empresaId;
 
-    if (vista === 'proximas' || vista === 'historial' || vista === 'todas') {
+    if (
+      vista === 'proximas' ||
+      vista === 'historial' ||
+      vista === 'todas'
+    ) {
       this.vista = vista;
     }
 
@@ -158,6 +171,22 @@ export class CitasPage implements OnDestroy {
     this.destruida = true;
     this.versionCarga++;
     this.detenerTemporizador();
+  }
+
+  get fotoPerfil(): string {
+    return this.usuario?.avatarUrl?.trim() ?? '';
+  }
+
+  get inicialPerfil(): string {
+    return (
+      this.usuario?.nombre?.trim().charAt(0).toUpperCase() ||
+      '?'
+    );
+  }
+
+  marcarAvatarFallido(): void {
+    this.avatarFallido = true;
+    this.actualizarVista();
   }
 
   tieneResena(cita: Reserva): boolean {
@@ -176,7 +205,8 @@ export class CitasPage implements OnDestroy {
     this.actualizarVista();
 
     try {
-      const usuarioApi = await this.api.get<AuthResponse>('/auth/me');
+      const usuarioApi =
+        await this.api.get<AuthResponse>('/auth/me');
 
       if (!this.esCargaActual(version)) {
         return;
@@ -184,9 +214,11 @@ export class CitasPage implements OnDestroy {
 
       this.clienteId = usuarioApi.userId;
       this.usuario = usuarioApi;
+      this.avatarFallido = false;
 
       try {
-        const usuarioLocal = await this.authService.getCurrentUser();
+        const usuarioLocal =
+          await this.authService.getCurrentUser();
 
         if (!this.esCargaActual(version)) {
           return;
@@ -197,10 +229,46 @@ export class CitasPage implements OnDestroy {
             ...usuarioLocal,
             ...usuarioApi,
             nombre: usuarioApi.nombre || usuarioLocal.nombre,
+            avatarUrl:
+              usuarioApi.avatarUrl !== undefined
+                ? usuarioApi.avatarUrl
+                : usuarioLocal.avatarUrl,
           };
         }
       } catch {
-        // /auth/me ya aporta la información necesaria para esta pantalla.
+        // La respuesta de /auth/me permite continuar.
+      }
+
+      this.actualizarVista();
+
+      try {
+        const perfil =
+          await this.usuarioService.obtenerMiPerfil();
+
+        if (!this.esCargaActual(version)) {
+          return;
+        }
+
+        if (perfil.id === usuarioApi.userId) {
+          this.usuario = {
+            ...usuarioApi,
+            nombre: perfil.nombre,
+            email: perfil.email,
+            rol: perfil.rol,
+            avatarUrl: perfil.avatarUrl,
+          };
+
+          await this.authService.updateStoredUser(perfil);
+
+          if (!this.esCargaActual(version)) {
+            return;
+          }
+
+          this.avatarFallido = false;
+          this.actualizarVista();
+        }
+      } catch {
+        // Un fallo al actualizar el perfil no bloquea las citas.
       }
 
       const citas = await this.reservaService.listarPorCliente(
@@ -241,12 +309,12 @@ export class CitasPage implements OnDestroy {
   }
 
   async abrirChatEmpresa(cita: Reserva): Promise<void> {
-  await this.router.navigate(['/tabs/mensajes'], {
-    queryParams: {
-      reservaId: cita.id,
-    },
-  });
-}
+    await this.router.navigate(['/tabs/mensajes'], {
+      queryParams: {
+        reservaId: cita.id,
+      },
+    });
+  }
 
   async abrirPerfil(): Promise<void> {
     await this.router.navigateByUrl('/tabs/perfil');
@@ -283,7 +351,8 @@ export class CitasPage implements OnDestroy {
     }
 
     const inicio = this.fechaHoraCita(cita);
-    const antelacion = this.horasCancelacion * 60 * 60 * 1000;
+    const antelacion =
+      this.horasCancelacion * 60 * 60 * 1000;
 
     return inicio - Date.now() >= antelacion;
   }
@@ -361,17 +430,21 @@ export class CitasPage implements OnDestroy {
         return;
       }
 
-      this.citas = this.citas.filter((item) => item.id !== cita.id);
+      this.citas = this.citas.filter(
+        (item) => item.id !== cita.id,
+      );
 
       if (this.reservaConResenaId === cita.id) {
         this.cerrarResena();
       }
 
       this.actualizarListado();
-      this.mensajeAccion = 'La cita se ha quitado de tu listado.';
+      this.mensajeAccion =
+        'La cita se ha quitado de tu listado.';
     } catch (error: unknown) {
       if (!this.destruida) {
-        this.errorAccion = this.mensajeErrorOcultarCita(error);
+        this.errorAccion =
+          this.mensajeErrorOcultarCita(error);
       }
     } finally {
       this.dialogoAbierto = false;
@@ -381,7 +454,10 @@ export class CitasPage implements OnDestroy {
   }
 
   async cancelarCita(cita: Reserva): Promise<void> {
-    if (this.dialogoAbierto || this.cancelandoId !== null) {
+    if (
+      this.dialogoAbierto ||
+      this.cancelandoId !== null
+    ) {
       return;
     }
 
@@ -422,7 +498,8 @@ export class CitasPage implements OnDestroy {
       }
 
       if (!this.esCancelable(cita)) {
-        this.errorAccion = 'El plazo para cancelar esta cita ha terminado.';
+        this.errorAccion =
+          'El plazo para cancelar esta cita ha terminado.';
         this.actualizarVista();
         return;
       }
@@ -432,7 +509,8 @@ export class CitasPage implements OnDestroy {
       this.errorAccion = '';
       this.actualizarVista();
 
-      const reservaActualizada = await this.reservaService.cancelar(cita.id);
+      const reservaActualizada =
+        await this.reservaService.cancelar(cita.id);
 
       if (this.destruida) {
         return;
@@ -443,10 +521,12 @@ export class CitasPage implements OnDestroy {
       );
 
       this.actualizarListado();
-      this.mensajeAccion = 'La cita se ha cancelado correctamente.';
+      this.mensajeAccion =
+        'La cita se ha cancelado correctamente.';
     } catch (error: unknown) {
       if (!this.destruida) {
-        this.errorAccion = this.mensajeErrorCancelacion(error);
+        this.errorAccion =
+          this.mensajeErrorCancelacion(error);
 
         if (
           error instanceof HttpErrorResponse &&
@@ -463,7 +543,10 @@ export class CitasPage implements OnDestroy {
   }
 
   abrirResena(cita: Reserva): void {
-    if (!this.puedeResenar(cita) || this.enviandoResena) {
+    if (
+      !this.puedeResenar(cita) ||
+      this.enviandoResena
+    ) {
       return;
     }
 
@@ -515,7 +598,8 @@ export class CitasPage implements OnDestroy {
     const comentario = this.comentarioResena.trim();
 
     if (comentario.length > 500) {
-      this.errorAccion = 'El comentario no puede superar 500 caracteres.';
+      this.errorAccion =
+        'El comentario no puede superar 500 caracteres.';
       this.actualizarVista();
       return;
     }
@@ -553,9 +637,11 @@ export class CitasPage implements OnDestroy {
           this.reservaConResenaId = null;
           this.puntuacionResena = 0;
           this.comentarioResena = '';
-          this.errorAccion = 'Esta cita ya tiene una reseña publicada.';
+          this.errorAccion =
+            'Esta cita ya tiene una reseña publicada.';
         } else {
-          this.errorAccion = this.mensajeErrorResena(error);
+          this.errorAccion =
+            this.mensajeErrorResena(error);
         }
       }
     } finally {
@@ -564,19 +650,28 @@ export class CitasPage implements OnDestroy {
     }
   }
 
-  estadoEnEspanol(estado: string | null | undefined): string {
+  estadoEnEspanol(
+    estado: string | null | undefined,
+  ): string {
     const normalizado = this.normalizarEstado(estado);
 
-    return this.etiquetasEstado[normalizado] ?? 'Estado no disponible';
+    return (
+      this.etiquetasEstado[normalizado] ??
+      'Estado no disponible'
+    );
   }
 
-  claseEstado(estado: string | null | undefined): string {
+  claseEstado(
+    estado: string | null | undefined,
+  ): string {
     const normalizado = this.normalizarEstado(estado);
 
     return this.clasesEstado[normalizado] ?? 'unknown';
   }
 
-  fechaEnEspanol(fecha: string | null | undefined): string {
+  fechaEnEspanol(
+    fecha: string | null | undefined,
+  ): string {
     if (!fecha) {
       return 'Fecha no disponible';
     }
@@ -590,22 +685,32 @@ export class CitasPage implements OnDestroy {
     return this.formatoFecha.format(fechaLocal);
   }
 
-  horaFormateada(hora: string | null | undefined): string {
-    return hora ? hora.slice(0, 5) : 'Hora no disponible';
+  horaFormateada(
+    hora: string | null | undefined,
+  ): string {
+    return hora
+      ? hora.slice(0, 5)
+      : 'Hora no disponible';
   }
 
   private actualizarListado(): void {
     const citasDeEmpresa = this.empresaFiltroId
-      ? this.citas.filter((cita) => cita.empresaId === this.empresaFiltroId)
+      ? this.citas.filter(
+          (cita) => cita.empresaId === this.empresaFiltroId,
+        )
       : this.citas;
 
     this.nombreEmpresaFiltro = this.empresaFiltroId
       ? citasDeEmpresa[0]?.empresaNombre || 'Esta empresa'
       : '';
 
-    const proximas = citasDeEmpresa.filter((cita) => this.esProxima(cita));
+    const proximas = citasDeEmpresa.filter(
+      (cita) => this.esProxima(cita),
+    );
 
-    const historial = citasDeEmpresa.filter((cita) => !this.esProxima(cita));
+    const historial = citasDeEmpresa.filter(
+      (cita) => !this.esProxima(cita),
+    );
 
     this.proximasCount = proximas.length;
     this.historialCount = historial.length;
@@ -618,8 +723,10 @@ export class CitasPage implements OnDestroy {
           : citasDeEmpresa;
 
     this.citasVisibles = [...origen].sort((a, b) => {
-      const primera = `${a.fecha ?? ''}T${a.horaInicio ?? ''}`;
-      const segunda = `${b.fecha ?? ''}T${b.horaInicio ?? ''}`;
+      const primera =
+        `${a.fecha ?? ''}T${a.horaInicio ?? ''}`;
+      const segunda =
+        `${b.fecha ?? ''}T${b.horaInicio ?? ''}`;
 
       return this.vista === 'proximas'
         ? primera.localeCompare(segunda)
@@ -632,10 +739,14 @@ export class CitasPage implements OnDestroy {
       return Number.NaN;
     }
 
-    return new Date(`${cita.fecha}T${cita.horaInicio}`).getTime();
+    return new Date(
+      `${cita.fecha}T${cita.horaInicio}`,
+    ).getTime();
   }
 
-  private normalizarEstado(estado: string | null | undefined): string {
+  private normalizarEstado(
+    estado: string | null | undefined,
+  ): string {
     return (estado ?? '')
       .trim()
       .toUpperCase()
@@ -643,7 +754,10 @@ export class CitasPage implements OnDestroy {
   }
 
   private esCargaActual(version: number): boolean {
-    return !this.destruida && version === this.versionCarga;
+    return (
+      !this.destruida &&
+      version === this.versionCarga
+    );
   }
 
   private actualizarVista(): void {
@@ -668,11 +782,17 @@ export class CitasPage implements OnDestroy {
     }
   }
 
-  private async cargarResenasExistentes(versionCarga: number): Promise<void> {
+  private async cargarResenasExistentes(
+    versionCarga: number,
+  ): Promise<void> {
     const empresasCompletadas = [
       ...new Set(
         this.citas
-          .filter((cita) => this.esCompletada(cita) && Boolean(cita.empresaId))
+          .filter(
+            (cita) =>
+              this.esCompletada(cita) &&
+              Boolean(cita.empresaId),
+          )
           .map((cita) => cita.empresaId),
       ),
     ];
@@ -706,8 +826,8 @@ export class CitasPage implements OnDestroy {
         }
       }
     } catch {
-      // Si falla esta comprobación, no se interrumpe la carga de citas.
-      // El backend sigue impidiendo publicar reseñas duplicadas.
+      // La comprobación de reseñas no interrumpe las citas.
+      // El backend debe impedir las reseñas duplicadas.
     } finally {
       if (this.esCargaActual(versionCarga)) {
         this.cargandoResenas = false;
@@ -717,7 +837,8 @@ export class CitasPage implements OnDestroy {
   }
 
   private mensajeErrorOcultarCita(error: unknown): string {
-    const mensajeServidor = this.obtenerMensajeError(error);
+    const mensajeServidor =
+      this.obtenerMensajeError(error);
 
     if (mensajeServidor) {
       return mensajeServidor;
@@ -745,7 +866,8 @@ export class CitasPage implements OnDestroy {
   }
 
   private mensajeErrorCancelacion(error: unknown): string {
-    const mensajeServidor = this.obtenerMensajeError(error);
+    const mensajeServidor =
+      this.obtenerMensajeError(error);
 
     if (mensajeServidor) {
       return mensajeServidor;
@@ -777,7 +899,8 @@ export class CitasPage implements OnDestroy {
   }
 
   private mensajeErrorResena(error: unknown): string {
-    const mensajeServidor = this.obtenerMensajeError(error);
+    const mensajeServidor =
+      this.obtenerMensajeError(error);
 
     if (mensajeServidor) {
       return mensajeServidor;
@@ -800,7 +923,9 @@ export class CitasPage implements OnDestroy {
     return 'No hemos podido publicar tu reseña. Inténtalo de nuevo.';
   }
 
-  private obtenerMensajeError(error: unknown): string | null {
+  private obtenerMensajeError(
+    error: unknown,
+  ): string | null {
     if (!(error instanceof HttpErrorResponse)) {
       return null;
     }
@@ -816,7 +941,10 @@ export class CitasPage implements OnDestroy {
     for (const campo of ['detail', 'message', 'error']) {
       const mensaje = datos[campo];
 
-      if (typeof mensaje === 'string' && mensaje.trim()) {
+      if (
+        typeof mensaje === 'string' &&
+        mensaje.trim()
+      ) {
         return mensaje;
       }
     }
@@ -826,8 +954,9 @@ export class CitasPage implements OnDestroy {
 
   get totalCitasFiltro(): number {
     return this.empresaFiltroId
-      ? this.citas.filter((cita) => cita.empresaId === this.empresaFiltroId)
-          .length
+      ? this.citas.filter(
+          (cita) => cita.empresaId === this.empresaFiltroId,
+        ).length
       : this.citas.length;
   }
 

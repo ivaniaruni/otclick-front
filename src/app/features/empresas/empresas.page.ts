@@ -1,28 +1,36 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+
 import {
   ActivatedRoute,
   Router,
   RouterLink
 } from '@angular/router';
+
 import {
   IonButton,
   IonContent,
   IonIcon,
   IonInput
 } from '@ionic/angular/standalone';
+
+import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
+
 import {
   heart,
   heartOutline,
   searchOutline
 } from 'ionicons/icons';
+
 import {
   AuthResponse,
   AuthService
 } from '../../core/services/auth.service';
+
 import { EmpresaService } from '../../core/services/empresa.service';
+import { UsuarioService } from '../../core/services/usuario.service';
 import { Empresa } from '../../shared/models/empresa';
 
 type VistaEmpresas = 'todas' | 'seguidas';
@@ -42,7 +50,7 @@ type VistaEmpresas = 'todas' | 'seguidas';
     IonInput
   ]
 })
-export class EmpresasPage implements OnInit {
+export class EmpresasPage implements OnInit, OnDestroy {
   empresas: Empresa[] = [];
   empresasSeguidas: Empresa[] = [];
 
@@ -50,6 +58,7 @@ export class EmpresasPage implements OnInit {
   corazonesOcupados = new Set<string>();
 
   usuario: AuthResponse | null = null;
+  avatarFallido = false;
 
   vista: VistaEmpresas = 'todas';
   busqueda = '';
@@ -60,9 +69,12 @@ export class EmpresasPage implements OnInit {
   error = '';
   errorSeguimiento = '';
 
+  private queryParamsSubscription?: Subscription;
+
   constructor(
     private empresaService: EmpresaService,
     private authService: AuthService,
+    private usuarioService: UsuarioService,
     private route: ActivatedRoute,
     private router: Router
   ) {
@@ -74,14 +86,34 @@ export class EmpresasPage implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.queryParamMap.subscribe((params) => {
-      const termino = params.get('q') ?? '';
+    this.queryParamsSubscription =
+      this.route.queryParamMap.subscribe((params) => {
+        const termino = params.get('q') ?? '';
 
-      this.busqueda = termino;
-      this.terminoBuscado = termino;
-    });
+        this.busqueda = termino;
+        this.terminoBuscado = termino;
+      });
 
-    void this.inicializarPagina();
+    void this.cargarEmpresas();
+  }
+
+  ionViewWillEnter(): void {
+    void this.cargarUsuario();
+  }
+
+  ngOnDestroy(): void {
+    this.queryParamsSubscription?.unsubscribe();
+  }
+
+  get fotoPerfil(): string {
+    return this.usuario?.avatarUrl?.trim() ?? '';
+  }
+
+  get inicialPerfil(): string {
+    return (
+      this.usuario?.nombre?.trim().charAt(0).toUpperCase() ||
+      '?'
+    );
   }
 
   get resultados(): Empresa[] {
@@ -108,15 +140,30 @@ export class EmpresasPage implements OnInit {
     );
   }
 
-  async inicializarPagina(): Promise<void> {
-    await Promise.all([
-      this.cargarUsuario(),
-      this.cargarEmpresas()
-    ]);
+  async cargarUsuario(): Promise<void> {
+    try {
+      this.usuario = await this.authService.getCurrentUser();
+      this.avatarFallido = false;
+
+      if (!this.usuario) {
+        return;
+      }
+
+      const perfil = await this.usuarioService.obtenerMiPerfil();
+
+      await this.authService.updateStoredUser(perfil);
+
+      this.usuario = await this.authService.getCurrentUser();
+      this.avatarFallido = false;
+    } catch {
+      console.warn(
+        'No se ha podido actualizar el perfil de la cabecera.'
+      );
+    }
   }
 
-  async cargarUsuario(): Promise<void> {
-    this.usuario = await this.authService.getCurrentUser();
+  marcarAvatarFallido(): void {
+    this.avatarFallido = true;
   }
 
   async cargar(): Promise<void> {
@@ -152,7 +199,8 @@ export class EmpresasPage implements OnInit {
     this.errorSeguimiento = '';
 
     try {
-      const seguidas = await this.empresaService.listarSeguidas();
+      const seguidas =
+        await this.empresaService.listarSeguidas();
 
       this.empresasSeguidas = seguidas.filter(
         (empresa) => empresa.activa
@@ -164,7 +212,8 @@ export class EmpresasPage implements OnInit {
         )
       );
     } catch {
-      this.error = 'No hemos podido cargar tus empresas seguidas.';
+      this.error =
+        'No hemos podido cargar tus empresas seguidas.';
     } finally {
       this.cargandoSeguidas = false;
       this.cargando = false;
@@ -175,7 +224,9 @@ export class EmpresasPage implements OnInit {
     this.terminoBuscado = this.busqueda.trim();
   }
 
-  async seleccionarVista(vista: VistaEmpresas): Promise<void> {
+  async seleccionarVista(
+    vista: VistaEmpresas
+  ): Promise<void> {
     this.vista = vista;
     this.error = '';
     this.errorSeguimiento = '';
@@ -185,7 +236,9 @@ export class EmpresasPage implements OnInit {
     }
   }
 
-  async alternarSeguimiento(empresa: Empresa): Promise<void> {
+  async alternarSeguimiento(
+    empresa: Empresa
+  ): Promise<void> {
     if (this.corazonesOcupados.has(empresa.id)) {
       return;
     }
@@ -197,7 +250,9 @@ export class EmpresasPage implements OnInit {
 
     try {
       if (yaSeguida) {
-        await this.empresaService.dejarDeSeguir(empresa.id);
+        await this.empresaService.dejarDeSeguir(
+          empresa.id
+        );
 
         this.idsSeguidas = new Set(
           [...this.idsSeguidas].filter(
@@ -205,9 +260,10 @@ export class EmpresasPage implements OnInit {
           )
         );
 
-        this.empresasSeguidas = this.empresasSeguidas.filter(
-          (item) => item.id !== empresa.id
-        );
+        this.empresasSeguidas =
+          this.empresasSeguidas.filter(
+            (item) => item.id !== empresa.id
+          );
       } else {
         await this.empresaService.seguir(empresa.id);
 

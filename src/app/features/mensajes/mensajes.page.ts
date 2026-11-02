@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
+
 import {
   AfterViewChecked,
   Component,
@@ -7,21 +8,30 @@ import {
   OnDestroy,
   ViewChild,
 } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+
 import {
   AlertController,
   IonContent,
 } from '@ionic/angular/standalone';
 
 import { ApiService } from '../../core/services/api.service';
-import { AuthResponse } from '../../core/services/auth.service';
+
+import {
+  AuthResponse,
+  AuthService,
+} from '../../core/services/auth.service';
+
 import {
   Conversacion,
   ConversacionService,
   MensajeChat,
 } from '../../core/services/conversacion.service';
+
 import { ReservaService } from '../../core/services/reserva.service';
+import { UsuarioService } from '../../core/services/usuario.service';
 
 @Component({
   selector: 'app-mensajes',
@@ -41,6 +51,8 @@ export class MensajesPage
   private historial?: ElementRef<HTMLElement>;
 
   usuario: AuthResponse | null = null;
+  avatarFallido = false;
+
   conversaciones: Conversacion[] = [];
   seleccionada: Conversacion | null = null;
   mensajes: MensajeChat[] = [];
@@ -74,6 +86,8 @@ export class MensajesPage
 
   constructor(
     private api: ApiService,
+    private authService: AuthService,
+    private usuarioService: UsuarioService,
     private chats: ConversacionService,
     private reservas: ReservaService,
     private route: ActivatedRoute,
@@ -123,6 +137,21 @@ export class MensajesPage
     }
   }
 
+  get fotoPerfil(): string {
+    return this.usuario?.avatarUrl?.trim() ?? '';
+  }
+
+  get inicialPerfil(): string {
+    return (
+      this.usuario?.nombre?.trim().charAt(0).toUpperCase() ||
+      '?'
+    );
+  }
+
+  marcarAvatarFallido(): void {
+    this.avatarFallido = true;
+  }
+
   async cargar(): Promise<void> {
     const version = ++this.versionCarga;
 
@@ -139,6 +168,13 @@ export class MensajesPage
       }
 
       this.usuario = usuario;
+      this.avatarFallido = false;
+
+      await this.actualizarPerfilCabecera(version, usuario);
+
+      if (!this.cargaActual(version)) {
+        return;
+      }
 
       const params = this.route.snapshot.queryParamMap;
       const reservaId = params.get('reservaId');
@@ -188,6 +224,65 @@ export class MensajesPage
       if (this.cargaActual(version)) {
         this.cargando = false;
       }
+    }
+  }
+
+  private async actualizarPerfilCabecera(
+    version: number,
+    usuarioApi: AuthResponse,
+  ): Promise<void> {
+    try {
+      const usuarioLocal =
+        await this.authService.getCurrentUser();
+
+      if (!this.cargaActual(version)) {
+        return;
+      }
+
+      if (usuarioLocal?.userId === usuarioApi.userId) {
+        this.usuario = {
+          ...usuarioLocal,
+          ...usuarioApi,
+          nombre: usuarioApi.nombre || usuarioLocal.nombre,
+          avatarUrl:
+            usuarioApi.avatarUrl !== undefined
+              ? usuarioApi.avatarUrl
+              : usuarioLocal.avatarUrl,
+        };
+      }
+    } catch {
+      // Se mantiene la información recibida de /auth/me.
+    }
+
+    if (!this.cargaActual(version)) {
+      return;
+    }
+
+    try {
+      const perfil =
+        await this.usuarioService.obtenerMiPerfil();
+
+      if (!this.cargaActual(version)) {
+        return;
+      }
+
+      if (perfil.id !== usuarioApi.userId) {
+        return;
+      }
+
+      this.usuario = {
+        ...usuarioApi,
+        nombre: perfil.nombre,
+        email: perfil.email,
+        rol: perfil.rol,
+        avatarUrl: perfil.avatarUrl,
+      };
+
+      this.avatarFallido = false;
+
+      await this.authService.updateStoredUser(perfil);
+    } catch {
+      // Un fallo al actualizar el perfil no bloquea los chats.
     }
   }
 

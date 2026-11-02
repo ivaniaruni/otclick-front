@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
+
 import { ApiService } from './api.service';
 import { Usuario } from '../../shared/models/usuario';
 
@@ -15,6 +16,7 @@ export interface AuthResponse {
   email: string;
   nombre: string;
   rol: RolUsuario;
+  avatarUrl?: string | null;
 }
 
 export interface RegisterRequest {
@@ -33,6 +35,7 @@ export class AuthService {
 
   private tokenCache: string | null = null;
   private userCache: AuthResponse | null = null;
+
   private readonly storageReady: Promise<void>;
 
   constructor(
@@ -50,10 +53,15 @@ export class AuthService {
   }
 
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await this.api.post<AuthResponse>('/auth/register', data);
+    const response = await this.api.post<AuthResponse>(
+      '/auth/register',
+      data,
+    );
 
     if (!response.token) {
-      throw new Error('El servidor no ha devuelto un token de acceso.');
+      throw new Error(
+        'El servidor no ha devuelto un token de acceso.',
+      );
     }
 
     await this.saveSession(response);
@@ -61,14 +69,22 @@ export class AuthService {
     return response;
   }
 
-  async login(email: string, password: string): Promise<AuthResponse> {
-    const response = await this.api.post<AuthResponse>('/auth/login', {
-      email,
-      password,
-    });
+  async login(
+    email: string,
+    password: string,
+  ): Promise<AuthResponse> {
+    const response = await this.api.post<AuthResponse>(
+      '/auth/login',
+      {
+        email,
+        password,
+      },
+    );
 
     if (!response.token) {
-      throw new Error('El servidor no ha devuelto un token de acceso.');
+      throw new Error(
+        'El servidor no ha devuelto un token de acceso.',
+      );
     }
 
     await this.saveSession(response);
@@ -78,11 +94,13 @@ export class AuthService {
 
   async getToken(): Promise<string | null> {
     await this.storageReady;
+
     return this.tokenCache;
   }
 
   async getCurrentUser(): Promise<AuthResponse | null> {
     await this.storageReady;
+
     return this.userCache;
   }
 
@@ -97,16 +115,21 @@ export class AuthService {
       const user = await this.api.get<AuthResponse>('/auth/me');
 
       const currentToken = this.tokenCache;
+
       this.userCache = {
         ...user,
         token: currentToken,
       };
 
-      await this.storage.set(this.USER_KEY, this.userCache);
+      await this.storage.set(
+        this.USER_KEY,
+        this.userCache,
+      );
 
       return this.userCache;
     } catch {
       await this.logout();
+
       return null;
     }
   }
@@ -124,18 +147,24 @@ export class AuthService {
       email: user.email,
       nombre: user.nombre,
       rol: user.rol,
+      avatarUrl: user.avatarUrl,
     };
 
-    await this.storage.set(this.USER_KEY, this.userCache);
+    await this.storage.set(
+      this.USER_KEY,
+      this.userCache,
+    );
   }
 
   async isLoggedIn(): Promise<boolean> {
     await this.storageReady;
+
     return !!this.tokenCache;
   }
 
   async hasRole(role: RolUsuario): Promise<boolean> {
     const user = await this.getCurrentUser();
+
     return user?.rol === role;
   }
 
@@ -161,19 +190,30 @@ export class AuthService {
     this.userCache = null;
   }
 
-  private async saveSession(response: AuthResponse): Promise<void> {
+  private async saveSession(
+    response: AuthResponse,
+  ): Promise<void> {
     await this.storageReady;
 
     const token = response.token;
 
     if (!token) {
-      throw new Error('No se puede guardar una sesión sin token.');
+      throw new Error(
+        'No se puede guardar una sesión sin token.',
+      );
     }
 
     this.tokenCache = token;
     this.userCache = response;
 
-    await this.storage.set(this.TOKEN_KEY, token);
-    await this.storage.set(this.USER_KEY, response);
+    await this.storage.set(
+      this.TOKEN_KEY,
+      token,
+    );
+
+    await this.storage.set(
+      this.USER_KEY,
+      response,
+    );
   }
 }

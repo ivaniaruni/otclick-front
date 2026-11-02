@@ -3,16 +3,48 @@
     <section class="welcome-band" aria-labelledby="citas-title">
       <div class="content-width">
         <div class="top-row">
-          <img class="logo" src="assets/otclick-logo.jpg" alt="OtClick" width="72" height="72">
+          <img
+            class="logo"
+            src="assets/otclick-logo.jpg"
+            alt="OtClick"
+            width="72"
+            height="72"
+          >
 
-          <button class="profile-access" type="button" (click)="abrirPerfil()" aria-label="Abrir mi perfil">
+          <button
+            class="profile-access"
+            type="button"
+            (click)="abrirPerfil()"
+            aria-label="Abrir mi perfil"
+          >
             <span class="profile-copy">
-              <small>Hola{{ usuario?.nombre ? ',' : '' }}</small>
-              <strong>{{ usuario?.nombre || 'Mi perfil' }}</strong>
+              <small>
+                Hola{{ usuario?.nombre ? ',' : '' }}
+              </small>
+
+              <strong>
+                {{ usuario?.nombre || 'Mi perfil' }}
+              </strong>
             </span>
 
-            <span class="profile-avatar" aria-hidden="true">
-              {{ usuario?.nombre?.charAt(0)?.toUpperCase() || '?' }}
+            <span
+              class="profile-avatar"
+              [class.has-photo]="fotoPerfil && !avatarFallido"
+              aria-hidden="true"
+            >
+              <img
+                *ngIf="
+                  fotoPerfil && !avatarFallido;
+                  else inicialAvatar
+                "
+                [src]="fotoPerfil"
+                alt=""
+                (error)="marcarAvatarFallido()"
+              >
+
+              <ng-template #inicialAvatar>
+                {{ inicialPerfil }}
+              </ng-template>
             </span>
           </button>
         </div>
@@ -20,7 +52,9 @@
         <div class="welcome-layout">
           <div>
             <p class="eyebrow">Tu agenda</p>
+
             <h1 id="citas-title">Mis citas</h1>
+
             <p class="intro">
               Consulta tus próximas reservas y las citas anteriores.
             </p>
@@ -29,23 +63,38 @@
       </div>
     </section>
 
-    <section class="appointments-band" aria-labelledby="listado-title">
+    <section
+      class="appointments-band"
+      aria-labelledby="listado-title"
+    >
       <div class="content-width">
         <div class="view-switch" aria-label="Filtrar citas">
-          <button type="button" [class.active]="vista === 'proximas'" [attr.aria-pressed]="vista === 'proximas'"
-            (click)="seleccionarVista('proximas')">
+          <button
+            type="button"
+            [class.active]="vista === 'proximas'"
+            [attr.aria-pressed]="vista === 'proximas'"
+            (click)="seleccionarVista('proximas')"
+          >
             Próximas
             <span class="filter-count">{{ proximasCount }}</span>
           </button>
 
-          <button type="button" [class.active]="vista === 'historial'" [attr.aria-pressed]="vista === 'historial'"
-            (click)="seleccionarVista('historial')">
+          <button
+            type="button"
+            [class.active]="vista === 'historial'"
+            [attr.aria-pressed]="vista === 'historial'"
+            (click)="seleccionarVista('historial')"
+          >
             Historial
             <span class="filter-count">{{ historialCount }}</span>
           </button>
 
-          <button type="button" [class.active]="vista === 'todas'" [attr.aria-pressed]="vista === 'todas'"
-            (click)="seleccionarVista('todas')">
+          <button
+            type="button"
+            [class.active]="vista === 'todas'"
+            [attr.aria-pressed]="vista === 'todas'"
+            (click)="seleccionarVista('todas')"
+          >
             Todas
             <span class="filter-count">{{ totalCitasFiltro }}</span>
           </button>
@@ -62,7 +111,11 @@
             </span>
           </div>
 
-          <button class="clear-company-filter" type="button" (click)="quitarFiltroEmpresa()">
+          <button
+            class="clear-company-filter"
+            type="button"
+            (click)="quitarFiltroEmpresa()"
+          >
             Ver todas mis citas
           </button>
         </div>
@@ -71,53 +124,82 @@
           <div>
             <p class="eyebrow">
               {{
-              vista === 'proximas'
-              ? 'Lo que viene'
-              : vista === 'historial'
-              ? 'Citas anteriores'
-              : 'Tu actividad'
+                vista === 'proximas'
+                  ? 'Lo que viene'
+                  : vista === 'historial'
+                    ? 'Citas anteriores'
+                    : 'Tu actividad'
               }}
             </p>
 
             <h2 id="listado-title">
               {{
-              vista === 'proximas'
-              ? 'Próximas citas'
-              : vista === 'historial'
-              ? 'Historial de citas'
-              : 'Todas tus citas'
+                vista === 'proximas'
+                  ? 'Próximas citas'
+                  : vista === 'historial'
+                    ? 'Historial de citas'
+                    : 'Todas tus citas'
               }}
             </h2>
           </div>
 
-          <span class="result-count" *ngIf="!cargando && !error" aria-live="polite">
+          <span
+            class="result-count"
+            *ngIf="!cargando && !error"
+            aria-live="polite"
+          >
             {{ citasVisibles.length }}
             {{ citasVisibles.length === 1 ? 'cita' : 'citas' }}
           </span>
         </div>
 
-        <div class="state-message" *ngIf="cargando" role="status" aria-live="polite">
+        <div
+          class="state-message"
+          *ngIf="cargando"
+          role="status"
+          aria-live="polite"
+        >
           Cargando tus citas…
         </div>
 
-        <div class="state-message error-message" *ngIf="error" role="alert">
+        <div
+          class="state-message error-message"
+          *ngIf="error"
+          role="alert"
+        >
           <p>{{ error }}</p>
 
           <ion-button fill="outline" (click)="cargar()">
-            <ion-icon slot="start" name="refresh-outline" aria-hidden="true"></ion-icon>
+            <ion-icon
+              slot="start"
+              name="refresh-outline"
+              aria-hidden="true"
+            ></ion-icon>
             Reintentar
           </ion-button>
         </div>
 
-        <p class="action-message success" *ngIf="mensajeAccion" role="status" aria-live="polite">
+        <p
+          class="action-message success"
+          *ngIf="mensajeAccion"
+          role="status"
+          aria-live="polite"
+        >
           {{ mensajeAccion }}
         </p>
 
-        <p class="action-message error" *ngIf="errorAccion" role="alert">
+        <p
+          class="action-message error"
+          *ngIf="errorAccion"
+          role="alert"
+        >
           {{ errorAccion }}
         </p>
 
-        <section class="state-message empty-state" *ngIf="!cargando && !error && citas.length === 0">
+        <section
+          class="state-message empty-state"
+          *ngIf="!cargando && !error && citas.length === 0"
+        >
           <span class="empty-icon" aria-hidden="true">
             <ion-icon name="calendar-clear-outline"></ion-icon>
           </span>
@@ -134,42 +216,51 @@
           </a>
         </section>
 
-        <section class="state-message empty-state" *ngIf="
+        <section
+          class="state-message empty-state"
+          *ngIf="
             !cargando &&
             !error &&
             citas.length > 0 &&
             citasVisibles.length === 0
-          ">
+          "
+        >
           <span class="empty-icon" aria-hidden="true">
             <ion-icon name="calendar-outline"></ion-icon>
           </span>
 
           <h3>
             {{
-            vista === 'proximas'
-            ? 'No tienes próximas citas'
-            : vista === 'historial'
-            ? 'Todavía no hay citas en el historial'
-            : 'No hay citas para mostrar'
+              vista === 'proximas'
+                ? 'No tienes próximas citas'
+                : vista === 'historial'
+                  ? 'Todavía no hay citas en el historial'
+                  : 'No hay citas para mostrar'
             }}
           </h3>
 
           <p>
             {{
-            vista === 'proximas'
-            ? 'Cuando reserves una cita, aparecerá aquí.'
-            : vista === 'historial'
-            ? 'Las citas completadas, canceladas o anteriores aparecerán aquí.'
-            : 'Las citas que tengas aparecerán aquí.'
+              vista === 'proximas'
+                ? 'Cuando reserves una cita, aparecerá aquí.'
+                : vista === 'historial'
+                  ? 'Las citas completadas, canceladas o anteriores aparecerán aquí.'
+                  : 'Las citas que tengas aparecerán aquí.'
             }}
           </p>
         </section>
 
-        <div class="appointments-grid" *ngIf="!cargando && !error && citasVisibles.length > 0">
-          <article class="appointment-card" *ngFor="
+        <div
+          class="appointments-grid"
+          *ngIf="!cargando && !error && citasVisibles.length > 0"
+        >
+          <article
+            class="appointment-card"
+            *ngFor="
               let cita of citasVisibles;
               trackBy: trackByCita
-            ">
+            "
+          >
             <div class="appointment-date">
               <span>{{ fechaEnEspanol(cita.fecha) }}</span>
               <strong>{{ horaFormateada(cita.horaInicio) }}</strong>
@@ -179,12 +270,17 @@
               <div class="appointment-heading">
                 <p class="service-label">Servicio</p>
 
-                <span class="status" [ngClass]="claseEstado(cita.estado)">
+                <span
+                  class="status"
+                  [ngClass]="claseEstado(cita.estado)"
+                >
                   {{ estadoEnEspanol(cita.estado) }}
                 </span>
               </div>
 
-              <h3>{{ cita.servicioNombre || 'Servicio no disponible' }}</h3>
+              <h3>
+                {{ cita.servicioNombre || 'Servicio no disponible' }}
+              </h3>
 
               <p class="company-name">
                 {{ cita.empresaNombre || 'Empresa no disponible' }}
@@ -195,64 +291,100 @@
               </p>
             </div>
 
-            <div class="appointment-price" *ngIf="
+            <div
+              class="appointment-price"
+              *ngIf="
                 cita.precioTotal !== null &&
                 cita.precioTotal !== undefined
-              ">
+              "
+            >
               {{
-              cita.precioTotal
-              | currency:'EUR':'symbol':'1.2-2':'es-ES'
+                cita.precioTotal
+                  | currency:'EUR':'symbol':'1.2-2':'es-ES'
               }}
             </div>
 
-            <div class="cancellation-area" *ngIf="esProxima(cita) && esCancelable(cita)">
+            <div
+              class="cancellation-area"
+              *ngIf="esProxima(cita) && esCancelable(cita)"
+            >
               <p class="cancellation-reminder">
                 Puedes cancelar esta cita hasta 24 horas antes de su inicio.
               </p>
 
-              <ion-button class="cancel-appointment-button" fill="outline" size="small"
-                [disabled]="cancelandoId === cita.id" (click)="cancelarCita(cita)">
+              <ion-button
+                class="cancel-appointment-button"
+                fill="outline"
+                size="small"
+                [disabled]="cancelandoId === cita.id"
+                (click)="cancelarCita(cita)"
+              >
                 {{
-                cancelandoId === cita.id
-                ? 'Cancelando…'
-                : 'Cancelar cita'
+                  cancelandoId === cita.id
+                    ? 'Cancelando…'
+                    : 'Cancelar cita'
                 }}
               </ion-button>
             </div>
 
-            <div class="cancellation-area cancellation-closed" *ngIf="
-                esProxima(cita) &&
-                !esCancelable(cita)
-              ">
+            <div
+              class="cancellation-area cancellation-closed"
+              *ngIf="esProxima(cita) && !esCancelable(cita)"
+            >
               <p class="cancellation-reminder">
                 Ya no se puede cancelar desde la aplicación porque faltan
                 menos de 24 horas para la cita.
               </p>
             </div>
 
-            <div class="automatic-cancellation-note" *ngIf="esCancelacionAutomatica(cita)">
+            <div
+              class="automatic-cancellation-note"
+              *ngIf="esCancelacionAutomatica(cita)"
+            >
               <p>
                 Esta cita se canceló automáticamente porque pasó su horario sin
                 confirmarse.
               </p>
             </div>
 
-            <div class="appointment-actions" *ngIf="esCancelada(cita)">
-              <ion-button class="appointment-action-button remove-appointment-button" fill="outline" size="small"
-                [disabled]="ocultandoId === cita.id" (click)="ocultarCitaCancelada(cita)">
-                <ion-icon slot="start" name="trash-outline" aria-hidden="true"></ion-icon>
+            <div
+              class="appointment-actions"
+              *ngIf="esCancelada(cita)"
+            >
+              <ion-button
+                class="appointment-action-button remove-appointment-button"
+                fill="outline"
+                size="small"
+                [disabled]="ocultandoId === cita.id"
+                (click)="ocultarCitaCancelada(cita)"
+              >
+                <ion-icon
+                  slot="start"
+                  name="trash-outline"
+                  aria-hidden="true"
+                ></ion-icon>
 
                 {{
-                ocultandoId === cita.id
-                ? 'Quitando…'
-                : 'Quitar de Mis citas'
+                  ocultandoId === cita.id
+                    ? 'Quitando…'
+                    : 'Quitar de Mis citas'
                 }}
               </ion-button>
             </div>
 
-            <div class="appointment-chat-access" *ngIf="cita.empresaId">
-              <button class="company-chat-button" type="button" (click)="abrirChatEmpresa(cita)">
-                <ion-icon name="chatbubble-outline" aria-hidden="true"></ion-icon>
+            <div
+              class="appointment-chat-access"
+              *ngIf="cita.empresaId"
+            >
+              <button
+                class="company-chat-button"
+                type="button"
+                (click)="abrirChatEmpresa(cita)"
+              >
+                <ion-icon
+                  name="chatbubble-outline"
+                  aria-hidden="true"
+                ></ion-icon>
 
                 <span>
                   Hablar con {{ cita.empresaNombre || 'la empresa' }}
@@ -260,66 +392,123 @@
               </button>
             </div>
 
-            <div class="appointment-actions" *ngIf="
+            <div
+              class="appointment-actions"
+              *ngIf="
                 esCompletada(cita) &&
                 reservaConResenaId !== cita.id
-              ">
-              <ion-button class="appointment-action-button" fill="outline" size="small" *ngIf="puedeResenar(cita)"
-                [disabled]="cargandoResenas || enviandoResena" (click)="abrirResena(cita)">
-                <ion-icon slot="start" name="star-outline" aria-hidden="true"></ion-icon>
+              "
+            >
+              <ion-button
+                class="appointment-action-button"
+                fill="outline"
+                size="small"
+                *ngIf="puedeResenar(cita)"
+                [disabled]="cargandoResenas || enviandoResena"
+                (click)="abrirResena(cita)"
+              >
+                <ion-icon
+                  slot="start"
+                  name="star-outline"
+                  aria-hidden="true"
+                ></ion-icon>
+
                 {{
-                cargandoResenas
-                ? 'Comprobando reseña…'
-                : 'Escribir reseña'
+                  cargandoResenas
+                    ? 'Comprobando reseña…'
+                    : 'Escribir reseña'
                 }}
               </ion-button>
 
               <p class="review-published" *ngIf="tieneResena(cita)">
-                <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+                <ion-icon
+                  name="checkmark-circle-outline"
+                  aria-hidden="true"
+                ></ion-icon>
                 Reseña publicada
               </p>
             </div>
 
-            <form class="review-form" *ngIf="reservaConResenaId === cita.id" (ngSubmit)="enviarResena(cita)">
+            <form
+              class="review-form"
+              *ngIf="reservaConResenaId === cita.id"
+              (ngSubmit)="enviarResena(cita)"
+            >
               <div class="review-form-heading">
                 <div>
                   <p class="service-label">Tu opinión</p>
                   <h4>¿Cómo fue tu cita?</h4>
                 </div>
 
-                <button class="close-review-button" type="button" [disabled]="enviandoResena" (click)="cerrarResena()"
-                  aria-label="Cerrar formulario de reseña">
+                <button
+                  class="close-review-button"
+                  type="button"
+                  [disabled]="enviandoResena"
+                  (click)="cerrarResena()"
+                  aria-label="Cerrar formulario de reseña"
+                >
                   Cerrar
                 </button>
               </div>
 
-              <div class="rating-picker" role="radiogroup" aria-label="Puntuación de la cita">
-                <button *ngFor="let valor of puntuaciones" type="button" class="star-button"
-                  [class.selected]="esEstrellaSeleccionada(valor)" [attr.aria-checked]="puntuacionResena === valor"
-                  role="radio" [attr.aria-label]="valor + ' de 5 estrellas'" [disabled]="enviandoResena"
-                  (click)="seleccionarPuntuacion(valor)">
-                  <ion-icon [name]="
+              <div
+                class="rating-picker"
+                role="radiogroup"
+                aria-label="Puntuación de la cita"
+              >
+                <button
+                  *ngFor="let valor of puntuaciones"
+                  type="button"
+                  class="star-button"
+                  [class.selected]="esEstrellaSeleccionada(valor)"
+                  [attr.aria-checked]="puntuacionResena === valor"
+                  role="radio"
+                  [attr.aria-label]="valor + ' de 5 estrellas'"
+                  [disabled]="enviandoResena"
+                  (click)="seleccionarPuntuacion(valor)"
+                >
+                  <ion-icon
+                    [name]="
                       esEstrellaSeleccionada(valor)
                         ? 'star'
                         : 'star-outline'
-                    " aria-hidden="true"></ion-icon>
+                    "
+                    aria-hidden="true"
+                  ></ion-icon>
                 </button>
               </div>
 
-              <ion-textarea class="review-comment" label="Comentario opcional" labelPlacement="stacked"
-                placeholder="Cuéntanos cómo fue el servicio" [counter]="true" [maxlength]="500" [autoGrow]="true"
-                [(ngModel)]="comentarioResena" name="comentarioResena" [disabled]="enviandoResena"></ion-textarea>
+              <ion-textarea
+                class="review-comment"
+                label="Comentario opcional"
+                labelPlacement="stacked"
+                placeholder="Cuéntanos cómo fue el servicio"
+                [counter]="true"
+                [maxlength]="500"
+                [autoGrow]="true"
+                [(ngModel)]="comentarioResena"
+                name="comentarioResena"
+                [disabled]="enviandoResena"
+              ></ion-textarea>
 
               <div class="review-form-actions">
-                <ion-button type="button" fill="clear" [disabled]="enviandoResena" (click)="cerrarResena()">
+                <ion-button
+                  type="button"
+                  fill="clear"
+                  [disabled]="enviandoResena"
+                  (click)="cerrarResena()"
+                >
                   Cancelar
                 </ion-button>
 
-                <ion-button type="submit" [disabled]="puntuacionResena < 1 || enviandoResena">
+                <ion-button
+                  type="submit"
+                  [disabled]="puntuacionResena < 1 || enviandoResena"
+                >
                   {{
-                  enviandoResena
-                  ? 'Publicando…'
-                  : 'Publicar reseña'
+                    enviandoResena
+                      ? 'Publicando…'
+                      : 'Publicar reseña'
                   }}
                 </ion-button>
               </div>
