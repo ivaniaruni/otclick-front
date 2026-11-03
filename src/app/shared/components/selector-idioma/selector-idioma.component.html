@@ -1,0 +1,69 @@
+<button
+  class="language-button"
+  type="button"
+  (click)="abrir($event)"
+  [attr.aria-label]="'IDIOMA_ABRIR' | translate"
+  [attr.title]="'IDIOMA_ABRIR' | translate"
+  aria-haspopup="dialog"
+  [attr.aria-expanded]="abierto"
+>
+  <ion-icon
+    name="globe-outline"
+    aria-hidden="true"
+  ></ion-icon>
+</button>
+
+<ion-popover
+  class="language-popover"
+  [isOpen]="abierto"
+  [event]="evento"
+  [attr.aria-label]="'IDIOMA_TITULO' | translate"
+  (didDismiss)="cerrar()"
+>
+  <ng-template>
+    <section class="language-panel">
+      <header class="language-heading">
+        <h2>
+          {{ 'IDIOMA_TITULO' | translate }}
+        </h2>
+
+        <p>
+          {{ 'IDIOMA_DESCRIPCION' | translate }}
+        </p>
+      </header>
+
+      <div
+        class="language-options"
+        [attr.aria-busy]="idioma.cambiando()"
+      >
+        <button
+          class="language-option"
+          type="button"
+          *ngFor="let opcion of idioma.disponibles"
+          [class.selected]="idioma.actual() === opcion.codigo"
+          [attr.aria-pressed]="idioma.actual() === opcion.codigo"
+          [disabled]="idioma.cambiando()"
+          (click)="seleccionar(opcion.codigo)"
+        >
+          <span [attr.lang]="opcion.codigo">
+            {{ opcion.nombre }}
+          </span>
+
+          <ion-icon
+            *ngIf="idioma.actual() === opcion.codigo"
+            name="checkmark-outline"
+            aria-hidden="true"
+          ></ion-icon>
+        </button>
+      </div>
+
+      <p
+        class="language-error"
+        *ngIf="error"
+        role="alert"
+      >
+        {{ 'IDIOMA_ERROR' | translate }}
+      </p>
+    </section>
+  </ng-template>
+</ion-popover>

@@ -2,13 +2,16 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import {
   IonButton,
   IonContent,
   IonIcon,
-  IonInput
+  IonInput,
 } from '@ionic/angular/standalone';
+
+import { SelectorIdiomaComponent } from '../../shared/components/selector-idioma/selector-idioma.component';
 
 import { addIcons } from 'ionicons';
 
@@ -16,13 +19,10 @@ import {
   arrowForwardOutline,
   calendarOutline,
   chatbubblesOutline,
-  searchOutline
+  searchOutline,
 } from 'ionicons/icons';
 
-import {
-  AuthResponse,
-  AuthService
-} from '../../core/services/auth.service';
+import { AuthResponse, AuthService } from '../../core/services/auth.service';
 
 import { EmpresaService } from '../../core/services/empresa.service';
 import { UsuarioService } from '../../core/services/usuario.service';
@@ -40,8 +40,10 @@ import { Empresa } from '../../shared/models/empresa';
     IonButton,
     IonContent,
     IonIcon,
-    IonInput
-  ]
+    IonInput,
+    TranslatePipe,
+    SelectorIdiomaComponent,
+  ],
 })
 export class HomePage implements OnInit {
   empresas: Empresa[] = [];
@@ -57,13 +59,13 @@ export class HomePage implements OnInit {
     private empresaService: EmpresaService,
     private authService: AuthService,
     private usuarioService: UsuarioService,
-    private router: Router
+    private router: Router,
   ) {
     addIcons({
       arrowForwardOutline,
       calendarOutline,
       chatbubblesOutline,
-      searchOutline
+      searchOutline,
     });
   }
 
@@ -106,9 +108,7 @@ export class HomePage implements OnInit {
       this.avatarFallido = false;
     } catch {
       // Si falla la actualización, conservamos el usuario ya cargado.
-      console.warn(
-        'No se ha podido actualizar el perfil de la cabecera.'
-      );
+      console.warn('No se ha podido actualizar el perfil de la cabecera.');
     }
   }
 
@@ -123,9 +123,7 @@ export class HomePage implements OnInit {
     try {
       const respuesta = await this.empresaService.listar();
 
-      this.empresas = respuesta.filter(
-        (empresa) => empresa.activa
-      );
+      this.empresas = respuesta.filter((empresa) => empresa.activa);
     } catch {
       this.error = 'No hemos podido cargar las empresas.';
     } finally {
@@ -135,9 +133,7 @@ export class HomePage implements OnInit {
 
   async buscar(): Promise<void> {
     await this.router.navigate(['/tabs/empresas'], {
-      queryParams: this.busqueda.trim()
-        ? { q: this.busqueda.trim() }
-        : {}
+      queryParams: this.busqueda.trim() ? { q: this.busqueda.trim() } : {},
     });
   }
 
