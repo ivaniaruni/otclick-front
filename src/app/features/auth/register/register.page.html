@@ -1,6 +1,13 @@
 <ion-content>
   <main class="register-shell">
-    <section class="register-panel" aria-labelledby="register-title">
+    <section
+      class="register-panel"
+      aria-labelledby="register-title"
+    >
+      <div class="auth-toolbar">
+        <app-selector-idioma></app-selector-idioma>
+      </div>
+
       <div class="brand">
         <img
           class="brand-logo"
@@ -12,18 +19,29 @@
       </div>
 
       <div class="intro">
-        <h1 id="register-title">Crea tu cuenta.</h1>
-        <p>Empieza a gestionar tus citas con OtClick.</p>
+        <h1 id="register-title">
+          {{ 'AUTH.REGISTRO_TITULO' | translate }}
+        </h1>
+
+        <p>
+          {{ 'AUTH.REGISTRO_INTRO' | translate }}
+        </p>
       </div>
 
-      <form #registerForm="ngForm" (ngSubmit)="onRegister()">
+      <form
+        #registerForm="ngForm"
+        (ngSubmit)="onRegister(registerForm)"
+        [attr.aria-busy]="loading"
+        novalidate
+      >
         <div class="field">
           <ion-input
             name="nombre"
-            label="Nombre"
+            [label]="'AUTH.NOMBRE' | translate"
             labelPlacement="stacked"
             autocomplete="given-name"
             [(ngModel)]="nombre"
+            [disabled]="loading"
             required
           ></ion-input>
         </div>
@@ -31,23 +49,27 @@
         <div class="field">
           <ion-input
             name="apellido"
-            label="Apellido"
+            [label]="'AUTH.APELLIDO' | translate"
             labelPlacement="stacked"
             autocomplete="family-name"
             [(ngModel)]="apellido"
+            [disabled]="loading"
           ></ion-input>
         </div>
 
         <div class="field">
           <ion-input
             name="email"
-            label="Correo electrónico"
+            [label]="'AUTH.EMAIL' | translate"
             labelPlacement="stacked"
             type="email"
             inputmode="email"
             autocomplete="email"
-            placeholder="tu@email.com"
+            autocapitalize="off"
+            [spellcheck]="false"
+            [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
             [(ngModel)]="email"
+            [disabled]="loading"
             required
             email
           ></ion-input>
@@ -56,29 +78,40 @@
         <div class="field">
           <ion-input
             name="telefono"
-            label="Teléfono"
+            [label]="'AUTH.TELEFONO' | translate"
             labelPlacement="stacked"
             type="tel"
             autocomplete="tel"
             [(ngModel)]="telefono"
+            [disabled]="loading"
           ></ion-input>
         </div>
 
         <div class="field">
           <ion-input
             name="password"
-            label="Contraseña"
+            [label]="'AUTH.PASSWORD' | translate"
             labelPlacement="stacked"
             type="password"
             autocomplete="new-password"
+            [helperText]="'AUTH.PASSWORD_AYUDA' | translate"
             [(ngModel)]="password"
+            [disabled]="loading"
             required
             minlength="8"
           ></ion-input>
         </div>
 
-        <ion-text *ngIf="error" color="danger">
-          <p class="form-error" role="alert">{{ error }}</p>
+        <ion-text
+          *ngIf="error"
+          color="danger"
+        >
+          <p
+            class="form-error"
+            role="alert"
+          >
+            {{ error | translate }}
+          </p>
         </ion-text>
 
         <ion-button
@@ -87,14 +120,32 @@
           type="submit"
           [disabled]="registerForm.invalid || loading"
         >
-          <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
-          <span *ngIf="!loading">Crear cuenta</span>
+          <ion-spinner
+            *ngIf="loading"
+            name="crescent"
+            aria-hidden="true"
+          ></ion-spinner>
+
+          <span>
+            {{
+              (
+                loading
+                  ? 'AUTH.REGISTRO_CARGANDO'
+                  : 'AUTH.REGISTRO_BOTON'
+              ) | translate
+            }}
+          </span>
         </ion-button>
       </form>
 
       <p class="switch-page">
-        ¿Ya tienes cuenta?
-        <a routerLink="/login">Inicia sesión</a>
+        <span>
+          {{ 'AUTH.CON_CUENTA' | translate }}
+        </span>
+
+        <a routerLink="/login">
+          {{ 'AUTH.IR_LOGIN' | translate }}
+        </a>
       </p>
     </section>
   </main>

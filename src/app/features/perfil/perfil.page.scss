@@ -21,6 +21,12 @@ ion-content {
   --color: var(--ink);
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 .page {
   width: min(100% - 40px, 1120px);
   margin-inline: auto;
@@ -38,6 +44,7 @@ ion-content {
   border: 1px solid var(--border);
   border-radius: 12px;
   text-decoration: none;
+
   transition:
     color 160ms ease,
     background 160ms ease,
@@ -54,7 +61,8 @@ ion-content {
 
 .back-button:focus-visible,
 .save-button:focus-visible,
-.logout-button:focus-visible {
+.logout-button:focus-visible,
+.remove-image-button:focus-visible {
   outline: 3px solid var(--blue);
   outline-offset: 3px;
 }
@@ -79,22 +87,87 @@ ion-content {
   place-items: center;
   width: 100%;
   height: 280px;
+  padding: 20px;
   overflow: hidden;
-  color: var(--blue);
-  background: var(--blue-image);
+  background: #f4f8fe;
   border-bottom: 1px solid var(--border);
 }
 
-.cover img {
+.profile-photo-frame {
+  --frame-color: #b8c4d2;
+
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  min-width: 0;
+  min-height: 0;
+  padding: 5px;
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 3px solid var(--frame-color);
+  border-radius: 18px;
 }
 
-.cover span {
+.profile-photo-frame.frame-client {
+  --frame-color: #0474fc;
+
+  border-width: 2px;
+  border-style: solid;
+}
+
+.profile-photo-frame.frame-business {
+  --frame-color: #173e79;
+
+  border-width: 6px;
+  border-style: double;
+}
+
+.profile-photo-frame.frame-worker {
+  --frame-color: #168778;
+
+  border-width: 3px;
+  border-style: solid;
+}
+
+.profile-photo-frame.frame-admin {
+  --frame-color: #7954bd;
+
+  border-width: 6px;
+  border-style: double;
+}
+
+.profile-photo-frame.frame-default {
+  --frame-color: #b8c4d2;
+
+  border-width: 2px;
+  border-style: solid;
+}
+
+.profile-photo {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  color: var(--blue);
+  background: var(--blue-image);
+  border-radius: 10px;
+}
+
+.profile-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.profile-initials {
   font-size: 80px;
   font-weight: 400;
+  line-height: 1;
 }
 
 .profile-title {
@@ -118,23 +191,11 @@ p {
 }
 
 .profile-title h1 {
-  margin: 0 0 10px;
+  margin: 0;
   color: var(--ink);
   font-size: clamp(32px, 4vw, 46px);
   font-weight: 400;
   line-height: 1.1;
-}
-
-.profile-role {
-  display: inline-flex;
-  margin: 0;
-  padding: 6px 10px;
-  color: var(--blue-dark);
-  background: var(--blue-soft);
-  border: 1px solid #cfe2ff;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 400;
 }
 
 .section {
@@ -151,6 +212,10 @@ p {
   margin-bottom: 22px;
 }
 
+.section-heading > div {
+  min-width: 0;
+}
+
 .section-heading h2 {
   margin: 0;
   color: var(--ink);
@@ -163,6 +228,7 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 20px;
   padding: 18px;
   background: #f8fbff;
@@ -175,6 +241,7 @@ p {
   align-items: center;
   gap: 14px;
   min-width: 0;
+  flex: 1 1 220px;
 }
 
 .upload-copy > ion-icon {
@@ -190,25 +257,27 @@ p {
 }
 
 .upload-copy strong {
-  overflow: hidden;
   color: var(--ink);
   font-size: 15px;
   font-weight: 400;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .upload-copy span {
   color: var(--muted);
   font-size: 13px;
   font-weight: 400;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .upload-actions {
   display: flex;
   align-items: center;
-  flex: 0 0 auto;
+  flex-wrap: wrap;
   gap: 10px;
+  min-width: 0;
 }
 
 .upload-button,
@@ -216,19 +285,25 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  max-width: 100%;
   min-height: 42px;
   padding: 9px 13px;
   border-radius: 9px;
   font: inherit;
   font-size: 14px;
   font-weight: 400;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 
 .upload-button {
+  position: relative;
   color: #ffffff;
   background: var(--blue);
   border: 1px solid var(--blue);
+
   transition:
     background 160ms ease,
     border-color 160ms ease,
@@ -239,6 +314,11 @@ p {
   background: var(--blue-dark);
   border-color: var(--blue-dark);
   transform: translateY(-1px);
+}
+
+.upload-button:focus-within {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
 }
 
 .upload-button.disabled {
@@ -252,7 +332,6 @@ p {
   height: 1px;
   overflow: hidden;
   opacity: 0;
-  pointer-events: none;
 }
 
 .remove-image-button {
@@ -260,6 +339,7 @@ p {
   color: #a42121;
   background: #ffffff;
   border: 1px solid #efc5c5;
+
   transition:
     color 160ms ease,
     background 160ms ease,
@@ -278,6 +358,7 @@ p {
 }
 
 .remove-image-button ion-icon {
+  flex: 0 0 auto;
   font-size: 18px;
 }
 
@@ -295,10 +376,9 @@ p {
   border-radius: 10px;
 }
 
-.field:nth-child(3),
-.field:nth-child(4),
+.field-wide,
 .readonly-info,
-.form-message,
+.profile-form > ion-text,
 .save-button {
   grid-column: 1 / -1;
 }
@@ -309,12 +389,15 @@ p {
 }
 
 .field ion-input {
+  min-width: 0;
+
   --color: var(--ink);
   --placeholder-color: #53657b;
   --placeholder-opacity: 1;
   --highlight-color-focused: var(--blue);
   --highlight-color-valid: var(--blue);
   --highlight-color-invalid: #c62828;
+
   font-weight: 400;
 }
 
@@ -333,7 +416,7 @@ p {
 
 .readonly-info {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   margin-top: 6px;
 }
@@ -352,6 +435,7 @@ p {
   color: var(--muted);
   font-size: 12px;
   font-weight: 400;
+  overflow-wrap: anywhere;
 }
 
 .readonly-info strong {
@@ -377,14 +461,36 @@ p {
 }
 
 .save-button {
+  height: auto;
   min-height: 48px;
   margin-top: 4px;
+  white-space: normal;
+  text-transform: none;
+
   --background: var(--blue);
   --background-hover: var(--blue-dark);
   --background-activated: #0848a5;
   --color: #ffffff;
   --border-radius: 10px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+
   font-weight: 400;
+}
+
+.save-button span,
+.logout-button span {
+  min-width: 0;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.save-button ion-spinner,
+.logout-button ion-spinner {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-inline-end: 10px;
 }
 
 .account-section {
@@ -409,9 +515,16 @@ p {
 }
 
 .logout-button {
+  height: auto;
   min-height: 46px;
   margin: 0;
+  white-space: normal;
+  text-transform: none;
+
   --border-radius: 10px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+
   font-weight: 400;
 }
 
@@ -438,7 +551,9 @@ p {
 .error-state ion-button {
   --color: var(--blue-dark);
   --border-color: var(--blue-dark);
+
   font-weight: 400;
+  text-transform: none;
 }
 
 @media (max-width: 600px) {
@@ -450,9 +565,19 @@ p {
 
   .cover {
     height: 190px;
+    padding: 14px;
   }
 
-  .cover span {
+  .profile-photo-frame {
+    padding: 4px;
+    border-radius: 14px;
+  }
+
+  .profile-photo {
+    border-radius: 7px;
+  }
+
+  .profile-initials {
     font-size: 60px;
   }
 
@@ -464,6 +589,10 @@ p {
   .upload-panel {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .upload-copy {
+    flex: initial;
   }
 
   .upload-actions {
@@ -479,18 +608,6 @@ p {
   .profile-form {
     grid-template-columns: 1fr;
   }
-
-  .field:nth-child(3),
-  .field:nth-child(4),
-  .readonly-info,
-  .form-message,
-  .save-button {
-    grid-column: auto;
-  }
-
-  .readonly-info {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -501,5 +618,113 @@ p {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
+  }
+
+  .back-button:hover,
+  .upload-button:hover:not(.disabled) {
+    transform: none;
+  }
+}
+
+/* Foto de perfil circular */
+
+.cover {
+  display: grid;
+  place-items: center;
+
+  width: 100%;
+  height: auto;
+  padding: 28px 20px 0;
+
+  overflow: visible;
+  background: #ffffff;
+  border-bottom: 0;
+}
+
+.profile-photo-frame {
+  display: block;
+
+  width: 112px;
+  height: 112px;
+  min-width: 112px;
+  min-height: 112px;
+  padding: 4px;
+
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 50%;
+}
+
+.profile-photo {
+  display: grid;
+  place-items: center;
+
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
+  overflow: hidden;
+  color: var(--blue);
+  background: var(--blue-image);
+  border-radius: 50%;
+}
+
+.profile-photo img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
+}
+
+.profile-initials {
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.profile-title {
+  padding: 20px 28px 28px;
+  text-align: center;
+}
+
+.profile-title h1 {
+  margin: 0;
+  font-size: clamp(25px, 3vw, 34px);
+  line-height: 1.2;
+}
+
+@media (max-width: 600px) {
+  .cover {
+    height: auto;
+    padding: 24px 20px 0;
+  }
+
+  .profile-photo-frame {
+    width: 96px;
+    height: 96px;
+    min-width: 96px;
+    min-height: 96px;
+    padding: 4px;
+    border-radius: 50%;
+  }
+
+  .profile-photo {
+    border-radius: 50%;
+  }
+
+  .profile-initials {
+    font-size: 30px;
+  }
+
+  .profile-title {
+    padding: 18px 20px 24px;
+  }
+
+  .profile-title h1 {
+    font-size: 26px;
   }
 }

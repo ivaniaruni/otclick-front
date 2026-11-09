@@ -1,35 +1,80 @@
 <ion-tabs>
   <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="home" href="/tabs/home">
+    <ion-tab-button
+      tab="home"
+      href="/tabs/home"
+      [attr.aria-label]="'TAB_INICIO' | translate"
+    >
       <ion-icon
         name="home-outline"
         aria-hidden="true"
       ></ion-icon>
-      <ion-label>Inicio</ion-label>
+
+      <ion-label>
+        {{ 'TAB_INICIO' | translate }}
+      </ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="empresas" href="/tabs/empresas">
+    <ion-tab-button
+      tab="empresas"
+      href="/tabs/empresas"
+      [attr.aria-label]="'TAB_EMPRESAS' | translate"
+    >
       <ion-icon
         name="storefront-outline"
         aria-hidden="true"
       ></ion-icon>
-      <ion-label>Empresas</ion-label>
+
+      <ion-label>
+        {{ 'TAB_EMPRESAS' | translate }}
+      </ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="citas" href="/tabs/citas">
+    <ion-tab-button
+      tab="citas"
+      href="/tabs/citas"
+      [attr.aria-label]="'TAB_CITAS' | translate"
+    >
       <ion-icon
         name="calendar-outline"
         aria-hidden="true"
       ></ion-icon>
-      <ion-label>Mis citas</ion-label>
+
+      <ion-label>
+        {{ 'TAB_CITAS' | translate }}
+      </ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="mensajes" href="/tabs/mensajes">
+    <ion-tab-button
+      tab="mensajes"
+      href="/tabs/mensajes"
+      [attr.aria-label]="
+        pendientes.total() > 0
+          ? (
+              'TAB_MENSAJES_PENDIENTES'
+                | translate: {
+                    cantidad: pendientes.total()
+                  }
+            )
+          : ('TAB_MENSAJES' | translate)
+      "
+    >
       <ion-icon
         name="chatbubbles-outline"
         aria-hidden="true"
       ></ion-icon>
-      <ion-label>Mensajes</ion-label>
+
+      <ion-label>
+        {{ 'TAB_MENSAJES' | translate }}
+      </ion-label>
+
+      <ion-badge
+        class="unread-badge"
+        *ngIf="pendientes.total() > 0"
+        aria-hidden="true"
+      >
+        {{ pendientes.etiqueta() }}
+      </ion-badge>
     </ion-tab-button>
   </ion-tab-bar>
 </ion-tabs>

@@ -1,6 +1,9 @@
 <ion-content>
   <main>
-    <section class="welcome-band" aria-labelledby="empresas-title">
+    <section
+      class="welcome-band"
+      aria-labelledby="empresas-title"
+    >
       <div class="content-width">
         <div class="top-row">
           <img
@@ -11,68 +14,82 @@
             height="72"
           >
 
-          <button
-            class="profile-access"
-            type="button"
-            (click)="abrirPerfil()"
-            aria-label="Abrir mi perfil"
-          >
-            <span class="profile-copy">
-              <small>
-                Hola{{ usuario?.nombre ? ',' : '' }}
-              </small>
+          <div class="header-actions">
+            <app-selector-idioma></app-selector-idioma>
 
-              <strong>
-                {{ usuario?.nombre || 'Mi perfil' }}
-              </strong>
-            </span>
-
-            <span
-              class="profile-avatar"
-              [class.has-photo]="fotoPerfil && !avatarFallido"
-              aria-hidden="true"
+            <button
+              class="profile-access"
+              type="button"
+              (click)="abrirPerfil()"
+              [attr.aria-label]="'PERFIL_ABRIR' | translate"
             >
-              <img
-                *ngIf="
-                  fotoPerfil && !avatarFallido;
-                  else inicialAvatar
-                "
-                [src]="fotoPerfil"
-                alt=""
-                (error)="marcarAvatarFallido()"
-              >
+              <span class="profile-copy">
+                <small>
+                  {{ 'SALUDO' | translate }}{{ usuario?.nombre ? ',' : '' }}
+                </small>
 
-              <ng-template #inicialAvatar>
-                {{ inicialPerfil }}
-              </ng-template>
-            </span>
-          </button>
+                <strong>
+                  {{ usuario?.nombre || ('PERFIL_NOMBRE' | translate) }}
+                </strong>
+              </span>
+
+              <span
+                class="profile-avatar"
+                [class.has-photo]="fotoPerfil && !avatarFallido"
+                [attr.data-profile-role]="usuario?.rol"
+                aria-hidden="true"
+              >
+                <img
+                  *ngIf="
+                    fotoPerfil && !avatarFallido;
+                    else inicialAvatar
+                  "
+                  [src]="fotoPerfil"
+                  alt=""
+                  (error)="marcarAvatarFallido()"
+                >
+
+                <ng-template #inicialAvatar>
+                  {{ inicialPerfil }}
+                </ng-template>
+              </span>
+            </button>
+          </div>
         </div>
 
         <div class="welcome-layout">
           <div>
-            <p class="eyebrow">Explora OtClick</p>
+            <p class="eyebrow">
+              {{ 'EMPRESAS.EYEBROW' | translate }}
+            </p>
 
-            <h1 id="empresas-title">Empresas</h1>
+            <h1 id="empresas-title">
+              {{ 'EMPRESAS.TITULO' | translate }}
+            </h1>
 
             <p class="intro">
-              Encuentra negocios y guarda los que más te interesen.
+              {{ 'EMPRESAS.INTRO' | translate }}
             </p>
           </div>
 
-          <form class="search" (ngSubmit)="buscar()">
+          <form
+            class="search"
+            (ngSubmit)="buscar()"
+          >
             <ion-input
               name="busqueda"
-              label="Buscar empresas"
+              [label]="'EMPRESAS.BUSCAR' | translate"
               labelPlacement="stacked"
-              placeholder="Nombre o ubicación"
+              [placeholder]="
+                'EMPRESAS.BUSQUEDA_PLACEHOLDER' | translate
+              "
               [(ngModel)]="busqueda"
               [clearInput]="true"
             ></ion-input>
 
             <ion-button
               type="submit"
-              aria-label="Buscar empresas"
+              [attr.aria-label]="'EMPRESAS.BUSCAR' | translate"
             >
               <ion-icon
                 name="search-outline"
@@ -84,16 +101,25 @@
       </div>
     </section>
 
-    <section class="companies-band" aria-labelledby="listado-title">
+    <section
+      class="companies-band"
+      aria-labelledby="listado-title"
+    >
       <div class="content-width">
-        <div class="view-switch" aria-label="Qué empresas mostrar">
+        <div
+          class="view-switch"
+          role="group"
+          [attr.aria-label]="
+            'EMPRESAS.VISTAS_LABEL' | translate
+          "
+        >
           <button
             type="button"
             [class.active]="vista === 'todas'"
             [attr.aria-pressed]="vista === 'todas'"
             (click)="seleccionarVista('todas')"
           >
-            Todas las empresas
+            {{ 'EMPRESAS.TODAS' | translate }}
           </button>
 
           <button
@@ -102,35 +128,52 @@
             [attr.aria-pressed]="vista === 'seguidas'"
             (click)="seleccionarVista('seguidas')"
           >
-            Mis empresas
+            {{ 'EMPRESAS.MIS_EMPRESAS' | translate }}
           </button>
         </div>
 
         <div class="section-title">
           <div>
             <p class="eyebrow">
-              {{ vista === 'todas' ? 'Directorio' : 'Empresas que sigues' }}
+              {{
+                (
+                  vista === 'todas'
+                    ? 'EMPRESAS.DIRECTORIO'
+                    : 'EMPRESAS.EMPRESAS_SEGUIDAS'
+                ) | translate
+              }}
             </p>
 
             <h2 id="listado-title">
               {{
-                terminoBuscado
-                  ? 'Resultados'
-                  : vista === 'todas'
-                    ? 'Todas las empresas'
-                    : 'Mis empresas'
+                (
+                  terminoBuscado
+                    ? 'EMPRESAS.RESULTADOS'
+                    : vista === 'todas'
+                      ? 'EMPRESAS.TODAS'
+                      : 'EMPRESAS.MIS_EMPRESAS'
+                ) | translate
               }}
             </h2>
           </div>
 
-          <span class="result-count" *ngIf="!cargando && !error">
-            {{ resultados.length }}
-            {{ resultados.length === 1 ? 'empresa' : 'empresas' }}
+          <span
+            class="result-count"
+            *ngIf="!cargando && !error"
+          >
+            {{
+              'EMPRESAS.CONTADOR'
+                | translate: { cantidad: resultados.length }
+            }}
           </span>
         </div>
 
-        <div class="state-message" *ngIf="cargando" role="status">
-          Cargando empresas…
+        <div
+          class="state-message"
+          *ngIf="cargando"
+          role="status"
+        >
+          {{ 'EMPRESAS.CARGANDO' | translate }}
         </div>
 
         <div
@@ -138,10 +181,15 @@
           *ngIf="error"
           role="alert"
         >
-          <p>{{ error }}</p>
+          <p>
+            {{ error | translate }}
+          </p>
 
-          <ion-button fill="outline" (click)="cargar()">
-            Reintentar
+          <ion-button
+            fill="outline"
+            (click)="cargar()"
+          >
+            {{ 'EMPRESAS.REINTENTAR' | translate }}
           </ion-button>
         </div>
 
@@ -150,7 +198,12 @@
           *ngIf="errorSeguimiento"
           role="alert"
         >
-          {{ errorSeguimiento }}
+          {{
+            errorSeguimiento
+              | translate: {
+                  nombre: nombreErrorSeguimiento
+                }
+          }}
         </p>
 
         <div
@@ -159,21 +212,25 @@
         >
           <h3>
             {{
-              terminoBuscado
-                ? 'No encontramos resultados'
-                : vista === 'seguidas'
-                  ? 'Aún no sigues ninguna empresa'
-                  : 'Todavía no hay empresas'
+              (
+                terminoBuscado
+                  ? 'EMPRESAS.VACIO_BUSQUEDA_TITULO'
+                  : vista === 'seguidas'
+                    ? 'EMPRESAS.VACIO_SEGUIDAS_TITULO'
+                    : 'EMPRESAS.VACIO_TODAS_TITULO'
+              ) | translate
             }}
           </h3>
 
           <p>
             {{
-              terminoBuscado
-                ? 'Prueba con otro nombre o ubicación.'
-                : vista === 'seguidas'
-                  ? 'Las empresas que sigas aparecerán aquí.'
-                  : 'Las empresas que se incorporen aparecerán aquí.'
+              (
+                terminoBuscado
+                  ? 'EMPRESAS.VACIO_BUSQUEDA_TEXTO'
+                  : vista === 'seguidas'
+                    ? 'EMPRESAS.VACIO_SEGUIDAS_TEXTO'
+                    : 'EMPRESAS.VACIO_TODAS_TEXTO'
+              ) | translate
             }}
           </p>
 
@@ -183,7 +240,7 @@
             *ngIf="vista === 'seguidas' && !terminoBuscado"
             (click)="seleccionarVista('todas')"
           >
-            Explorar todas las empresas
+            {{ 'EMPRESAS.EXPLORAR_TODAS' | translate }}
           </button>
         </div>
 
@@ -198,13 +255,19 @@
             <a
               class="company-card-link"
               [routerLink]="['/tabs/empresas', empresa.id]"
-              [attr.aria-label]="'Ver empresa ' + empresa.nombre"
+              [attr.aria-label]="
+                'EMPRESAS.VER_EMPRESA'
+                  | translate: { nombre: empresa.nombre }
+              "
             >
               <span class="company-picture">
                 <img
                   *ngIf="empresa.logoUrl; else initial"
                   [src]="empresa.logoUrl"
-                  [alt]="'Logo de ' + empresa.nombre"
+                  [alt]="
+                    'EMPRESAS.LOGO_EMPRESA'
+                      | translate: { nombre: empresa.nombre }
+                  "
                   loading="lazy"
                 >
 
@@ -216,10 +279,15 @@
               </span>
 
               <span class="company-copy">
-                <strong>{{ empresa.nombre }}</strong>
+                <strong>
+                  {{ empresa.nombre }}
+                </strong>
 
                 <small>
-                  {{ empresa.direccion || 'Conoce este negocio' }}
+                  {{
+                    empresa.direccion ||
+                    ('EMPRESAS.CONOCER_NEGOCIO' | translate)
+                  }}
                 </small>
               </span>
             </a>
@@ -229,9 +297,11 @@
               type="button"
               [disabled]="corazonesOcupados.has(empresa.id)"
               [attr.aria-label]="
-                (idsSeguidas.has(empresa.id)
-                  ? 'Dejar de seguir a '
-                  : 'Seguir a ') + empresa.nombre
+                (
+                  idsSeguidas.has(empresa.id)
+                    ? 'EMPRESAS.DEJAR_SEGUIR'
+                    : 'EMPRESAS.SEGUIR'
+                ) | translate: { nombre: empresa.nombre }
               "
               [attr.aria-pressed]="idsSeguidas.has(empresa.id)"
               (click)="alternarSeguimiento(empresa)"

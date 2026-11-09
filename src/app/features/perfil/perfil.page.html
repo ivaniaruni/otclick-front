@@ -3,7 +3,7 @@
     <a
       class="back-button"
       routerLink="/tabs/home"
-      aria-label="Volver al inicio"
+      [attr.aria-label]="'PERFIL.VOLVER' | translate"
     >
       <ion-icon
         name="arrow-back-outline"
@@ -16,8 +16,14 @@
       *ngIf="cargando"
       role="status"
     >
-      <ion-spinner name="crescent"></ion-spinner>
-      <p>Cargando perfil…</p>
+      <ion-spinner
+        name="crescent"
+        aria-hidden="true"
+      ></ion-spinner>
+
+      <p>
+        {{ 'PERFIL.CARGANDO' | translate }}
+      </p>
     </div>
 
     <div
@@ -25,13 +31,15 @@
       *ngIf="!cargando && error && !perfil"
       role="alert"
     >
-      <p>{{ error }}</p>
+      <p>
+        {{ error | translate }}
+      </p>
 
       <ion-button
         fill="outline"
         (click)="cargarPerfil()"
       >
-        Reintentar
+        {{ 'PERFIL.REINTENTAR' | translate }}
       </ion-button>
     </div>
 
@@ -41,29 +49,40 @@
     >
       <header class="profile-header">
         <div class="cover">
-          <img
-            *ngIf="imagenMostrada; else profileInitials"
-            [src]="imagenMostrada"
-            alt="Foto de perfil"
+          <div
+            class="profile-photo-frame"
+            [ngClass]="claseMarco"
           >
+            <div class="profile-photo">
+              <img
+                *ngIf="imagenMostrada; else profileInitials"
+                [src]="imagenMostrada"
+                [alt]="'PERFIL.FOTO_ALT' | translate"
+              >
 
-          <ng-template #profileInitials>
-            <span aria-hidden="true">
-              {{ iniciales }}
-            </span>
-          </ng-template>
+              <ng-template #profileInitials>
+                <span
+                  class="profile-initials"
+                  aria-hidden="true"
+                >
+                  {{ iniciales }}
+                </span>
+              </ng-template>
+            </div>
+          </div>
         </div>
 
         <div class="profile-title">
-          <p class="eyebrow">Tu perfil en OtClick</p>
+          <p class="eyebrow">
+            {{ 'PERFIL.EYEBROW' | translate }}
+          </p>
 
           <h1>
-            {{ nombreCompleto || 'Mi perfil' }}
+            {{
+              nombreCompleto ||
+              ('PERFIL.TITULO' | translate)
+            }}
           </h1>
-
-          <p class="profile-role">
-            {{ perfil.rol }}
-          </p>
         </div>
       </header>
 
@@ -73,8 +92,13 @@
       >
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Imagen de perfil</p>
-            <h2 id="foto-title">Tu foto</h2>
+            <p class="eyebrow">
+              {{ 'PERFIL.IMAGEN_PERFIL' | translate }}
+            </p>
+
+            <h2 id="foto-title">
+              {{ 'PERFIL.TU_FOTO' | translate }}
+            </h2>
           </div>
         </div>
 
@@ -90,12 +114,15 @@
                 {{
                   archivoSeleccionado
                     ? archivoSeleccionado.name
-                    : 'Selecciona una imagen desde tu dispositivo'
+                    : (
+                        'PERFIL.SELECCIONAR_DESCRIPCION'
+                          | translate
+                      )
                 }}
               </strong>
 
               <span>
-                JPG, PNG o WEBP · Máximo 5 MB
+                {{ 'PERFIL.FORMATOS' | translate }}
               </span>
             </div>
           </div>
@@ -103,14 +130,17 @@
           <div class="upload-actions">
             <label
               class="upload-button"
-              [class.disabled]="guardando"
+              [class.disabled]="guardando || cerrandoSesion"
             >
-              Seleccionar imagen
+              {{ 'PERFIL.SELECCIONAR' | translate }}
 
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                [disabled]="guardando"
+                [attr.aria-label]="
+                  'PERFIL.SELECCIONAR' | translate
+                "
+                [disabled]="guardando || cerrandoSesion"
                 (change)="seleccionarArchivo($event)"
               >
             </label>
@@ -119,14 +149,15 @@
               class="remove-image-button"
               type="button"
               *ngIf="archivoSeleccionado"
-              [disabled]="guardando"
+              [disabled]="guardando || cerrandoSesion"
               (click)="quitarImagenSeleccionada()"
             >
               <ion-icon
                 name="close-outline"
                 aria-hidden="true"
               ></ion-icon>
-              Quitar selección
+
+              {{ 'PERFIL.QUITAR_SELECCION' | translate }}
             </button>
           </div>
         </div>
@@ -138,23 +169,30 @@
       >
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Información personal</p>
-            <h2 id="datos-title">Tus datos</h2>
+            <p class="eyebrow">
+              {{ 'PERFIL.INFORMACION' | translate }}
+            </p>
+
+            <h2 id="datos-title">
+              {{ 'PERFIL.DATOS' | translate }}
+            </h2>
           </div>
         </div>
 
         <form
           class="profile-form"
           #profileForm="ngForm"
-          (ngSubmit)="guardar()"
+          (ngSubmit)="guardar(profileForm)"
+          [attr.aria-busy]="guardando"
         >
           <div class="field">
             <ion-input
               name="nombre"
-              label="Nombre"
+              [label]="'PERFIL.NOMBRE' | translate"
               labelPlacement="stacked"
               autocomplete="given-name"
               [(ngModel)]="nombre"
+              [disabled]="guardando || cerrandoSesion"
               required
               maxlength="100"
             ></ion-input>
@@ -163,54 +201,57 @@
           <div class="field">
             <ion-input
               name="apellido"
-              label="Apellido"
+              [label]="'PERFIL.APELLIDO' | translate"
               labelPlacement="stacked"
               autocomplete="family-name"
               [(ngModel)]="apellido"
+              [disabled]="guardando || cerrandoSesion"
               maxlength="100"
             ></ion-input>
           </div>
 
-          <div class="field">
+          <div class="field field-wide">
             <ion-input
               name="telefono"
-              label="Teléfono"
+              [label]="'PERFIL.TELEFONO' | translate"
               labelPlacement="stacked"
               type="tel"
               inputmode="tel"
               autocomplete="tel"
               [(ngModel)]="telefono"
+              [disabled]="guardando || cerrandoSesion"
               maxlength="30"
             ></ion-input>
           </div>
 
-          <div class="field">
+          <div class="field field-wide">
             <ion-input
               name="avatarUrl"
-              label="URL de imagen externa"
+              [label]="'PERFIL.URL_IMAGEN' | translate"
               labelPlacement="stacked"
               type="url"
               inputmode="url"
               autocomplete="url"
               placeholder="https://..."
               [(ngModel)]="avatarUrl"
+              [disabled]="guardando || cerrandoSesion"
               maxlength="500"
             ></ion-input>
 
             <p class="field-help">
-              Opcional. Si seleccionas un archivo, se usará esa imagen.
+              {{ 'PERFIL.URL_AYUDA' | translate }}
             </p>
           </div>
 
           <div class="readonly-info">
             <div>
-              <span>Correo electrónico</span>
-              <strong>{{ perfil.email }}</strong>
-            </div>
+              <span>
+                {{ 'PERFIL.EMAIL' | translate }}
+              </span>
 
-            <div>
-              <span>Tipo de cuenta</span>
-              <strong>{{ perfil.rol }}</strong>
+              <strong>
+                {{ perfil.email }}
+              </strong>
             </div>
           </div>
 
@@ -222,7 +263,7 @@
               class="form-message error"
               role="alert"
             >
-              {{ error }}
+              {{ error | translate }}
             </p>
           </ion-text>
 
@@ -234,7 +275,7 @@
               class="form-message success"
               role="status"
             >
-              {{ mensaje }}
+              {{ mensaje | translate }}
             </p>
           </ion-text>
 
@@ -242,11 +283,16 @@
             class="save-button"
             expand="block"
             type="submit"
-            [disabled]="profileForm.invalid || guardando"
+            [disabled]="
+              profileForm.invalid ||
+              guardando ||
+              cerrandoSesion
+            "
           >
             <ion-spinner
               *ngIf="guardando"
               name="crescent"
+              aria-hidden="true"
             ></ion-spinner>
 
             <ion-icon
@@ -257,7 +303,13 @@
             ></ion-icon>
 
             <span>
-              {{ guardando ? 'Guardando…' : 'Guardar cambios' }}
+              {{
+                (
+                  guardando
+                    ? 'PERFIL.GUARDANDO'
+                    : 'PERFIL.GUARDAR'
+                ) | translate
+              }}
             </span>
           </ion-button>
         </form>
@@ -269,14 +321,19 @@
       >
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Sesión</p>
-            <h2 id="account-title">Cuenta</h2>
+            <p class="eyebrow">
+              {{ 'PERFIL.SESION' | translate }}
+            </p>
+
+            <h2 id="account-title">
+              {{ 'PERFIL.CUENTA' | translate }}
+            </h2>
           </div>
         </div>
 
         <p class="account-text">
-          Tu sesión está activa como
-          <strong>{{ perfil.email }}</strong>.
+          {{ 'PERFIL.SESION_ACTIVA' | translate }}:
+          <strong>{{ perfil.email }}</strong>
         </p>
 
         <ion-button
@@ -284,12 +341,13 @@
           expand="block"
           fill="outline"
           color="danger"
-          [disabled]="cerrandoSesion"
+          [disabled]="cerrandoSesion || guardando"
           (click)="cerrarSesion()"
         >
           <ion-spinner
             *ngIf="cerrandoSesion"
             name="crescent"
+            aria-hidden="true"
           ></ion-spinner>
 
           <ion-icon
@@ -301,9 +359,11 @@
 
           <span>
             {{
-              cerrandoSesion
-                ? 'Cerrando sesión…'
-                : 'Cerrar sesión'
+              (
+                cerrandoSesion
+                  ? 'PERFIL.CERRANDO_SESION'
+                  : 'PERFIL.CERRAR_SESION'
+              ) | translate
             }}
           </span>
         </ion-button>

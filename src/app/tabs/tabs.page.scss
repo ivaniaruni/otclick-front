@@ -16,13 +16,19 @@ ion-tab-bar {
   justify-content: center;
   gap: 4px;
 
-  height: calc(64px + var(--ion-safe-area-bottom, 0px));
-  min-height: calc(64px + var(--ion-safe-area-bottom, 0px));
+  height: calc(72px + var(--ion-safe-area-bottom, 0px));
+  min-height: calc(72px + var(--ion-safe-area-bottom, 0px));
 
   padding-top: 5px;
-  padding-right: calc(8px + var(--ion-safe-area-right, 0px));
-  padding-bottom: calc(5px + var(--ion-safe-area-bottom, 0px));
-  padding-left: calc(8px + var(--ion-safe-area-left, 0px));
+
+  padding-right:
+    calc(8px + var(--ion-safe-area-right, 0px));
+
+  padding-bottom:
+    calc(5px + var(--ion-safe-area-bottom, 0px));
+
+  padding-left:
+    calc(8px + var(--ion-safe-area-left, 0px));
 
   --background: #ffffff;
   --border: 1px solid var(--tabs-border);
@@ -39,8 +45,8 @@ ion-tab-button {
   min-width: 0;
   max-width: 200px;
 
-  height: 54px;
-  min-height: 54px;
+  height: 62px;
+  min-height: 62px;
   margin: 0;
 
   overflow: hidden;
@@ -52,10 +58,10 @@ ion-tab-button {
   --color-selected: var(--tabs-blue);
   --ripple-color: rgba(5, 98, 212, 0.12);
 
-  --padding-top: 6px;
-  --padding-bottom: 6px;
-  --padding-start: 2px;
-  --padding-end: 2px;
+  --padding-top: 4px;
+  --padding-bottom: 4px;
+  --padding-start: 3px;
+  --padding-end: 3px;
 
   transition:
     background-color 160ms ease,
@@ -72,19 +78,34 @@ ion-tab-button.tab-selected {
 
 ion-tab-button ion-icon {
   flex-shrink: 0;
-  margin: 0 0 3px;
-  font-size: 23px;
+  margin: 0 0 2px;
+  font-size: 22px;
 }
 
-/* Textos */
+/* Etiquetas */
 
 ion-tab-button ion-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 28px;
   margin: 0;
+  padding: 0 2px;
+
   font-size: 12px;
   font-weight: 400;
-  line-height: 1.2;
+  line-height: 1.15;
   letter-spacing: 0;
-  white-space: nowrap;
+  text-align: center;
+  text-transform: none;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* Foco de teclado */
@@ -92,6 +113,33 @@ ion-tab-button ion-label {
 ion-tab-button:focus-visible {
   outline: 2px solid var(--tabs-blue);
   outline-offset: -3px;
+}
+
+
+ion-tab-button .unread-badge {
+  position: absolute;
+  top: 2px;
+  left: calc(50% + 7px);
+  z-index: 2;
+
+  display: grid;
+  place-items: center;
+
+  min-width: 19px;
+  height: 19px;
+  margin: 0;
+  padding: 0 5px;
+
+  --background: #c6283d;
+  --color: #ffffff;
+
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  pointer-events: none;
 }
 
 /* Pantallas estrechas */
@@ -107,8 +155,9 @@ ion-tab-button:focus-visible {
       calc(4px + var(--ion-safe-area-left, 0px));
   }
 
-  ion-tab-button ion-icon {
-    font-size: 22px;
+  ion-tab-button {
+    --padding-start: 2px;
+    --padding-end: 2px;
   }
 
   ion-tab-button ion-label {

@@ -3,7 +3,7 @@
     <a
       class="back-button"
       [routerLink]="['/tabs/empresas', empresaId]"
-      aria-label="Volver a la empresa"
+      [attr.aria-label]="'RESERVA.VOLVER' | translate"
     >
       <ion-icon
         name="arrow-back-outline"
@@ -16,8 +16,12 @@
       *ngIf="cargando"
       role="status"
     >
-      <ion-spinner name="crescent"></ion-spinner>
-      <p>Cargando opciones de reserva…</p>
+      <ion-spinner
+        name="crescent"
+        aria-hidden="true"
+      ></ion-spinner>
+
+      <p>{{ 'RESERVA.CARGANDO' | translate }}</p>
     </div>
 
     <div
@@ -25,7 +29,7 @@
       *ngIf="!cargando && error && !empresa"
       role="alert"
     >
-      <p>{{ error }}</p>
+      <p>{{ error | translate }}</p>
     </div>
 
     <article
@@ -33,20 +37,25 @@
       *ngIf="!cargando && empresa"
     >
       <header class="booking-header">
-        <p class="eyebrow">Reserva en OtClick</p>
+        <p class="eyebrow">
+          {{ 'RESERVA.EYEBROW' | translate }}
+        </p>
 
         <h1>{{ empresa.nombre }}</h1>
 
         <p class="intro">
-          Selecciona un servicio, un profesional y una hora disponible.
+          {{ 'RESERVA.INTRO' | translate }}
         </p>
       </header>
 
       <section class="section">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Paso 1</p>
-            <h2>Servicio</h2>
+            <p class="eyebrow">
+              {{ 'RESERVA.PASO' | translate: { numero: 1 } }}
+            </p>
+
+            <h2>{{ 'RESERVA.SERVICIO' | translate }}</h2>
           </div>
         </div>
 
@@ -54,11 +63,8 @@
           class="empty-state"
           *ngIf="!serviciosFiltrados.length"
         >
-          <h3>No hay servicios para esta selección</h3>
-          <p>
-            Esta empresa todavía no ha publicado servicios disponibles
-            para el profesional seleccionado.
-          </p>
+          <h3>{{ 'RESERVA.SIN_SERVICIOS_TITULO' | translate }}</h3>
+          <p>{{ 'RESERVA.SIN_SERVICIOS_TEXTO' | translate }}</p>
         </div>
 
         <div
@@ -71,15 +77,29 @@
             *ngFor="let servicio of serviciosFiltrados"
             [class.selected]="servicioSeleccionado?.id === servicio.id"
             [attr.aria-pressed]="servicioSeleccionado?.id === servicio.id"
+            [disabled]="
+              confirmando ||
+              solicitudEnviada ||
+              cargandoCalendario ||
+              cargandoSlots
+            "
             (click)="seleccionarServicio(servicio)"
           >
             <span class="option-copy">
               <strong>{{ servicio.nombre }}</strong>
-              <small>{{ servicio.duracionMinutos }} min</small>
+
+              <small>
+                {{
+                  'RESERVA.DURACION_VALOR'
+                    | translate: {
+                        minutos: servicio.duracionMinutos
+                      }
+                }}
+              </small>
             </span>
 
             <span class="option-price">
-              {{ servicio.precio | number: '1.2-2' }} €
+              {{ precioFormateado(servicio.precio) }}
             </span>
           </button>
         </div>
@@ -88,8 +108,11 @@
       <section class="section">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Paso 2</p>
-            <h2>Profesional</h2>
+            <p class="eyebrow">
+              {{ 'RESERVA.PASO' | translate: { numero: 2 } }}
+            </p>
+
+            <h2>{{ 'RESERVA.PROFESIONAL' | translate }}</h2>
           </div>
         </div>
 
@@ -97,9 +120,12 @@
           class="empty-state"
           *ngIf="!trabajadoresFiltrados.length"
         >
-          <h3>No hay profesionales disponibles</h3>
+          <h3>
+            {{ 'RESERVA.SIN_PROFESIONALES_TITULO' | translate }}
+          </h3>
+
           <p>
-            No hay profesionales asociados al servicio seleccionado.
+            {{ 'RESERVA.SIN_PROFESIONALES_TEXTO' | translate }}
           </p>
         </div>
 
@@ -113,6 +139,12 @@
             *ngFor="let trabajador of trabajadoresFiltrados"
             [class.selected]="trabajadorSeleccionado?.id === trabajador.id"
             [attr.aria-pressed]="trabajadorSeleccionado?.id === trabajador.id"
+            [disabled]="
+              confirmando ||
+              solicitudEnviada ||
+              cargandoCalendario ||
+              cargandoSlots
+            "
             (click)="seleccionarTrabajador(trabajador)"
           >
             <span class="worker-avatar">
@@ -122,7 +154,10 @@
                   !imagenesTrabajadorFallidas.has(trabajador.id)
                 "
                 [src]="trabajador.avatarUrl"
-                [alt]="trabajador.nombreCompleto || 'Profesional'"
+                [alt]="
+                  trabajador.nombreCompleto ||
+                  ('RESERVA.PROFESIONAL' | translate)
+                "
                 loading="lazy"
                 (error)="marcarImagenTrabajadorFallida(trabajador.id)"
               >
@@ -134,19 +169,25 @@
                 "
                 aria-hidden="true"
               >
-                {{ trabajador.nombreCompleto?.charAt(0)?.toUpperCase() || '?' }}
+                {{
+                  trabajador.nombreCompleto?.charAt(0)?.toUpperCase() ||
+                  '?'
+                }}
               </span>
             </span>
 
             <span class="worker-copy">
               <strong>
-                {{ trabajador.nombreCompleto || 'Profesional' }}
+                {{
+                  trabajador.nombreCompleto ||
+                  ('RESERVA.PROFESIONAL' | translate)
+                }}
               </strong>
 
               <small>
                 {{
                   trabajador.especialidad ||
-                  'Profesional de la empresa'
+                  ('RESERVA.PROFESIONAL_EMPRESA' | translate)
                 }}
               </small>
             </span>
@@ -160,18 +201,28 @@
       >
         <div class="section-heading calendar-heading">
           <div>
-            <p class="eyebrow">Paso 3</p>
-            <h2>Fechas y horas disponibles</h2>
+            <p class="eyebrow">
+              {{ 'RESERVA.PASO' | translate: { numero: 3 } }}
+            </p>
+
+            <h2>{{ 'RESERVA.FECHAS_HORAS' | translate }}</h2>
+
             <p class="calendar-instruction">
-              Los días marcados en azul tienen al menos una hora libre.
+              {{ 'RESERVA.CALENDARIO_AYUDA' | translate }}
             </p>
           </div>
 
           <div class="month-navigation">
             <button
               type="button"
-              aria-label="Mes anterior"
-              [disabled]="!puedeIrAlMesAnterior || cargandoCalendario"
+              [attr.aria-label]="'RESERVA.MES_ANTERIOR' | translate"
+              [disabled]="
+                !puedeIrAlMesAnterior ||
+                cargandoCalendario ||
+                cargandoSlots ||
+                confirmando ||
+                solicitudEnviada
+              "
               (click)="irMesAnterior()"
             >
               <ion-icon
@@ -184,8 +235,14 @@
 
             <button
               type="button"
-              aria-label="Mes siguiente"
-              [disabled]="!puedeIrAlMesSiguiente || cargandoCalendario"
+              [attr.aria-label]="'RESERVA.MES_SIGUIENTE' | translate"
+              [disabled]="
+                !puedeIrAlMesSiguiente ||
+                cargandoCalendario ||
+                cargandoSlots ||
+                confirmando ||
+                solicitudEnviada
+              "
               (click)="irMesSiguiente()"
             >
               <ion-icon
@@ -201,8 +258,12 @@
           *ngIf="cargandoCalendario"
           role="status"
         >
-          <ion-spinner name="crescent"></ion-spinner>
-          <span>Buscando días con disponibilidad…</span>
+          <ion-spinner
+            name="crescent"
+            aria-hidden="true"
+          ></ion-spinner>
+
+          <span>{{ 'RESERVA.BUSCANDO_DIAS' | translate }}</span>
         </div>
 
         <div class="calendar">
@@ -210,13 +271,9 @@
             class="calendar-weekdays"
             aria-hidden="true"
           >
-            <span>L</span>
-            <span>M</span>
-            <span>X</span>
-            <span>J</span>
-            <span>V</span>
-            <span>S</span>
-            <span>D</span>
+            <span *ngFor="let diaSemana of diasSemana">
+              {{ diaSemana }}
+            </span>
           </div>
 
           <div class="calendar-days">
@@ -236,15 +293,18 @@
                 dia.pasado ||
                 dia.fueraDeVentana ||
                 dia.cargando ||
-                !dia.tieneDisponibilidad
+                !dia.tieneDisponibilidad ||
+                cargandoCalendario ||
+                cargandoSlots ||
+                confirmando ||
+                solicitudEnviada
               "
               [attr.aria-label]="
-                dia.fecha +
                 (
                   dia.tieneDisponibilidad
-                    ? ', hay horas disponibles'
-                    : ', sin horas disponibles'
-                )
+                    ? 'RESERVA.DIA_DISPONIBLE'
+                    : 'RESERVA.DIA_SIN_DISPONIBILIDAD'
+                ) | translate: { fecha: fechaLegible(dia.fecha) }
               "
               [attr.aria-pressed]="esFechaSeleccionada(dia.fecha)"
               (click)="seleccionarFecha(dia.fecha)"
@@ -260,6 +320,7 @@
               <ion-spinner
                 *ngIf="dia.cargando"
                 name="crescent"
+                aria-hidden="true"
               ></ion-spinner>
             </button>
           </div>
@@ -272,11 +333,11 @@
           <h3>{{ fechaLegible(fechaSeleccionada) }}</h3>
 
           <span>
-            {{ disponibilidad?.slots?.length || 0 }}
             {{
-              disponibilidad?.slots?.length === 1
-                ? 'hora libre'
-                : 'horas libres'
+              'RESERVA.HORAS_DISPONIBLES'
+                | translate: {
+                    cantidad: disponibilidad?.slots?.length || 0
+                  }
             }}
           </span>
         </div>
@@ -286,8 +347,12 @@
           *ngIf="cargandoSlots"
           role="status"
         >
-          <ion-spinner name="crescent"></ion-spinner>
-          <span>Buscando horas libres…</span>
+          <ion-spinner
+            name="crescent"
+            aria-hidden="true"
+          ></ion-spinner>
+
+          <span>{{ 'RESERVA.BUSCANDO_HORAS' | translate }}</span>
         </div>
 
         <div
@@ -295,7 +360,7 @@
           *ngIf="!cargandoSlots && errorSlots"
           role="alert"
         >
-          {{ errorSlots }}
+          {{ errorSlots | translate }}
         </div>
 
         <div
@@ -307,15 +372,14 @@
             !fechaSeleccionada
           "
         >
-          <h3>No encontramos fechas con horas libres</h3>
-          <p>
-            Prueba otro profesional o vuelve a consultar más adelante.
-          </p>
+          <h3>{{ 'RESERVA.SIN_FECHAS_TITULO' | translate }}</h3>
+          <p>{{ 'RESERVA.SIN_FECHAS_TEXTO' | translate }}</p>
         </div>
 
         <div
           class="empty-state"
           *ngIf="
+            !cargandoCalendario &&
             !cargandoSlots &&
             !errorSlots &&
             fechaSeleccionada &&
@@ -323,10 +387,8 @@
             !disponibilidad.slots.length
           "
         >
-          <h3>Ese día se ha ocupado</h3>
-          <p>
-            Selecciona otro día marcado en azul.
-          </p>
+          <h3>{{ 'RESERVA.DIA_OCUPADO_TITULO' | translate }}</h3>
+          <p>{{ 'RESERVA.DIA_OCUPADO_TEXTO' | translate }}</p>
         </div>
 
         <div
@@ -343,6 +405,11 @@
             *ngFor="let slot of disponibilidad?.slots"
             [class.selected]="horaSeleccionada === slot.horaInicio"
             [attr.aria-pressed]="horaSeleccionada === slot.horaInicio"
+            [disabled]="
+              confirmando ||
+              solicitudEnviada ||
+              cargandoCalendario
+            "
             (click)="seleccionarHora(slot.horaInicio)"
           >
             {{ formatearHora(slot.horaInicio) }}
@@ -356,48 +423,64 @@
       >
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Resumen</p>
-            <h2>Tu solicitud</h2>
+            <p class="eyebrow">
+              {{ 'RESERVA.RESUMEN' | translate }}
+            </p>
+
+            <h2>{{ 'RESERVA.SOLICITUD' | translate }}</h2>
           </div>
         </div>
 
         <div class="summary">
           <p>
-            <span>Empresa</span>
+            <span>{{ 'RESERVA.EMPRESA' | translate }}</span>
             <strong>{{ empresa.nombre }}</strong>
           </p>
 
           <p>
-            <span>Servicio</span>
+            <span>{{ 'RESERVA.SERVICIO' | translate }}</span>
             <strong>{{ servicioSeleccionado.nombre }}</strong>
           </p>
 
           <p>
-            <span>Profesional</span>
+            <span>{{ 'RESERVA.PROFESIONAL' | translate }}</span>
+
             <strong>
-              {{ trabajadorSeleccionado.nombreCompleto || 'Profesional' }}
+              {{
+                trabajadorSeleccionado.nombreCompleto ||
+                ('RESERVA.PROFESIONAL' | translate)
+              }}
             </strong>
           </p>
 
           <p *ngIf="fechaSeleccionada">
-            <span>Fecha</span>
+            <span>{{ 'RESERVA.FECHA' | translate }}</span>
             <strong>{{ fechaLegible(fechaSeleccionada) }}</strong>
           </p>
 
           <p *ngIf="horaSeleccionada">
-            <span>Hora</span>
+            <span>{{ 'RESERVA.HORA' | translate }}</span>
             <strong>{{ formatearHora(horaSeleccionada) }}</strong>
           </p>
 
           <p>
-            <span>Duración</span>
-            <strong>{{ servicioSeleccionado.duracionMinutos }} min</strong>
+            <span>{{ 'RESERVA.DURACION' | translate }}</span>
+
+            <strong>
+              {{
+                'RESERVA.DURACION_VALOR'
+                  | translate: {
+                      minutos: servicioSeleccionado.duracionMinutos
+                    }
+              }}
+            </strong>
           </p>
 
           <p>
-            <span>Precio</span>
+            <span>{{ 'RESERVA.PRECIO' | translate }}</span>
+
             <strong>
-              {{ servicioSeleccionado.precio | number: '1.2-2' }} €
+              {{ precioFormateado(servicioSeleccionado.precio) }}
             </strong>
           </p>
         </div>
@@ -405,32 +488,27 @@
         <div class="notes-field">
           <ion-input
             name="notas"
-            label="Notas para la empresa"
+            [label]="'RESERVA.NOTAS' | translate"
             labelPlacement="stacked"
-            placeholder="Opcional"
+            [placeholder]="'RESERVA.OPCIONAL' | translate"
             [(ngModel)]="notas"
+            [disabled]="confirmando || solicitudEnviada"
           ></ion-input>
         </div>
 
         <p class="note-caption">
-          La nota se enviará junto con la solicitud de cita.
+          {{ 'RESERVA.NOTAS_AYUDA' | translate }}
         </p>
 
         <ion-text *ngIf="error" color="danger">
-          <p
-            class="form-message error"
-            role="alert"
-          >
-            {{ error }}
+          <p class="form-message error" role="alert">
+            {{ error | translate }}
           </p>
         </ion-text>
 
         <ion-text *ngIf="mensaje" color="success">
-          <p
-            class="form-message success"
-            role="status"
-          >
-            {{ mensaje }}
+          <p class="form-message success" role="status">
+            {{ mensaje | translate }}
           </p>
         </ion-text>
 
@@ -444,6 +522,7 @@
           <ion-spinner
             *ngIf="confirmando"
             name="crescent"
+            aria-hidden="true"
           ></ion-spinner>
 
           <ion-icon
@@ -455,15 +534,19 @@
 
           <span>
             {{
-              confirmando
-                ? 'Enviando solicitud…'
-                : 'Solicitar cita'
+              (
+                confirmando
+                  ? 'RESERVA.ENVIANDO'
+                  : solicitudEnviada
+                    ? 'RESERVA.ENVIADA_BOTON'
+                    : 'RESERVA.SOLICITAR'
+              ) | translate
             }}
           </span>
         </ion-button>
 
         <p class="pending-caption">
-          La cita quedará pendiente hasta que la empresa la confirme.
+          {{ 'RESERVA.PENDIENTE_AYUDA' | translate }}
         </p>
       </section>
     </article>

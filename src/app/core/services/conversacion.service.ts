@@ -15,15 +15,20 @@ export interface Conversacion {
   ultimaActividad: string;
 
   puedeGestionarReservas: boolean;
+
+  mensajesNoLeidos: number;
 }
 
 export interface MensajeChat {
   id: string;
   conversacionId: string;
+
   remitenteId: string;
   remitenteNombre: string;
+
   tipo: 'TEXTO' | 'SOLICITUD_RESERVA';
   contenido: string | null;
+
   reservaId: string | null;
   reservaEstado: string | null;
   servicioNombre: string | null;
@@ -31,7 +36,10 @@ export interface MensajeChat {
   reservaHoraInicio: string | null;
   reservaPrecio: number | null;
   motivoCancelacion: string | null;
+
   fechaCreacion: string;
+
+  leido: boolean;
 }
 
 export interface HistorialChat {
@@ -42,12 +50,22 @@ export interface HistorialChat {
   hayMas: boolean;
 }
 
-@Injectable({ providedIn: 'root' })
+export interface LecturaMensajesResponse {
+  conversacionId: string;
+  mensajesMarcados: number;
+  mensajesNoLeidos: number;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
 export class ConversacionService {
   constructor(private api: ApiService) {}
 
   listar(): Promise<Conversacion[]> {
-    return this.api.get<Conversacion[]>('/conversaciones');
+    return this.api.get<Conversacion[]>(
+      '/conversaciones',
+    );
   }
 
   obtener(id: string): Promise<Conversacion> {
@@ -56,24 +74,42 @@ export class ConversacionService {
     );
   }
 
-  abrirDesdeReserva(id: string): Promise<Conversacion> {
+  abrirDesdeReserva(
+    id: string,
+  ): Promise<Conversacion> {
     return this.api.post<Conversacion>(
       `/conversaciones/desde-reserva/${encodeURIComponent(id)}`,
       {},
     );
   }
 
-  mensajes(id: string, pagina = 0): Promise<HistorialChat> {
+  mensajes(
+    id: string,
+    pagina = 0,
+  ): Promise<HistorialChat> {
     return this.api.get<HistorialChat>(
       `/conversaciones/${encodeURIComponent(id)}/mensajes` +
       `?pagina=${pagina}&tamano=30`,
     );
   }
 
-  enviar(id: string, contenido: string): Promise<MensajeChat> {
+  enviar(
+    id: string,
+    contenido: string,
+  ): Promise<MensajeChat> {
     return this.api.post<MensajeChat>(
       `/conversaciones/${encodeURIComponent(id)}/mensajes`,
       { contenido },
+    );
+  }
+
+  marcarLeidos(
+    id: string,
+    mensajeIds: string[],
+  ): Promise<LecturaMensajesResponse> {
+    return this.api.put<LecturaMensajesResponse>(
+      `/conversaciones/${encodeURIComponent(id)}/mensajes/leidos`,
+      { mensajeIds },
     );
   }
 }

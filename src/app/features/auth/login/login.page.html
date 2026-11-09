@@ -1,6 +1,13 @@
 <ion-content>
   <main class="auth-shell">
-    <section class="auth-panel" aria-labelledby="login-title">
+    <section
+      class="auth-panel"
+      aria-labelledby="login-title"
+    >
+      <div class="auth-toolbar">
+        <app-selector-idioma></app-selector-idioma>
+      </div>
+
       <div class="brand">
         <img
           class="brand-logo"
@@ -12,21 +19,34 @@
       </div>
 
       <div class="intro">
-        <h1 id="login-title">Qué bien verte de nuevo.</h1>
-        <p>Entra en tu cuenta para gestionar tus citas.</p>
+        <h1 id="login-title">
+          {{ 'AUTH.LOGIN_TITULO' | translate }}
+        </h1>
+
+        <p>
+          {{ 'AUTH.LOGIN_INTRO' | translate }}
+        </p>
       </div>
 
-      <form #loginForm="ngForm" (ngSubmit)="onLogin()">
+      <form
+        #loginForm="ngForm"
+        (ngSubmit)="onLogin(loginForm)"
+        [attr.aria-busy]="loading"
+        novalidate
+      >
         <div class="field">
           <ion-input
             name="email"
-            label="Correo electrónico"
+            [label]="'AUTH.EMAIL' | translate"
             labelPlacement="stacked"
             type="email"
             inputmode="email"
             autocomplete="email"
-            placeholder="tu@email.com"
+            autocapitalize="off"
+            [spellcheck]="false"
+            [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
             [(ngModel)]="email"
+            [disabled]="loading"
             required
             email
           ></ion-input>
@@ -35,18 +55,29 @@
         <div class="field">
           <ion-input
             name="password"
-            label="Contraseña"
+            [label]="'AUTH.PASSWORD' | translate"
             labelPlacement="stacked"
             type="password"
             autocomplete="current-password"
-            placeholder="Tu contraseña"
+            [placeholder]="
+              'AUTH.PASSWORD_PLACEHOLDER' | translate
+            "
             [(ngModel)]="password"
+            [disabled]="loading"
             required
           ></ion-input>
         </div>
 
-        <ion-text *ngIf="error" color="danger">
-          <p class="form-error" role="alert">{{ error }}</p>
+        <ion-text
+          *ngIf="error"
+          color="danger"
+        >
+          <p
+            class="form-error"
+            role="alert"
+          >
+            {{ error | translate }}
+          </p>
         </ion-text>
 
         <ion-button
@@ -55,14 +86,32 @@
           type="submit"
           [disabled]="loginForm.invalid || loading"
         >
-          <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
-          <span *ngIf="!loading">Iniciar sesión</span>
+          <ion-spinner
+            *ngIf="loading"
+            name="crescent"
+            aria-hidden="true"
+          ></ion-spinner>
+
+          <span>
+            {{
+              (
+                loading
+                  ? 'AUTH.LOGIN_CARGANDO'
+                  : 'AUTH.LOGIN_BOTON'
+              ) | translate
+            }}
+          </span>
         </ion-button>
       </form>
 
       <p class="switch-page">
-        ¿Aún no tienes cuenta?
-        <a routerLink="/register">Crear cuenta</a>
+        <span>
+          {{ 'AUTH.SIN_CUENTA' | translate }}
+        </span>
+
+        <a routerLink="/register">
+          {{ 'AUTH.IR_REGISTRO' | translate }}
+        </a>
       </p>
     </section>
   </main>

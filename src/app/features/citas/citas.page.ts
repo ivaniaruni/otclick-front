@@ -1,9 +1,19 @@
-import { CommonModule, registerLocaleData } from '@angular/common';
-import localeEs from '@angular/common/locales/es';
+import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+
+import {
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+} from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
+import {
+  ActivatedRoute,
+  Router,
+  RouterLink,
+} from '@angular/router';
 
 import {
   AlertController,
@@ -13,6 +23,12 @@ import {
   IonTextarea,
 } from '@ionic/angular/standalone';
 
+import {
+  TranslatePipe,
+  TranslateService,
+} from '@ngx-translate/core';
+
+import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
 
 import {
@@ -27,18 +43,44 @@ import {
 } from 'ionicons/icons';
 
 import { ApiService } from '../../core/services/api.service';
+
 import {
   AuthResponse,
   AuthService,
 } from '../../core/services/auth.service';
-import { ReservaService } from '../../core/services/reserva.service';
-import { ResenaService } from '../../core/services/resena.service';
-import { UsuarioService } from '../../core/services/usuario.service';
+
+import {
+  ReservaService,
+} from '../../core/services/reserva.service';
+
+import {
+  ResenaService,
+} from '../../core/services/resena.service';
+
+import {
+  UsuarioService,
+} from '../../core/services/usuario.service';
+
+import {
+  IdiomaService,
+} from '../../core/services/idioma.service';
+
+import {
+  IdiomaApp,
+} from '../../core/i18n/traducciones';
+
+import {
+  CITAS_TRADUCCIONES,
+} from '../../core/i18n/citas.traducciones';
+
+import {
+  SelectorIdiomaComponent,
+} from '../../shared/components/selector-idioma/selector-idioma.component';
+
 import { Reserva } from '../../shared/models/reserva';
 
-registerLocaleData(localeEs, 'es-ES');
-
 type VistaCitas = 'proximas' | 'historial' | 'todas';
+type AccionCita = 'quitar' | 'cancelar' | 'resena';
 
 @Component({
   selector: 'app-citas',
@@ -53,6 +95,8 @@ type VistaCitas = 'proximas' | 'historial' | 'todas';
     IonContent,
     IonIcon,
     IonTextarea,
+    TranslatePipe,
+    SelectorIdiomaComponent,
   ],
 })
 export class CitasPage implements OnDestroy {
@@ -84,6 +128,7 @@ export class CitasPage implements OnDestroy {
   readonly puntuaciones = [1, 2, 3, 4, 5];
 
   cargandoResenas = false;
+  readonly horasCancelacion = 24;
 
   private readonly reservasResenadas = new Set<string>();
 
@@ -91,18 +136,35 @@ export class CitasPage implements OnDestroy {
   private versionCarga = 0;
   private destruida = false;
   private dialogoAbierto = false;
-  private temporizador: ReturnType<typeof setInterval> | null = null;
 
-  private readonly horasCancelacion = 24;
+  private temporizador:
+    ReturnType<typeof setInterval> | null = null;
+
+  private readonly idiomaSubscription: Subscription;
+
+  private readonly locales: Record<IdiomaApp, string> = {
+    es: 'es-ES',
+    en: 'en-GB',
+    fr: 'fr-FR',
+    de: 'de-DE',
+    ru: 'ru-RU',
+    uk: 'uk-UA',
+  };
+
+  private readonly formatosFecha =
+    new Map<string, Intl.DateTimeFormat>();
+
+  private readonly formatosPrecio =
+    new Map<string, Intl.NumberFormat>();
 
   private readonly etiquetasEstado: Record<string, string> = {
-    PENDING: 'Pendiente',
-    CONFIRMED: 'Confirmada',
-    COMPLETED: 'Completada',
-    CANCELLED: 'Cancelada',
-    CANCELED: 'Cancelada',
-    NO_SHOW: 'No asististe',
-    REJECTED: 'Rechazada',
+    PENDING: 'CITAS.ESTADO_PENDING',
+    CONFIRMED: 'CITAS.ESTADO_CONFIRMED',
+    COMPLETED: 'CITAS.ESTADO_COMPLETED',
+    CANCELLED: 'CITAS.ESTADO_CANCELLED',
+    CANCELED: 'CITAS.ESTADO_CANCELLED',
+    NO_SHOW: 'CITAS.ESTADO_NO_SHOW',
+    REJECTED: 'CITAS.ESTADO_REJECTED',
   };
 
   private readonly clasesEstado: Record<string, string> = {
@@ -115,12 +177,6 @@ export class CitasPage implements OnDestroy {
     REJECTED: 'cancelled',
   };
 
-  private readonly formatoFecha = new Intl.DateTimeFormat('es-ES', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  });
-
   constructor(
     private api: ApiService,
     private reservaService: ReservaService,
@@ -131,6 +187,8 @@ export class CitasPage implements OnDestroy {
     private route: ActivatedRoute,
     private alertController: AlertController,
     private changeDetector: ChangeDetectorRef,
+    private translate: TranslateService,
+    private idioma: IdiomaService,
   ) {
     addIcons({
       calendarClearOutline,
@@ -142,10 +200,19 @@ export class CitasPage implements OnDestroy {
       starOutline,
       trashOutline,
     });
+
+    this.registrarTraducciones();
+
+    this.idiomaSubscription =
+      this.translate.onLangChange.subscribe(() => {
+        this.actualizarVista();
+      });
   }
 
   ionViewWillEnter(): void {
-    const queryParams = this.route.snapshot.queryParamMap;
+    const queryParams =
+      this.route.snapshot.queryParamMap;
+
     const empresaId = queryParams.get('empresaId');
     const vista = queryParams.get('vista');
 
@@ -171,6 +238,7 @@ export class CitasPage implements OnDestroy {
     this.destruida = true;
     this.versionCarga++;
     this.detenerTemporizador();
+    this.idiomaSubscription.unsubscribe();
   }
 
   get fotoPerfil(): string {
@@ -184,6 +252,19 @@ export class CitasPage implements OnDestroy {
     );
   }
 
+  get totalCitasFiltro(): number {
+    return this.empresaFiltroId
+      ? this.citas.filter(
+          (cita) =>
+            cita.empresaId === this.empresaFiltroId,
+        ).length
+      : this.citas.length;
+  }
+
+  private get localeActual(): string {
+    return this.locales[this.idioma.actual()];
+  }
+
   marcarAvatarFallido(): void {
     this.avatarFallido = true;
     this.actualizarVista();
@@ -194,7 +275,9 @@ export class CitasPage implements OnDestroy {
   }
 
   esCompletada(cita: Reserva): boolean {
-    return this.normalizarEstado(cita.estado) === 'COMPLETED';
+    return (
+      this.normalizarEstado(cita.estado) === 'COMPLETED'
+    );
   }
 
   async cargar(): Promise<void> {
@@ -228,7 +311,8 @@ export class CitasPage implements OnDestroy {
           this.usuario = {
             ...usuarioLocal,
             ...usuarioApi,
-            nombre: usuarioApi.nombre || usuarioLocal.nombre,
+            nombre:
+              usuarioApi.nombre || usuarioLocal.nombre,
             avatarUrl:
               usuarioApi.avatarUrl !== undefined
                 ? usuarioApi.avatarUrl
@@ -236,7 +320,7 @@ export class CitasPage implements OnDestroy {
           };
         }
       } catch {
-        // La respuesta de /auth/me permite continuar.
+        // /auth/me permite continuar sin la sesión local.
       }
 
       this.actualizarVista();
@@ -268,19 +352,22 @@ export class CitasPage implements OnDestroy {
           this.actualizarVista();
         }
       } catch {
-        // Un fallo al actualizar el perfil no bloquea las citas.
+        // Un fallo del perfil no bloquea las citas.
       }
 
-      const citas = await this.reservaService.listarPorCliente(
-        usuarioApi.userId,
-      );
+      const citas =
+        await this.reservaService.listarPorCliente(
+          usuarioApi.userId,
+        );
 
       if (!this.esCargaActual(version)) {
         return;
       }
 
       if (!Array.isArray(citas)) {
-        throw new Error('La respuesta de citas no es una lista.');
+        throw new Error(
+          'La respuesta de citas no es una lista.',
+        );
       }
 
       this.citas = [...citas];
@@ -299,7 +386,7 @@ export class CitasPage implements OnDestroy {
       this.proximasCount = 0;
       this.historialCount = 0;
       this.reservasResenadas.clear();
-      this.error = 'No hemos podido cargar tus citas.';
+      this.error = 'CITAS.ERROR_CARGAR';
     } finally {
       if (this.esCargaActual(version)) {
         this.cargando = false;
@@ -366,11 +453,15 @@ export class CitasPage implements OnDestroy {
   }
 
   esPendiente(cita: Reserva): boolean {
-    return this.normalizarEstado(cita.estado) === 'PENDING';
+    return (
+      this.normalizarEstado(cita.estado) === 'PENDING'
+    );
   }
 
   esCancelada(cita: Reserva): boolean {
-    return this.normalizarEstado(cita.estado) === 'CANCELLED';
+    const estado = this.normalizarEstado(cita.estado);
+
+    return estado === 'CANCELLED' || estado === 'CANCELED';
   }
 
   esCancelacionAutomatica(cita: Reserva): boolean {
@@ -381,7 +472,9 @@ export class CitasPage implements OnDestroy {
     );
   }
 
-  async ocultarCitaCancelada(cita: Reserva): Promise<void> {
+  async ocultarCitaCancelada(
+    cita: Reserva,
+  ): Promise<void> {
     if (
       !this.esCancelada(cita) ||
       this.ocultandoId !== null ||
@@ -394,18 +487,16 @@ export class CitasPage implements OnDestroy {
 
     try {
       const alerta = await this.alertController.create({
-        header: 'Quitar de Mis citas',
-        message:
-          'Esta cita dejará de aparecer solo en tu listado. ' +
-          'La empresa conservará su registro.',
+        header: this.texto('QUITAR_TITULO'),
+        message: this.texto('QUITAR_CONFIRMACION'),
         backdropDismiss: false,
         buttons: [
           {
-            text: 'Conservar cita',
+            text: this.texto('CONSERVAR_CITA'),
             role: 'cancel',
           },
           {
-            text: 'Quitar cita',
+            text: this.texto('QUITAR_CITA'),
             role: 'confirm',
           },
         ],
@@ -439,12 +530,11 @@ export class CitasPage implements OnDestroy {
       }
 
       this.actualizarListado();
-      this.mensajeAccion =
-        'La cita se ha quitado de tu listado.';
+      this.mensajeAccion = 'CITAS.EXITO_QUITAR';
     } catch (error: unknown) {
       if (!this.destruida) {
         this.errorAccion =
-          this.mensajeErrorOcultarCita(error);
+          this.claveErrorAccion(error, 'quitar');
       }
     } finally {
       this.dialogoAbierto = false;
@@ -462,8 +552,7 @@ export class CitasPage implements OnDestroy {
     }
 
     if (!this.esCancelable(cita)) {
-      this.errorAccion =
-        'Esta cita ya no se puede cancelar desde la aplicación.';
+      this.errorAccion = 'CITAS.ERROR_NO_CANCELABLE';
       this.actualizarVista();
       return;
     }
@@ -472,18 +561,16 @@ export class CitasPage implements OnDestroy {
 
     try {
       const alerta = await this.alertController.create({
-        header: 'Cancelar cita',
-        message:
-          '¿Quieres cancelar esta cita? Dejará de aparecer ' +
-          'entre tus próximas reservas.',
+        header: this.texto('CANCELAR_CITA'),
+        message: this.texto('CANCELAR_CONFIRMACION'),
         backdropDismiss: false,
         buttons: [
           {
-            text: 'Mantener cita',
+            text: this.texto('MANTENER_CITA'),
             role: 'cancel',
           },
           {
-            text: 'Sí, cancelar',
+            text: this.texto('CONFIRMAR_CANCELAR'),
             role: 'confirm',
           },
         ],
@@ -498,8 +585,7 @@ export class CitasPage implements OnDestroy {
       }
 
       if (!this.esCancelable(cita)) {
-        this.errorAccion =
-          'El plazo para cancelar esta cita ha terminado.';
+        this.errorAccion = 'CITAS.ERROR_PLAZO';
         this.actualizarVista();
         return;
       }
@@ -517,16 +603,17 @@ export class CitasPage implements OnDestroy {
       }
 
       this.citas = this.citas.map((item) =>
-        item.id === cita.id ? reservaActualizada : item,
+        item.id === cita.id
+          ? reservaActualizada
+          : item,
       );
 
       this.actualizarListado();
-      this.mensajeAccion =
-        'La cita se ha cancelado correctamente.';
+      this.mensajeAccion = 'CITAS.EXITO_CANCELAR';
     } catch (error: unknown) {
       if (!this.destruida) {
         this.errorAccion =
-          this.mensajeErrorCancelacion(error);
+          this.claveErrorAccion(error, 'cancelar');
 
         if (
           error instanceof HttpErrorResponse &&
@@ -598,8 +685,7 @@ export class CitasPage implements OnDestroy {
     const comentario = this.comentarioResena.trim();
 
     if (comentario.length > 500) {
-      this.errorAccion =
-        'El comentario no puede superar 500 caracteres.';
+      this.errorAccion = 'CITAS.ERROR_COMENTARIO';
       this.actualizarVista();
       return;
     }
@@ -624,24 +710,29 @@ export class CitasPage implements OnDestroy {
       this.reservaConResenaId = null;
       this.puntuacionResena = 0;
       this.comentarioResena = '';
-
-      this.mensajeAccion =
-        'Gracias. Tu reseña se ha publicado y aparecerá en la empresa.';
+      this.mensajeAccion = 'CITAS.EXITO_RESENA';
     } catch (error: unknown) {
       if (!this.destruida) {
+        this.errorAccion =
+          this.claveErrorAccion(error, 'resena');
+
         if (
           error instanceof HttpErrorResponse &&
           (error.status === 400 || error.status === 409)
         ) {
-          this.reservasResenadas.add(cita.id);
-          this.reservaConResenaId = null;
-          this.puntuacionResena = 0;
-          this.comentarioResena = '';
-          this.errorAccion =
-            'Esta cita ya tiene una reseña publicada.';
-        } else {
-          this.errorAccion =
-            this.mensajeErrorResena(error);
+          // Comprobamos el estado real en vez de asumir
+          // que cualquier 400/409 implica una reseña publicada.
+          await this.cargarResenasExistentes(
+            this.versionCarga,
+          );
+
+          if (this.tieneResena(cita)) {
+            this.reservaConResenaId = null;
+            this.puntuacionResena = 0;
+            this.comentarioResena = '';
+            this.errorAccion =
+              'CITAS.ERROR_RESENA_EXISTENTE';
+          }
         }
       }
     } finally {
@@ -650,14 +741,14 @@ export class CitasPage implements OnDestroy {
     }
   }
 
-  estadoEnEspanol(
+  claveEstado(
     estado: string | null | undefined,
   ): string {
     const normalizado = this.normalizarEstado(estado);
 
     return (
       this.etiquetasEstado[normalizado] ??
-      'Estado no disponible'
+      'CITAS.ESTADO_DESCONOCIDO'
     );
   }
 
@@ -669,20 +760,33 @@ export class CitasPage implements OnDestroy {
     return this.clasesEstado[normalizado] ?? 'unknown';
   }
 
-  fechaEnEspanol(
+  fechaFormateada(
     fecha: string | null | undefined,
   ): string {
     if (!fecha) {
-      return 'Fecha no disponible';
+      return this.texto('FECHA_NO_DISPONIBLE');
     }
 
     const fechaLocal = new Date(`${fecha}T12:00:00`);
 
     if (!Number.isFinite(fechaLocal.getTime())) {
-      return 'Fecha no disponible';
+      return this.texto('FECHA_NO_DISPONIBLE');
     }
 
-    return this.formatoFecha.format(fechaLocal);
+    const locale = this.localeActual;
+    let formato = this.formatosFecha.get(locale);
+
+    if (!formato) {
+      formato = new Intl.DateTimeFormat(locale, {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+      });
+
+      this.formatosFecha.set(locale, formato);
+    }
+
+    return formato.format(fechaLocal);
   }
 
   horaFormateada(
@@ -690,18 +794,90 @@ export class CitasPage implements OnDestroy {
   ): string {
     return hora
       ? hora.slice(0, 5)
-      : 'Hora no disponible';
+      : this.texto('HORA_NO_DISPONIBLE');
+  }
+
+  precioFormateado(
+    precio: number | string | null | undefined,
+  ): string {
+    if (
+      precio === null ||
+      precio === undefined ||
+      precio === ''
+    ) {
+      return '';
+    }
+
+    const valor = Number(precio);
+
+    if (!Number.isFinite(valor)) {
+      return '';
+    }
+
+    const locale = this.localeActual;
+    let formato = this.formatosPrecio.get(locale);
+
+    if (!formato) {
+      formato = new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+      this.formatosPrecio.set(locale, formato);
+    }
+
+    return formato.format(valor);
+  }
+
+  async quitarFiltroEmpresa(): Promise<void> {
+    this.empresaFiltroId = null;
+    this.nombreEmpresaFiltro = '';
+    this.actualizarListado();
+    this.actualizarVista();
+
+    await this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        empresaId: null,
+        vista: null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  private registrarTraducciones(): void {
+    const idiomas = Object.keys(
+      CITAS_TRADUCCIONES,
+    ) as IdiomaApp[];
+
+    for (const idioma of idiomas) {
+      this.translate.setTranslation(
+        idioma,
+        {
+          CITAS: CITAS_TRADUCCIONES[idioma],
+        },
+        true,
+      );
+    }
+  }
+
+  private texto(clave: string): string {
+    return this.translate.instant(`CITAS.${clave}`);
   }
 
   private actualizarListado(): void {
     const citasDeEmpresa = this.empresaFiltroId
       ? this.citas.filter(
-          (cita) => cita.empresaId === this.empresaFiltroId,
+          (cita) =>
+            cita.empresaId === this.empresaFiltroId,
         )
       : this.citas;
 
     this.nombreEmpresaFiltro = this.empresaFiltroId
-      ? citasDeEmpresa[0]?.empresaNombre || 'Esta empresa'
+      ? citasDeEmpresa[0]?.empresaNombre || ''
       : '';
 
     const proximas = citasDeEmpresa.filter(
@@ -725,6 +901,7 @@ export class CitasPage implements OnDestroy {
     this.citasVisibles = [...origen].sort((a, b) => {
       const primera =
         `${a.fecha ?? ''}T${a.horaInicio ?? ''}`;
+
       const segunda =
         `${b.fecha ?? ''}T${b.horaInicio ?? ''}`;
 
@@ -800,6 +977,7 @@ export class CitasPage implements OnDestroy {
     this.reservasResenadas.clear();
 
     if (!empresasCompletadas.length) {
+      this.cargandoResenas = false;
       this.actualizarVista();
       return;
     }
@@ -826,8 +1004,7 @@ export class CitasPage implements OnDestroy {
         }
       }
     } catch {
-      // La comprobación de reseñas no interrumpe las citas.
-      // El backend debe impedir las reseñas duplicadas.
+      // El backend sigue siendo quien impide duplicados.
     } finally {
       if (this.esCargaActual(versionCarga)) {
         this.cargandoResenas = false;
@@ -836,144 +1013,50 @@ export class CitasPage implements OnDestroy {
     }
   }
 
-  private mensajeErrorOcultarCita(error: unknown): string {
-    const mensajeServidor =
-      this.obtenerMensajeError(error);
-
-    if (mensajeServidor) {
-      return mensajeServidor;
-    }
-
-    if (error instanceof HttpErrorResponse) {
-      if (error.status === 401) {
-        return 'Tu sesión ha caducado. Vuelve a iniciar sesión.';
-      }
-
-      if (error.status === 403) {
-        return 'No tienes permiso para quitar esta cita.';
-      }
-
-      if (error.status === 409) {
-        return 'Solo puedes quitar de tu lista una cita cancelada.';
-      }
-
-      if (error.status === 404) {
-        return 'La cita ya no está disponible.';
-      }
-    }
-
-    return 'No hemos podido quitar la cita. Inténtalo de nuevo.';
-  }
-
-  private mensajeErrorCancelacion(error: unknown): string {
-    const mensajeServidor =
-      this.obtenerMensajeError(error);
-
-    if (mensajeServidor) {
-      return mensajeServidor;
-    }
-
-    if (error instanceof HttpErrorResponse) {
-      if (error.status === 0) {
-        return 'No hay conexión con el servidor. Inténtalo de nuevo.';
-      }
-
-      if (error.status === 401) {
-        return 'Tu sesión ha caducado. Vuelve a iniciar sesión.';
-      }
-
-      if (error.status === 403) {
-        return 'No tienes permiso para cancelar esta cita.';
-      }
-
-      if (error.status === 409) {
-        return 'La cita ya no se puede cancelar o quedan menos de 24 horas.';
-      }
-
-      if (error.status === 404) {
-        return 'Esta cita ya no está disponible.';
-      }
-    }
-
-    return 'No hemos podido cancelar la cita. Inténtalo de nuevo.';
-  }
-
-  private mensajeErrorResena(error: unknown): string {
-    const mensajeServidor =
-      this.obtenerMensajeError(error);
-
-    if (mensajeServidor) {
-      return mensajeServidor;
-    }
-
-    if (error instanceof HttpErrorResponse) {
-      if (error.status === 401) {
-        return 'Tu sesión ha caducado. Vuelve a iniciar sesión.';
-      }
-
-      if (error.status === 403) {
-        return 'No tienes permiso para reseñar esta cita.';
-      }
-
-      if (error.status === 400 || error.status === 409) {
-        return 'Esta cita ya tiene una reseña o ya no se puede reseñar.';
-      }
-    }
-
-    return 'No hemos podido publicar tu reseña. Inténtalo de nuevo.';
-  }
-
-  private obtenerMensajeError(
+  private claveErrorAccion(
     error: unknown,
-  ): string | null {
+    accion: AccionCita,
+  ): string {
+    const genericos: Record<AccionCita, string> = {
+      quitar: 'CITAS.ERROR_QUITAR',
+      cancelar: 'CITAS.ERROR_CANCELAR',
+      resena: 'CITAS.ERROR_RESENA',
+    };
+
+    const permisos: Record<AccionCita, string> = {
+      quitar: 'CITAS.ERROR_PERMISO_QUITAR',
+      cancelar: 'CITAS.ERROR_PERMISO_CANCELAR',
+      resena: 'CITAS.ERROR_PERMISO_RESENA',
+    };
+
+    const conflictos: Record<AccionCita, string> = {
+      quitar: 'CITAS.ERROR_CONFLICTO_QUITAR',
+      cancelar: 'CITAS.ERROR_CONFLICTO_CANCELAR',
+      resena: 'CITAS.ERROR_CONFLICTO_RESENA',
+    };
+
     if (!(error instanceof HttpErrorResponse)) {
-      return null;
+      return genericos[accion];
     }
 
-    const body: unknown = error.error;
+    switch (error.status) {
+      case 0:
+        return 'CITAS.ERROR_CONEXION';
 
-    if (!body || typeof body !== 'object') {
-      return null;
+      case 401:
+        return 'CITAS.ERROR_SESION';
+
+      case 403:
+        return permisos[accion];
+
+      case 404:
+        return 'CITAS.ERROR_NO_DISPONIBLE';
+
+      case 409:
+        return conflictos[accion];
+
+      default:
+        return genericos[accion];
     }
-
-    const datos = body as Record<string, unknown>;
-
-    for (const campo of ['detail', 'message', 'error']) {
-      const mensaje = datos[campo];
-
-      if (
-        typeof mensaje === 'string' &&
-        mensaje.trim()
-      ) {
-        return mensaje;
-      }
-    }
-
-    return null;
-  }
-
-  get totalCitasFiltro(): number {
-    return this.empresaFiltroId
-      ? this.citas.filter(
-          (cita) => cita.empresaId === this.empresaFiltroId,
-        ).length
-      : this.citas.length;
-  }
-
-  async quitarFiltroEmpresa(): Promise<void> {
-    this.empresaFiltroId = null;
-    this.nombreEmpresaFiltro = '';
-    this.actualizarListado();
-    this.actualizarVista();
-
-    await this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        empresaId: null,
-        vista: null,
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
-    });
   }
 }

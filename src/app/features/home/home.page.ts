@@ -2,7 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+
+import {
+  TranslatePipe,
+  TranslateService,
+} from '@ngx-translate/core';
 
 import {
   IonButton,
@@ -10,8 +14,6 @@ import {
   IonIcon,
   IonInput,
 } from '@ionic/angular/standalone';
-
-import { SelectorIdiomaComponent } from '../../shared/components/selector-idioma/selector-idioma.component';
 
 import { addIcons } from 'ionicons';
 
@@ -22,10 +24,31 @@ import {
   searchOutline,
 } from 'ionicons/icons';
 
-import { AuthResponse, AuthService } from '../../core/services/auth.service';
+import {
+  AuthResponse,
+  AuthService,
+} from '../../core/services/auth.service';
 
-import { EmpresaService } from '../../core/services/empresa.service';
-import { UsuarioService } from '../../core/services/usuario.service';
+import {
+  EmpresaService,
+} from '../../core/services/empresa.service';
+
+import {
+  UsuarioService,
+} from '../../core/services/usuario.service';
+
+import {
+  HOME_TRADUCCIONES,
+} from '../../core/i18n/home.traducciones';
+
+import {
+  IdiomaApp,
+} from '../../core/i18n/traducciones';
+
+import {
+  SelectorIdiomaComponent,
+} from '../../shared/components/selector-idioma/selector-idioma.component';
+
 import { Empresa } from '../../shared/models/empresa';
 
 @Component({
@@ -60,6 +83,7 @@ export class HomePage implements OnInit {
     private authService: AuthService,
     private usuarioService: UsuarioService,
     private router: Router,
+    private translate: TranslateService,
   ) {
     addIcons({
       arrowForwardOutline,
@@ -67,6 +91,8 @@ export class HomePage implements OnInit {
       chatbubblesOutline,
       searchOutline,
     });
+
+    this.registrarTraducciones();
   }
 
   ngOnInit(): void {
@@ -86,12 +112,14 @@ export class HomePage implements OnInit {
   }
 
   get inicialPerfil(): string {
-    return this.usuario?.nombre?.trim().charAt(0).toUpperCase() || '?';
+    return (
+      this.usuario?.nombre?.trim().charAt(0).toUpperCase() ||
+      '?'
+    );
   }
 
   async cargarUsuario(): Promise<void> {
     try {
-      // Primero mostramos los datos disponibles en la sesión.
       this.usuario = await this.authService.getCurrentUser();
       this.avatarFallido = false;
 
@@ -99,16 +127,17 @@ export class HomePage implements OnInit {
         return;
       }
 
-      // Después consultamos el perfil actualizado del servidor.
-      const perfil = await this.usuarioService.obtenerMiPerfil();
+      const perfil =
+        await this.usuarioService.obtenerMiPerfil();
 
       await this.authService.updateStoredUser(perfil);
 
       this.usuario = await this.authService.getCurrentUser();
       this.avatarFallido = false;
     } catch {
-      // Si falla la actualización, conservamos el usuario ya cargado.
-      console.warn('No se ha podido actualizar el perfil de la cabecera.');
+      console.warn(
+        'No se ha podido actualizar el perfil de la cabecera.',
+      );
     }
   }
 
@@ -121,23 +150,44 @@ export class HomePage implements OnInit {
     this.error = '';
 
     try {
-      const respuesta = await this.empresaService.listar();
+      const respuesta =
+        await this.empresaService.listar();
 
-      this.empresas = respuesta.filter((empresa) => empresa.activa);
+      this.empresas = respuesta.filter(
+        (empresa) => empresa.activa,
+      );
     } catch {
-      this.error = 'No hemos podido cargar las empresas.';
+      this.error = 'HOME.ERROR_CARGAR';
     } finally {
       this.cargando = false;
     }
   }
 
   async buscar(): Promise<void> {
+    const termino = this.busqueda.trim();
+
     await this.router.navigate(['/tabs/empresas'], {
-      queryParams: this.busqueda.trim() ? { q: this.busqueda.trim() } : {},
+      queryParams: termino ? { q: termino } : {},
     });
   }
 
   async abrirPerfil(): Promise<void> {
     await this.router.navigateByUrl('/tabs/perfil');
+  }
+
+  private registrarTraducciones(): void {
+    const idiomas = Object.keys(
+      HOME_TRADUCCIONES,
+    ) as IdiomaApp[];
+
+    for (const idioma of idiomas) {
+      this.translate.setTranslation(
+        idioma,
+        {
+          HOME: HOME_TRADUCCIONES[idioma],
+        },
+        true,
+      );
+    }
   }
 }

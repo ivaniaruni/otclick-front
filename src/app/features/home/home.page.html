@@ -3,13 +3,23 @@
     <section class="welcome-band">
       <div class="content-width">
         <div class="top-row">
-          <img class="logo" src="assets/otclick-logo.jpg" alt="OtClick" width="72" height="72">
+          <img
+            class="logo"
+            src="assets/otclick-logo.jpg"
+            alt="OtClick"
+            width="72"
+            height="72"
+          >
 
           <div class="header-actions">
             <app-selector-idioma></app-selector-idioma>
 
-            <button class="profile-access" type="button" (click)="abrirPerfil()"
-              [attr.aria-label]="'PERFIL_ABRIR' | translate">
+            <button
+              class="profile-access"
+              type="button"
+              (click)="abrirPerfil()"
+              [attr.aria-label]="'PERFIL_ABRIR' | translate"
+            >
               <span class="profile-copy">
                 <small>
                   {{ 'SALUDO' | translate }}{{ usuario?.nombre ? ',' : '' }}
@@ -20,11 +30,21 @@
                 </strong>
               </span>
 
-              <span class="profile-avatar" [class.has-photo]="fotoPerfil && !avatarFallido" aria-hidden="true">
-                <img *ngIf="
-            fotoPerfil && !avatarFallido;
-            else inicialAvatar
-          " [src]="fotoPerfil" alt="" (error)="marcarAvatarFallido()">
+              <span
+                class="profile-avatar"
+                [class.has-photo]="fotoPerfil && !avatarFallido"
+                [attr.data-profile-role]="usuario?.rol"
+                aria-hidden="true"
+              >
+                <img
+                  *ngIf="
+                    fotoPerfil && !avatarFallido;
+                    else inicialAvatar
+                  "
+                  [src]="fotoPerfil"
+                  alt=""
+                  (error)="marcarAvatarFallido()"
+                >
 
                 <ng-template #inicialAvatar>
                   {{ inicialPerfil }}
@@ -49,12 +69,28 @@
             </p>
           </div>
 
-          <form class="search" (ngSubmit)="buscar()">
-            <ion-input name="busqueda" label="¿Qué estás buscando?" labelPlacement="stacked"
-              placeholder="Busca una empresa" [(ngModel)]="busqueda"></ion-input>
+          <form
+            class="search"
+            (ngSubmit)="buscar()"
+          >
+            <ion-input
+              name="busqueda"
+              [label]="'HOME.BUSQUEDA_LABEL' | translate"
+              labelPlacement="stacked"
+              [placeholder]="
+                'HOME.BUSQUEDA_PLACEHOLDER' | translate
+              "
+              [(ngModel)]="busqueda"
+            ></ion-input>
 
-            <ion-button type="submit" aria-label="Buscar empresas">
-              <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+            <ion-button
+              type="submit"
+              [attr.aria-label]="'HOME.BUSCAR' | translate"
+            >
+              <ion-icon
+                name="search-outline"
+                aria-hidden="true"
+              ></ion-icon>
             </ion-button>
           </form>
         </div>
@@ -64,36 +100,67 @@
     <section class="main-section content-width">
       <div class="section-title">
         <div>
-          <p class="eyebrow">Tu espacio</p>
-          <h2>Todo a mano</h2>
+          <p class="eyebrow">
+            {{ 'HOME.TU_ESPACIO' | translate }}
+          </p>
+
+          <h2>
+            {{ 'HOME.TODO_A_MANO' | translate }}
+          </h2>
         </div>
       </div>
 
       <div class="quick-links">
-        <a class="quick-link" routerLink="/tabs/citas">
+        <a
+          class="quick-link"
+          routerLink="/tabs/citas"
+        >
           <span class="quick-icon">
-            <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
+            <ion-icon
+              name="calendar-outline"
+              aria-hidden="true"
+            ></ion-icon>
           </span>
 
           <span class="quick-copy">
-            Mis citas
-            <small>Consulta tus reservas y tu historial.</small>
+            {{ 'HOME.CITAS' | translate }}
+
+            <small>
+              {{ 'HOME.CITAS_DESCRIPCION' | translate }}
+            </small>
           </span>
 
-          <ion-icon class="quick-arrow" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+          <ion-icon
+            class="quick-arrow"
+            name="arrow-forward-outline"
+            aria-hidden="true"
+          ></ion-icon>
         </a>
 
-        <a class="quick-link" routerLink="/tabs/mensajes">
+        <a
+          class="quick-link"
+          routerLink="/tabs/mensajes"
+        >
           <span class="quick-icon">
-            <ion-icon name="chatbubbles-outline" aria-hidden="true"></ion-icon>
+            <ion-icon
+              name="chatbubbles-outline"
+              aria-hidden="true"
+            ></ion-icon>
           </span>
 
           <span class="quick-copy">
-            Mensajes
-            <small>Accede a tus conversaciones.</small>
+            {{ 'HOME.MENSAJES' | translate }}
+
+            <small>
+              {{ 'HOME.MENSAJES_DESCRIPCION' | translate }}
+            </small>
           </span>
 
-          <ion-icon class="quick-arrow" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+          <ion-icon
+            class="quick-arrow"
+            name="arrow-forward-outline"
+            aria-hidden="true"
+          ></ion-icon>
         </a>
       </div>
     </section>
@@ -102,46 +169,85 @@
       <div class="content-width">
         <div class="section-title">
           <div>
-            <p class="eyebrow">Explora</p>
-            <h2>Descubre empresas</h2>
+            <p class="eyebrow">
+              {{ 'HOME.EXPLORA' | translate }}
+            </p>
+
+            <h2>
+              {{ 'HOME.DESCUBRE_EMPRESAS' | translate }}
+            </h2>
           </div>
 
-          <a class="view-all" routerLink="/tabs/empresas">
-            Ver todas
+          <a
+            class="view-all"
+            routerLink="/tabs/empresas"
+          >
+            {{ 'HOME.VER_TODAS' | translate }}
 
-            <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+            <ion-icon
+              name="arrow-forward-outline"
+              aria-hidden="true"
+            ></ion-icon>
           </a>
         </div>
 
-        <p *ngIf="cargando" role="status">
-          Cargando empresas…
+        <p
+          *ngIf="cargando"
+          role="status"
+        >
+          {{ 'HOME.CARGANDO' | translate }}
         </p>
 
-        <div class="load-error" *ngIf="error" role="alert">
-          <span>{{ error }}</span>
+        <div
+          class="load-error"
+          *ngIf="error"
+          role="alert"
+        >
+          <span>
+            {{ error | translate }}
+          </span>
 
-          <button type="button" (click)="cargarEmpresas()">
-            Reintentar
+          <button
+            type="button"
+            (click)="cargarEmpresas()"
+          >
+            {{ 'HOME.REINTENTAR' | translate }}
           </button>
         </div>
 
-        <p *ngIf="
+        <p
+          *ngIf="
             !cargando &&
             !error &&
             !empresasDestacadas.length
-          ">
-          Aún no hay empresas disponibles.
+          "
+        >
+          {{ 'HOME.SIN_EMPRESAS' | translate }}
         </p>
 
-        <div class="companies-grid" *ngIf="
+        <div
+          class="companies-grid"
+          *ngIf="
             !cargando &&
             !error &&
             empresasDestacadas.length
-          ">
-          <a class="company-card" *ngFor="let empresa of empresasDestacadas" routerLink="/tabs/empresas">
+          "
+        >
+          <a
+            class="company-card"
+            *ngFor="let empresa of empresasDestacadas"
+            routerLink="/tabs/empresas"
+          >
             <div class="company-picture">
-              <img *ngIf="empresa.logoUrl; else initial" [src]="empresa.logoUrl" [alt]="'Logo de ' + empresa.nombre"
-                loading="lazy">
+              <img
+                *ngIf="empresa.logoUrl; else initial"
+                [src]="empresa.logoUrl"
+                [alt]="
+                  'HOME.LOGO_EMPRESA'
+                    | translate: { nombre: empresa.nombre }
+                "
+                loading="lazy"
+              >
 
               <ng-template #initial>
                 <span aria-hidden="true">
@@ -151,12 +257,14 @@
             </div>
 
             <div class="company-copy">
-              <h3>{{ empresa.nombre }}</h3>
+              <h3>
+                {{ empresa.nombre }}
+              </h3>
 
               <p>
                 {{
-                empresa.direccion ||
-                'Descubre este negocio'
+                  empresa.direccion ||
+                  ('HOME.DESCUBRE_NEGOCIO' | translate)
                 }}
               </p>
             </div>

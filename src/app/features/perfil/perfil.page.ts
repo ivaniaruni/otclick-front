@@ -1,29 +1,69 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
+
+import {
+  FormsModule,
+  NgForm,
+} from '@angular/forms';
+
 import { RouterLink } from '@angular/router';
+
 import {
   IonButton,
   IonContent,
   IonIcon,
   IonInput,
   IonSpinner,
-  IonText
+  IonText,
 } from '@ionic/angular/standalone';
+
+import {
+  TranslatePipe,
+  TranslateService,
+} from '@ngx-translate/core';
+
 import { addIcons } from 'ionicons';
+
 import {
   arrowBackOutline,
   closeOutline,
   imageOutline,
   logOutOutline,
-  saveOutline
+  saveOutline,
 } from 'ionicons/icons';
-import { ArchivoService } from '../../core/services/archivo.service';
-import { AuthService } from '../../core/services/auth.service';
-import { UsuarioService } from '../../core/services/usuario.service';
+
+import {
+  ArchivoService,
+} from '../../core/services/archivo.service';
+
+import {
+  AuthService,
+} from '../../core/services/auth.service';
+
+import {
+  UsuarioService,
+} from '../../core/services/usuario.service';
+
+import {
+  IdiomaService,
+} from '../../core/services/idioma.service';
+
+import {
+  IdiomaApp,
+} from '../../core/i18n/traducciones';
+
+import {
+  PERFIL_TRADUCCIONES,
+} from '../../core/i18n/perfil.traducciones';
+
 import {
   ActualizarPerfilRequest,
-  Usuario
+  Usuario,
 } from '../../shared/models/usuario';
 
 @Component({
@@ -40,8 +80,9 @@ import {
     IonIcon,
     IonInput,
     IonSpinner,
-    IonText
-  ]
+    IonText,
+    TranslatePipe,
+  ],
 })
 export class PerfilPage implements OnInit, OnDestroy {
   perfil: Usuario | null = null;
@@ -64,15 +105,19 @@ export class PerfilPage implements OnInit, OnDestroy {
   constructor(
     private archivoService: ArchivoService,
     private usuarioService: UsuarioService,
-    private authService: AuthService
+    private authService: AuthService,
+    private idioma: IdiomaService,
+    private translate: TranslateService,
   ) {
     addIcons({
       arrowBackOutline,
       closeOutline,
       imageOutline,
       logOutOutline,
-      saveOutline
+      saveOutline,
     });
+
+    this.registrarTraducciones();
   }
 
   ngOnInit(): void {
@@ -88,10 +133,16 @@ export class PerfilPage implements OnInit, OnDestroy {
   }
 
   get iniciales(): string {
-    const nombreInicial = this.nombre.trim().charAt(0);
-    const apellidoInicial = this.apellido.trim().charAt(0);
+    const nombreInicial =
+      this.nombre.trim().charAt(0);
 
-    return `${nombreInicial}${apellidoInicial}`.toUpperCase() || '?';
+    const apellidoInicial =
+      this.apellido.trim().charAt(0);
+
+    return (
+      `${nombreInicial}${apellidoInicial}`.toUpperCase() ||
+      '?'
+    );
   }
 
   get nombreCompleto(): string {
@@ -101,29 +152,47 @@ export class PerfilPage implements OnInit, OnDestroy {
       .join(' ');
   }
 
+  get claseMarco(): string {
+    const rol = String(this.perfil?.rol ?? '')
+      .trim()
+      .toUpperCase();
+
+    const clases: Record<string, string> = {
+      CLIENTE: 'frame-client',
+      EMPRESARIO: 'frame-business',
+      TRABAJADOR: 'frame-worker',
+      ADMIN: 'frame-admin',
+    };
+
+    return clases[rol] ?? 'frame-default';
+  }
+
   async cargarPerfil(): Promise<void> {
     this.cargando = true;
     this.error = '';
     this.mensaje = '';
 
     try {
-      const perfil = await this.usuarioService.obtenerMiPerfil();
+      const perfil =
+        await this.usuarioService.obtenerMiPerfil();
 
       this.perfil = perfil;
       this.nombre = perfil.nombre ?? '';
       this.apellido = perfil.apellido ?? '';
       this.telefono = perfil.telefono ?? '';
       this.avatarUrl = perfil.avatarUrl ?? '';
-    } catch (error: any) {
-      this.error =
-        error?.error?.message ||
-        'No hemos podido cargar tu perfil.';
+    } catch {
+      this.error = 'PERFIL.ERROR_CARGAR';
     } finally {
       this.cargando = false;
     }
   }
 
   seleccionarArchivo(event: Event): void {
+    if (this.guardando || this.cerrandoSesion) {
+      return;
+    }
+
     const input = event.target as HTMLInputElement;
     const archivo = input.files?.[0] ?? null;
 
@@ -146,45 +215,59 @@ export class PerfilPage implements OnInit, OnDestroy {
     this.liberarVistaPrevia();
 
     this.archivoSeleccionado = archivo;
-    this.vistaPreviaArchivo = URL.createObjectURL(archivo);
+
+    this.vistaPreviaArchivo =
+      URL.createObjectURL(archivo);
   }
 
   quitarImagenSeleccionada(): void {
     this.liberarVistaPrevia();
-
     this.archivoSeleccionado = null;
-    this.vistaPreviaArchivo = null;
   }
 
-  async guardar(): Promise<void> {
-    if (this.guardando || !this.nombre.trim()) {
+  async guardar(form: NgForm): Promise<void> {
+    if (this.guardando || this.cerrandoSesion) {
       return;
     }
 
     this.error = '';
     this.mensaje = '';
+
+    if (form.invalid || !this.nombre.trim()) {
+      form.control.markAllAsTouched();
+      this.error = 'PERFIL.ERROR_FORMULARIO';
+      return;
+    }
+
     this.guardando = true;
 
     try {
-      let avatarUrlFinal = this.normalizarOpcional(this.avatarUrl);
+      let avatarUrlFinal =
+        this.normalizarOpcional(this.avatarUrl);
 
       if (this.archivoSeleccionado) {
-        const respuesta = await this.archivoService.subirAvatar(
-          this.archivoSeleccionado
-        );
+        const respuesta =
+          await this.archivoService.subirAvatar(
+            this.archivoSeleccionado,
+          );
 
-        avatarUrlFinal = this.construirUrlArchivo(respuesta.url);
+        avatarUrlFinal =
+          this.construirUrlArchivo(respuesta.url);
       }
 
       const request: ActualizarPerfilRequest = {
         nombre: this.nombre.trim(),
-        apellido: this.normalizarOpcional(this.apellido),
-        telefono: this.normalizarOpcional(this.telefono),
-        avatarUrl: avatarUrlFinal
+        apellido:
+          this.normalizarOpcional(this.apellido),
+        telefono:
+          this.normalizarOpcional(this.telefono),
+        avatarUrl: avatarUrlFinal,
       };
 
       const actualizado =
-        await this.usuarioService.actualizarMiPerfil(request);
+        await this.usuarioService.actualizarMiPerfil(
+          request,
+        );
 
       this.perfil = actualizado;
       this.nombre = actualizado.nombre ?? '';
@@ -194,55 +277,84 @@ export class PerfilPage implements OnInit, OnDestroy {
 
       this.quitarImagenSeleccionada();
 
-      await this.authService.updateStoredUser(actualizado);
+      await this.authService.updateStoredUser(
+        actualizado,
+      );
 
-      this.mensaje = 'Perfil actualizado correctamente.';
-    } catch (error: any) {
-      this.error =
-        error?.error?.message ||
-        'No hemos podido guardar los cambios.';
+      this.mensaje = 'PERFIL.EXITO_GUARDAR';
+    } catch {
+      this.error = 'PERFIL.ERROR_GUARDAR';
     } finally {
       this.guardando = false;
     }
   }
 
   async cerrarSesion(): Promise<void> {
-    if (this.cerrandoSesion) {
+    if (this.cerrandoSesion || this.guardando) {
       return;
     }
 
+    const idiomaElegido = this.idioma.actual();
+
     this.cerrandoSesion = true;
+    this.error = '';
 
     try {
       await this.authService.logout();
+
+      await this.idioma.cambiar(idiomaElegido);
+
       window.location.href = '/login';
+    } catch {
+      this.error = 'PERFIL.ERROR_SALIR';
     } finally {
       this.cerrandoSesion = false;
     }
   }
 
-  private validarArchivo(archivo: File): string | null {
+  private registrarTraducciones(): void {
+    const idiomas = Object.keys(
+      PERFIL_TRADUCCIONES,
+    ) as IdiomaApp[];
+
+    for (const idioma of idiomas) {
+      this.translate.setTranslation(
+        idioma,
+        {
+          PERFIL: PERFIL_TRADUCCIONES[idioma],
+        },
+        true,
+      );
+    }
+  }
+
+  private validarArchivo(
+    archivo: File,
+  ): string | null {
     const tiposPermitidos = [
       'image/jpeg',
       'image/png',
-      'image/webp'
+      'image/webp',
     ];
 
     const maximoBytes = 5 * 1024 * 1024;
 
     if (!tiposPermitidos.includes(archivo.type)) {
-      return 'Selecciona una imagen JPG, PNG o WEBP.';
+      return 'PERFIL.ERROR_TIPO_IMAGEN';
     }
 
     if (archivo.size > maximoBytes) {
-      return 'La imagen no puede superar 5 MB.';
+      return 'PERFIL.ERROR_TAMANO_IMAGEN';
     }
 
     return null;
   }
 
   private construirUrlArchivo(ruta: string): string {
-    if (ruta.startsWith('http://') || ruta.startsWith('https://')) {
+    if (
+      ruta.startsWith('http://') ||
+      ruta.startsWith('https://')
+    ) {
       return ruta;
     }
 
@@ -254,10 +366,13 @@ export class PerfilPage implements OnInit, OnDestroy {
   private liberarVistaPrevia(): void {
     if (this.vistaPreviaArchivo) {
       URL.revokeObjectURL(this.vistaPreviaArchivo);
+      this.vistaPreviaArchivo = null;
     }
   }
 
-  private normalizarOpcional(valor: string): string | null {
+  private normalizarOpcional(
+    valor: string,
+  ): string | null {
     const texto = valor.trim();
 
     return texto ? texto : null;

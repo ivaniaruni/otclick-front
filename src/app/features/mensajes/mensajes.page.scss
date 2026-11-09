@@ -73,8 +73,6 @@ p {
   overflow-wrap: anywhere;
 }
 
-/* Estructura */
-
 .messages-page {
   display: block;
   height: auto;
@@ -97,8 +95,6 @@ p {
   margin-inline: auto;
 }
 
-/* Cabecera de la lista */
-
 .welcome-band {
   padding: 28px 0 54px;
   background: #ffffff;
@@ -118,15 +114,36 @@ p {
   display: block;
   width: 72px;
   height: 72px;
+  flex: 0 0 auto;
   object-fit: contain;
   border-radius: 16px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  align-self: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.header-actions > app-selector-idioma,
+.conversation-header > app-selector-idioma {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  flex: 0 0 auto;
 }
 
 .profile-access {
   display: inline-flex;
   align-items: center;
+  align-self: center;
   gap: 15px;
   min-height: 52px;
+  margin: 0;
   padding: 6px 8px 6px 12px;
   color: var(--ink);
   background: #ffffff;
@@ -168,16 +185,13 @@ p {
 .profile-avatar {
   display: grid;
   place-items: center;
-
   width: 30px;
   height: 30px;
   flex: 0 0 auto;
   overflow: hidden;
-
   color: #ffffff;
   background: var(--blue);
   border-radius: 50%;
-
   font-size: 15px;
   font-weight: 400;
 }
@@ -196,11 +210,8 @@ p {
 
 .welcome-layout {
   display: grid;
-  grid-template-columns:
-    minmax(0, 1fr)
-    minmax(280px, 390px);
-  align-items: end;
-  gap: 48px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
 
   animation:
     content-enter
@@ -219,7 +230,6 @@ p {
 }
 
 .welcome-band h1 {
-  max-width: 13ch;
   margin: 0 0 16px;
   color: var(--ink);
   font-size: clamp(32px, 4vw, 52px);
@@ -235,8 +245,6 @@ p {
   font-weight: 400;
   line-height: 1.55;
 }
-
-/* Lista de conversaciones */
 
 .inbox-band {
   padding-block: 28px 56px;
@@ -279,10 +287,13 @@ p {
     backwards;
 }
 
+.chat-row.has-unread {
+  border-color: #b9d8ff;
+}
+
 .chat-row:active:not(:disabled) {
   transform: scale(0.992);
   border-color: #a9cfff;
-  background: #ffffff;
 }
 
 .chat-avatar {
@@ -339,10 +350,32 @@ p {
   white-space: nowrap;
 }
 
-.chat-row time {
+.chat-row-meta {
+  display: grid;
+  justify-items: end;
+  align-content: center;
+  gap: 6px;
   flex: 0 0 auto;
+}
+
+.chat-row time {
   color: var(--muted);
   font-size: 11px;
+  white-space: nowrap;
+}
+
+.chat-unread-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 6px;
+  color: #ffffff;
+  background: #c6283d;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .chat-company {
@@ -370,7 +403,6 @@ p {
   height: 24px;
   flex: 0 0 auto;
   color: var(--blue-dark);
-
   transition: transform 180ms ease;
 }
 
@@ -378,8 +410,6 @@ p {
   width: 20px;
   height: 20px;
 }
-
-/* Cabecera de la conversación */
 
 .conversation-header {
   display: flex;
@@ -412,7 +442,6 @@ p {
   height: 44px;
   flex: 0 0 auto;
   padding: 10px;
-
   color: var(--blue-dark);
   background: transparent;
   border: 0;
@@ -466,8 +495,6 @@ p {
   white-space: nowrap;
 }
 
-/* Historial */
-
 .message-history {
   flex: 1;
   min-height: 0;
@@ -497,11 +524,9 @@ p {
   min-width: 0;
   max-width: min(85%, 440px);
   padding: 10px 13px;
-
   background: #ffffff;
   border-radius: 16px 16px 16px 5px;
   box-shadow: 0 1px 2px rgba(23, 40, 63, 0.04);
-
   transform-origin: left bottom;
 
   animation:
@@ -536,13 +561,10 @@ p {
   text-align: right;
 }
 
-/* Solicitud de cita */
-
 .booking-message .bubble {
   width: 310px;
   max-width: 92%;
   padding: 16px;
-
   background: #ffffff;
   border: 1px solid #e1e8f1;
   border-radius: 16px;
@@ -562,7 +584,6 @@ p {
   width: 30px;
   height: 30px;
   flex: 0 0 auto;
-
   color: var(--blue-dark);
   background: var(--blue-soft);
   border-radius: 9px;
@@ -574,6 +595,7 @@ p {
 }
 
 .booking-label {
+  min-width: 0;
   margin: 0;
   color: var(--blue-dark);
   font-size: 11px;
@@ -605,10 +627,8 @@ p {
 .booking-note {
   margin: 13px 0 0;
   padding-top: 12px;
-
   color: var(--ink);
   border-top: 1px solid #edf0f5;
-
   font-size: 14px;
   line-height: 1.55;
   white-space: pre-wrap;
@@ -622,13 +642,12 @@ p {
   max-width: 100%;
   margin: 14px 0 0;
   padding: 7px 9px;
-
   color: #765713;
   background: #fff7df;
   border-radius: 8px;
-
   font-size: 11px;
   line-height: 1.4;
+  overflow-wrap: anywhere;
 
   transition:
     color var(--motion-normal) ease,
@@ -650,6 +669,8 @@ p {
 }
 
 .booking-status[data-estado="CANCELLED"],
+.booking-status[data-estado="CANCELED"],
+.booking-status[data-estado="REJECTED"],
 .booking-status[data-estado="NO_SHOW"] {
   color: #8c4545;
   background: #fff3f2;
@@ -688,12 +709,15 @@ p {
 }
 
 .booking-actions button {
-  flex: 1;
+  flex: 1 1 100px;
+  min-width: 0;
   min-height: 44px;
   padding: 9px 12px;
   border: 1px solid transparent;
   border-radius: 10px;
   font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 
   transition:
     background-color var(--motion-fast) ease,
@@ -716,8 +740,6 @@ p {
   background: #ffffff;
   border-color: #ecd7d3;
 }
-
-/* Entrada de texto */
 
 .composer {
   display: flex;
@@ -751,15 +773,12 @@ p {
   max-height: 110px;
   margin: 0;
   padding: 11px 14px;
-
   resize: none;
   overflow-y: auto;
-
   color: var(--ink);
   background: #f0f3f8;
   border: 0;
   border-radius: 22px;
-
   font-size: 16px;
   line-height: 22px;
 
@@ -785,7 +804,6 @@ p {
   height: 44px;
   flex: 0 0 auto;
   padding: 0;
-
   color: #ffffff;
   background: var(--blue);
   border: 0;
@@ -810,7 +828,6 @@ p {
   width: 23px;
   height: 23px;
   stroke-width: 2;
-
   animation: fade-in 120ms ease backwards;
 }
 
@@ -836,8 +853,6 @@ p {
 .sending-dots > span:nth-child(3) {
   animation-delay: 240ms;
 }
-
-/* Estados y errores */
 
 .empty-state {
   display: grid;
@@ -921,6 +936,7 @@ p {
 
 .older-button {
   display: block;
+  max-width: 100%;
   min-height: 40px;
   margin: 0 auto 18px;
   padding: 8px 13px;
@@ -929,6 +945,8 @@ p {
   border: 1px solid #e1e8f1;
   border-radius: 20px;
   font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 
   transition:
     background-color var(--motion-fast) ease,
@@ -983,8 +1001,6 @@ p {
   border: 0;
 }
 
-/* Interacción con ratón */
-
 @media (hover: hover) {
   .profile-access:hover {
     border-color: #b8c4d2;
@@ -993,7 +1009,6 @@ p {
   }
 
   .chat-row:hover:not(:disabled) {
-    background: #ffffff;
     border-color: #b8c4d2;
     box-shadow: 0 6px 18px rgba(25, 48, 82, 0.06);
     transform: translateY(-1px);
@@ -1018,8 +1033,6 @@ p {
     background: #fff5f3;
   }
 }
-
-/* Animaciones */
 
 @keyframes content-enter {
   from {
@@ -1123,15 +1136,6 @@ p {
   }
 }
 
-/* Adaptación móvil */
-
-@media (max-width: 900px) {
-  .welcome-layout {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
-}
-
 @media (max-width: 600px) {
   .content-width {
     width: min(100% - 32px, 1120px);
@@ -1180,6 +1184,10 @@ p {
     padding: 16px;
     gap: 18px;
   }
+
+  .conversation-header {
+    gap: 6px;
+  }
 }
 
 @media (max-width: 380px) {
@@ -1193,7 +1201,7 @@ p {
   }
 
   .conversation-header {
-    gap: 6px;
+    gap: 4px;
   }
 
   .header-avatar {
@@ -1209,8 +1217,6 @@ p {
     padding: 14px;
   }
 }
-
-/* Accesibilidad */
 
 @media (prefers-reduced-motion: reduce) {
   *,
