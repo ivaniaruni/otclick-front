@@ -1,0 +1,309 @@
+:host {
+  --blue: #0474fc;
+  --blue-dark: #0562d4;
+  --blue-soft: #eaf3ff;
+  --ink: #17283f;
+  --muted: #4e5e73;
+  --border: #d9e0e8;
+
+  display: block;
+
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  font-weight: 400;
+}
+
+ion-content {
+  --background: #f5f7fa;
+  --color: var(--ink);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button {
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2,
+p {
+  overflow-wrap: anywhere;
+}
+
+.content-width {
+  width: min(100% - 40px, 1120px);
+  margin-inline: auto;
+}
+
+/* Cabecera compartida con el resto de la aplicación */
+
+.welcome-band {
+  padding: 28px 0 48px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+}
+
+.top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  width: 100%;
+  margin-bottom: 42px;
+}
+
+.logo {
+  display: block;
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  border-radius: 16px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  align-self: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.header-actions > app-selector-idioma {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  flex: 0 0 auto;
+}
+
+.profile-access {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 15px;
+  min-height: 52px;
+  margin: 0;
+  padding: 6px 8px 6px 12px;
+  color: var(--ink);
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.profile-access:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.profile-copy {
+  display: grid;
+  gap: 2px;
+  text-align: right;
+}
+
+.profile-copy small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.profile-copy strong {
+  max-width: 130px;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  color: #ffffff;
+  background: var(--blue);
+  border-radius: 50%;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.profile-avatar.has-photo {
+  background: var(--blue-soft);
+}
+
+.profile-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Presentación */
+
+.welcome-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: var(--blue-dark);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 16px;
+  color: var(--ink);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.intro {
+  max-width: 52ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+/* Zona de contenido */
+
+.workspace-band {
+  min-height: 35vh;
+  padding-block: 32px 64px;
+  background: #f5f7fa;
+}
+
+.workspace-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 0;
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.workspace-symbol {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  color: var(--blue-dark);
+  background: var(--blue-soft);
+  border-radius: 12px;
+}
+
+.workspace-symbol svg {
+  display: block;
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.workspace-state p {
+  align-self: center;
+  min-width: 0;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+@media (hover: hover) {
+  .profile-access:hover {
+    border-color: #b8c4d2;
+    box-shadow: 0 6px 16px rgba(25, 48, 82, 0.06);
+    transform: translateY(-1px);
+  }
+}
+
+/* Móvil */
+
+@media (max-width: 600px) {
+  .content-width {
+    width: min(100% - 32px, 1120px);
+  }
+
+  .welcome-band {
+    padding: 24px 0 36px;
+  }
+
+  .top-row {
+    margin-bottom: 34px;
+  }
+
+  .logo {
+    width: 62px;
+    height: 62px;
+  }
+
+  .profile-copy {
+    display: none;
+  }
+
+  .profile-access {
+    padding: 5px;
+  }
+
+  .profile-avatar {
+    width: 42px;
+    height: 42px;
+  }
+
+  .workspace-band {
+    padding-block: 24px 56px;
+  }
+
+  .workspace-state {
+    gap: 12px;
+    padding: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

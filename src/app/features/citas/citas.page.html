@@ -235,20 +235,13 @@
           class="state-message empty-state"
           *ngIf="!cargando && !error && citas.length === 0"
         >
-          <span
-            class="empty-icon"
-            aria-hidden="true"
-          >
+          <span class="empty-icon" aria-hidden="true">
             <ion-icon name="calendar-clear-outline"></ion-icon>
           </span>
 
-          <h3>
-            {{ 'CITAS.VACIO_TITULO' | translate }}
-          </h3>
+          <h3>{{ 'CITAS.VACIO_TITULO' | translate }}</h3>
 
-          <p>
-            {{ 'CITAS.VACIO_TEXTO' | translate }}
-          </p>
+          <p>{{ 'CITAS.VACIO_TEXTO' | translate }}</p>
 
           <a
             class="empty-link"
@@ -267,10 +260,7 @@
             citasVisibles.length === 0
           "
         >
-          <span
-            class="empty-icon"
-            aria-hidden="true"
-          >
+          <span class="empty-icon" aria-hidden="true">
             <ion-icon name="calendar-outline"></ion-icon>
           </span>
 
@@ -310,58 +300,65 @@
               trackBy: trackByCita
             "
           >
-            <div class="appointment-date">
-              <span>{{ fechaFormateada(cita.fecha) }}</span>
-              <strong>{{ horaFormateada(cita.horaInicio) }}</strong>
+            <div class="appointment-heading">
+              <p class="service-label">
+                {{ 'CITAS.SERVICIO' | translate }}
+              </p>
+
+              <span
+                class="status"
+                [ngClass]="claseEstado(cita.estado)"
+              >
+                {{ claveEstado(cita.estado) | translate }}
+              </span>
             </div>
 
-            <div class="appointment-copy">
-              <div class="appointment-heading">
-                <p class="service-label">
-                  {{ 'CITAS.SERVICIO' | translate }}
-                </p>
-
-                <span
-                  class="status"
-                  [ngClass]="claseEstado(cita.estado)"
-                >
-                  {{ claveEstado(cita.estado) | translate }}
+            <div class="appointment-body">
+              <div class="appointment-date">
+                <span>
+                  {{ fechaFormateada(cita.fecha) }}
                 </span>
+
+                <strong>
+                  {{ horaFormateada(cita.horaInicio) }}
+                </strong>
               </div>
 
-              <h3>
-                {{
-                  cita.servicioNombre ||
-                  ('CITAS.SERVICIO_NO_DISPONIBLE' | translate)
-                }}
-              </h3>
+              <div class="appointment-copy">
+                <h3>
+                  {{
+                    cita.servicioNombre ||
+                    ('CITAS.SERVICIO_NO_DISPONIBLE' | translate)
+                  }}
+                </h3>
 
-              <p class="company-name">
-                {{
-                  cita.empresaNombre ||
-                  ('CITAS.EMPRESA_NO_DISPONIBLE' | translate)
-                }}
-              </p>
+                <p class="company-name">
+                  {{
+                    cita.empresaNombre ||
+                    ('CITAS.EMPRESA_NO_DISPONIBLE' | translate)
+                  }}
+                </p>
 
-              <p
-                class="worker-name"
-                *ngIf="cita.trabajadorNombre"
-              >
-                {{
-                  'CITAS.TRABAJADOR'
-                    | translate: { nombre: cita.trabajadorNombre }
-                }}
-              </p>
-            </div>
+                <p
+                  class="worker-name"
+                  *ngIf="cita.trabajadorNombre"
+                >
+                  {{
+                    'CITAS.TRABAJADOR'
+                      | translate: { nombre: cita.trabajadorNombre }
+                  }}
+                </p>
 
-            <div
-              class="appointment-price"
-              *ngIf="
-                cita.precioTotal !== null &&
-                cita.precioTotal !== undefined
-              "
-            >
-              {{ precioFormateado(cita.precioTotal) }}
+                <p
+                  class="appointment-price"
+                  *ngIf="
+                    cita.precioTotal !== null &&
+                    cita.precioTotal !== undefined
+                  "
+                >
+                  {{ precioFormateado(cita.precioTotal) }}
+                </p>
+              </div>
             </div>
 
             <div

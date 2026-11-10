@@ -1,0 +1,418 @@
+<ion-content>
+  <main>
+    <section
+      class="welcome-band"
+      aria-labelledby="mi-empresa-title"
+    >
+      <div class="content-width">
+        <div class="top-row">
+          <img
+            class="logo"
+            src="assets/otclick-logo.jpg"
+            alt="OtClick"
+            width="72"
+            height="72"
+          >
+
+          <div class="header-actions">
+            <app-selector-idioma></app-selector-idioma>
+
+            <button
+              class="profile-access"
+              type="button"
+              (click)="abrirPerfil()"
+              [attr.aria-label]="'PERFIL_ABRIR' | translate"
+            >
+              <span class="profile-copy">
+                <small>
+                  {{ 'SALUDO' | translate }}{{ usuario?.nombre ? ',' : '' }}
+                </small>
+
+                <strong>
+                  {{
+                    usuario?.nombre ||
+                    ('PERFIL_NOMBRE' | translate)
+                  }}
+                </strong>
+              </span>
+
+              <span
+                class="profile-avatar"
+                [class.has-photo]="fotoPerfil && !avatarFallido"
+                [attr.data-profile-role]="usuario?.rol"
+                aria-hidden="true"
+              >
+                <img
+                  *ngIf="
+                    fotoPerfil && !avatarFallido;
+                    else inicialAvatar
+                  "
+                  [src]="fotoPerfil"
+                  alt=""
+                  (error)="marcarAvatarFallido()"
+                >
+
+                <ng-template #inicialAvatar>
+                  {{ inicialPerfil }}
+                </ng-template>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div class="welcome-layout">
+          <div>
+            <p class="eyebrow">
+              {{ 'TRABAJADOR_EMPRESA.EYEBROW' | translate }}
+            </p>
+
+            <h1 id="mi-empresa-title">
+              {{ 'TRABAJADOR_EMPRESA.TITULO' | translate }}
+            </h1>
+
+            <p class="intro">
+              {{ 'TRABAJADOR_EMPRESA.INTRO' | translate }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="workspace-band"
+      [attr.aria-busy]="cargando"
+    >
+      <div class="content-width">
+        <div
+          class="state-message"
+          *ngIf="cargando"
+          role="status"
+        >
+          <span class="loading-ring" aria-hidden="true"></span>
+
+          <p>
+            {{ 'TRABAJADOR_EMPRESA.CARGANDO' | translate }}
+          </p>
+        </div>
+
+        <div
+          class="state-message error-state"
+          *ngIf="!cargando && error"
+          role="alert"
+        >
+          <p>{{ error | translate }}</p>
+
+          <button
+            class="secondary-button"
+            type="button"
+            (click)="cargar()"
+          >
+            {{ 'CITAS.REINTENTAR' | translate }}
+          </button>
+        </div>
+
+        <ng-container *ngIf="!cargando && !error && espacio as datos">
+          <section
+            class="panel empty-state"
+            *ngIf="datos.estado === 'SIN_VINCULACION'"
+          >
+            <h2>
+              {{
+                'TRABAJADOR_EMPRESA.SIN_EMPRESA_TITULO'
+                  | translate
+              }}
+            </h2>
+
+            <p class="muted">
+              {{
+                'TRABAJADOR_EMPRESA.SIN_EMPRESA_TEXTO'
+                  | translate
+              }}
+            </p>
+          </section>
+
+          <div
+            class="workspace-layout"
+            *ngIf="datos.estado === 'DISPONIBLE'"
+          >
+            <section
+              class="panel company-panel"
+              *ngIf="datos.empresa as empresa"
+            >
+              <div class="company-heading">
+                <span class="company-logo" aria-hidden="true">
+                  <img
+                    *ngIf="
+                      empresa.logoUrl && !logoFallido;
+                      else inicialLogo
+                    "
+                    [src]="empresa.logoUrl"
+                    alt=""
+                    (error)="marcarLogoFallido()"
+                  >
+
+                  <ng-template #inicialLogo>
+                    {{ inicialEmpresa }}
+                  </ng-template>
+                </span>
+
+                <h2>{{ empresa.nombre }}</h2>
+              </div>
+
+              <p
+                class="company-description muted"
+                *ngIf="empresa.descripcion"
+              >
+                {{ empresa.descripcion }}
+              </p>
+
+              <dl class="contact-list">
+                <div *ngIf="empresa.direccion">
+                  <dt>
+                    {{ 'TRABAJADOR_EMPRESA.DIRECCION' | translate }}
+                  </dt>
+                  <dd>{{ empresa.direccion }}</dd>
+                </div>
+
+                <div *ngIf="empresa.telefono">
+                  <dt>
+                    {{ 'TRABAJADOR_EMPRESA.TELEFONO' | translate }}
+                  </dt>
+                  <dd>
+                    <a [href]="telefonoHref(empresa.telefono)">
+                      {{ empresa.telefono }}
+                    </a>
+                  </dd>
+                </div>
+
+                <div *ngIf="empresa.email">
+                  <dt>
+                    {{ 'TRABAJADOR_EMPRESA.EMAIL' | translate }}
+                  </dt>
+                  <dd>
+                    <a [href]="'mailto:' + empresa.email">
+                      {{ empresa.email }}
+                    </a>
+                  </dd>
+                </div>
+              </dl>
+            </section>
+
+            <section
+              class="panel professional-panel"
+              *ngIf="datos.trabajador as trabajador"
+            >
+              <p class="section-eyebrow">
+                {{ 'TRABAJADOR_EMPRESA.MI_FICHA' | translate }}
+              </p>
+
+              <h2>{{ trabajador.nombreCompleto }}</h2>
+
+              <p
+                class="speciality"
+                *ngIf="trabajador.especialidad"
+              >
+                {{ trabajador.especialidad }}
+              </p>
+
+              <p
+                class="muted biography"
+                *ngIf="trabajador.biografia"
+              >
+                {{ trabajador.biografia }}
+              </p>
+            </section>
+
+            <section class="panel services-panel">
+              <h2>
+                {{ 'TRABAJADOR_EMPRESA.SERVICIOS' | translate }}
+              </h2>
+
+              <p
+                class="muted"
+                *ngIf="!datos.servicios.length"
+              >
+                {{ 'TRABAJADOR_EMPRESA.SIN_SERVICIOS' | translate }}
+              </p>
+
+              <ul
+                class="services-list"
+                *ngIf="datos.servicios.length"
+              >
+                <li
+                  *ngFor="
+                    let servicio of datos.servicios;
+                    trackBy: trackServicio
+                  "
+                >
+                  <div class="service-copy">
+                    <h3>{{ servicio.nombre }}</h3>
+
+                    <p class="muted">
+                      {{
+                        'TRABAJADOR_EMPRESA.DURACION'
+                          | translate: {
+                              minutos: servicio.duracionMinutos
+                            }
+                      }}
+                    </p>
+                  </div>
+
+                  <span class="service-price">
+                    {{ precio(servicio.precio) }}
+                  </span>
+                </li>
+              </ul>
+            </section>
+
+            <section
+              class="panel schedule-panel"
+              *ngIf="horario as semana"
+            >
+              <div class="schedule-heading">
+                <div>
+                  <h2>
+                    {{ 'TRABAJADOR_EMPRESA.HORARIO' | translate }}
+                  </h2>
+
+                  <p class="muted schedule-description">
+                    {{
+                      'TRABAJADOR_EMPRESA.HORARIO_TEXTO'
+                        | translate
+                    }}
+                  </p>
+                </div>
+              </div>
+
+              <nav
+                class="week-navigation"
+                [attr.aria-label]="
+                  'TRABAJADOR_EMPRESA.HORARIO' | translate
+                "
+              >
+                <button
+                  class="secondary-button"
+                  type="button"
+                  (click)="cambiarSemana(-1)"
+                  [disabled]="cargando"
+                  [attr.aria-label]="
+                    'TRABAJADOR_EMPRESA.ANTERIOR_ARIA'
+                      | translate
+                  "
+                >
+                  {{ 'TRABAJADOR_EMPRESA.ANTERIOR' | translate }}
+                </button>
+
+                <button
+                  class="secondary-button current-week-button"
+                  type="button"
+                  (click)="semanaActual()"
+                  [disabled]="cargando"
+                >
+                  {{ 'TRABAJADOR_EMPRESA.ACTUAL' | translate }}
+                </button>
+
+                <button
+                  class="secondary-button"
+                  type="button"
+                  (click)="cambiarSemana(1)"
+                  [disabled]="cargando"
+                  [attr.aria-label]="
+                    'TRABAJADOR_EMPRESA.SIGUIENTE_ARIA'
+                      | translate
+                  "
+                >
+                  {{ 'TRABAJADOR_EMPRESA.SIGUIENTE' | translate }}
+                </button>
+              </nav>
+
+              <p class="week-range">
+                <time [attr.datetime]="semana.fechaInicio">
+                  {{ fechaCorta(semana.fechaInicio) }}
+                </time>
+
+                <span aria-hidden="true"> — </span>
+
+                <time [attr.datetime]="semana.fechaFin">
+                  {{ fechaCorta(semana.fechaFin) }}
+                </time>
+              </p>
+
+              <ul class="schedule-list">
+                <li
+                  class="schedule-day"
+                  *ngFor="
+                    let dia of semana.dias;
+                    trackBy: trackDia
+                  "
+                >
+                  <div class="day-label">
+                    <span class="day-name">
+                      {{ diaSemana(dia.fecha) }}
+                    </span>
+
+                    <time
+                      class="day-date"
+                      [attr.datetime]="dia.fecha"
+                    >
+                      {{ fechaDia(dia.fecha) }}
+                    </time>
+                  </div>
+
+                  <div class="day-content">
+                    <div
+                      class="shifts"
+                      *ngIf="
+                        dia.horarioEfectivo.length;
+                        else sinTurno
+                      "
+                    >
+                      <span
+                        class="shift"
+                        *ngFor="
+                          let franja of dia.horarioEfectivo
+                        "
+                      >
+                        {{ hora(franja.horaInicio) }}
+                        –
+                        {{ hora(franja.horaFin) }}
+                      </span>
+                    </div>
+
+                    <ng-template #sinTurno>
+                      <span class="no-shift">
+                        {{
+                          'TRABAJADOR_EMPRESA.SIN_TURNO'
+                            | translate
+                        }}
+                      </span>
+                    </ng-template>
+
+                    <p
+                      class="assigned-note"
+                      *ngIf="horarioAjustado(dia)"
+                    >
+                      {{
+                        'TRABAJADOR_EMPRESA.ASIGNADO'
+                          | translate
+                      }}:
+
+                      <span
+                        *ngFor="
+                          let franja of dia.horarioAsignado;
+                          let ultima = last
+                        "
+                      >
+                        {{ hora(franja.horaInicio) }}–{{ hora(franja.horaFin) }}{{ ultima ? '' : ' · ' }}
+                      </span>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+            </section>
+          </div>
+        </ng-container>
+      </div>
+    </section>
+  </main>
+</ion-content>

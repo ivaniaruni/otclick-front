@@ -1,6 +1,10 @@
 <ion-tabs>
-  <ion-tab-bar slot="bottom">
+  <ion-tab-bar
+    slot="bottom"
+    *ngIf="usuario"
+  >
     <ion-tab-button
+      *ngIf="!esTrabajador"
       tab="home"
       href="/tabs/home"
       [attr.aria-label]="'TAB_INICIO' | translate"
@@ -16,6 +20,7 @@
     </ion-tab-button>
 
     <ion-tab-button
+      *ngIf="!esTrabajador"
       tab="empresas"
       href="/tabs/empresas"
       [attr.aria-label]="'TAB_EMPRESAS' | translate"
@@ -31,8 +36,43 @@
     </ion-tab-button>
 
     <ion-tab-button
+      *ngIf="esTrabajador"
+      tab="mi-empresa"
+      href="/tabs/mi-empresa"
+      [attr.aria-label]="
+        'TAB_EMPRESA_TRABAJADOR' | translate
+      "
+    >
+      <ion-icon
+        name="storefront-outline"
+        aria-hidden="true"
+      ></ion-icon>
+
+      <ion-label>
+        {{ 'TAB_EMPRESA_TRABAJADOR' | translate }}
+      </ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button
+      *ngIf="!esTrabajador"
       tab="citas"
       href="/tabs/citas"
+      [attr.aria-label]="'TAB_CITAS' | translate"
+    >
+      <ion-icon
+        name="calendar-outline"
+        aria-hidden="true"
+      ></ion-icon>
+
+      <ion-label>
+        {{ 'TAB_CITAS' | translate }}
+      </ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button
+      *ngIf="esTrabajador"
+      tab="agenda-trabajador"
+      href="/tabs/agenda-trabajador"
       [attr.aria-label]="'TAB_CITAS' | translate"
     >
       <ion-icon
